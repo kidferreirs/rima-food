@@ -1,0 +1,20 @@
+services:
+
+  mysql:
+    image: mysql:8.4
+    container_name: rimatech-food-mysql
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: rimatech_food
+
+    ports:
+      - "3306:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
