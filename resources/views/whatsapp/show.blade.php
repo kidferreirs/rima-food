@@ -7,7 +7,7 @@
                 <p class="text-gray-500"> Atendimento em tempo real.</p>
             </div>
 
-            <a href="{{ route('whatsapp.conversas.index') }}" class="text-gray-600 hover:underline">
+            <a href="{{ route('restaurante.whatsapp.index', $restauranteAtual->slug) }}" class="text-gray-600 hover:underline">
                 ← Voltar
             </a>
         </div>
@@ -222,10 +222,9 @@
 
                     </h2>
 
-                    <form action="{{ route('whatsapp.simular', $conversa) }}" method="POST">
+                    <form action="{{ route('restaurante.whatsapp.simular', [ $restauranteAtual->slug, $conversa ]) }}" method="POST">
 
-                        @csrf
-
+                    @csrf
                         <div class="flex gap-4">
 
                             <input type="text" name="mensagem" placeholder="Digite uma mensagem..."
@@ -236,15 +235,10 @@
                                 🚀 Enviar
 
                             </button>
-
                         </div>
-
                     </form>
-
                 </div>
-
             </div>
-
         </div>
     </div>
 </x-rimafood.layout>

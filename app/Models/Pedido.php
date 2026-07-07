@@ -22,6 +22,7 @@ class Pedido extends Model
         'tipo_entrega',
         'taxa_entrega',
         'endereco_entrega',
+        'token',
     ];
 
     public function restaurante()

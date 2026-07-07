@@ -7,12 +7,11 @@ use App\Models\ItemPedido;
 use App\Models\Pedido;
 use App\Models\Restaurante;
 
-class RelatorioController extends Controller
+class RelatorioController extends BaseRestaurantController
 {
     public function index()
     {
-        $restaurante = Restaurante::where('user_id', auth()->id())
-            ->first();
+        $restaurante = $this->restaurante();
 
         $faturamentoHoje = 0;
         $faturamentoMes = 0;
@@ -198,11 +197,7 @@ class RelatorioController extends Controller
 
     public function exportar()
     {
-        $restaurante = Restaurante::where('user_id', auth()->id())->first();
-
-        if (!$restaurante) {
-            abort(403);
-        }
+        $restaurante = $this->restaurante();
 
         $dataInicio = request('data_inicio');
         $dataFim = request('data_fim');

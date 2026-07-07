@@ -25,6 +25,11 @@ class Restaurante extends Model
         'tempo_medio',
         'logo',
         'ativo',
+        'delivery',
+        'retirada',
+        'consumo_local',
+        'quantidade_mesas',
+        'slug',
     ];
 
     public function categorias()
@@ -53,5 +58,10 @@ class Restaurante extends Model
     public function campanhas()
     {
         return $this->hasMany(Campanha::class);
+    }
+
+    public function configuracaoEntrega()
+    {
+        return $this->hasOne(ConfiguracaoEntrega::class);
     }
 }

@@ -48,6 +48,46 @@
             <input type="text" id="estado" name="estado" value="{{ $restaurante->estado }}" placeholder="Estado"
                 class="w-full border rounded-lg p-3">
 
+            <hr class="my-8">
+
+            <h2 class="text-2xl font-bold mb-4">
+                🍽 Atendimento
+            </h2>
+
+            <p class="text-gray-500 mb-5">
+                Como este estabelecimento atende seus clientes?
+            </p>
+
+            <div class="space-y-4">
+
+                <label class="flex items-center gap-3">
+                    <input type="checkbox" name="delivery" value="1" {{ old('delivery', $restaurante->delivery) ? 'checked' : '' }}>
+                    🚚 Delivery
+                </label>
+
+                <label class="flex items-center gap-3">
+                    <input type="checkbox" name="retirada" value="1" {{ old('retirada', $restaurante->retirada) ? 'checked' : '' }}>
+                    🛍️ Retirada no balcão
+                </label>
+
+                <label class="flex items-center gap-3">
+                    <input id="consumo_local" type="checkbox" name="consumo_local" value="1" {{ old('consumo_local', $restaurante->consumo_local) ? 'checked' : '' }}>
+                    🍽️ Consumo no local
+                </label>
+
+            </div>
+
+            <div id="mesas" class="mt-5 {{ old('consumo_local', $restaurante->consumo_local) ? '' : 'hidden' }}">
+
+                <label class="font-semibold">
+                    Quantidade de mesas
+                </label>
+
+                <input type="number" name="quantidade_mesas" min="1" class="w-full border rounded-lg p-3 mt-2"
+                    value="{{ old('quantidade_mesas', $restaurante->quantidade_mesas) }}">
+
+            </div>
+
             <button class="bg-green-500 text-white px-6 py-3 rounded-lg">
                 Salvar Alterações
             </button>
@@ -88,6 +128,17 @@
 
             campo.value = valor.substring(0, 18);
         }
+
+        <script>
+            const consumo = document.getElementById('consumo_local');
+            const mesas = document.getElementById('mesas');
+
+            if (consumo) {
+                consumo.addEventListener('change', function () {
+                    mesas.classList.toggle('hidden', !this.checked);
+                });
+}
+    </script>
     </script>
 
 </x-rimafood.layout>

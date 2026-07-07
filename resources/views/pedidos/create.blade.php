@@ -5,7 +5,7 @@
         <div class="flex justify-between items-center mb-8">
             <h1 class="text-4xl font-bold">🛒 Novo Pedido</h1>
 
-            <a href="{{ route('dashboard') }}" class="text-gray-600 hover:underline">
+            <a href="{{ route('restaurante.dashboard', $restaurante->slug) }}" class="text-gray-600 hover:underline">
                 🏠 Voltar ao Dashboard
             </a>
         </div>
@@ -16,7 +16,7 @@
             📦 Status inicial: <strong>🟡 Novo pedido</strong>
         </div>
 
-        <form action="{{ route('pedidos.store') }}" method="POST" class="space-y-4">
+        <form action="{{ route('restaurante.pedidos.store', $restaurante->slug) }}" method="POST" class="space-y-4">
             @csrf
 
             <select name="cliente_id" class="w-full border rounded-lg p-3" required>

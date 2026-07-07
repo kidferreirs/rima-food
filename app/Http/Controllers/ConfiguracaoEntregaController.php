@@ -2,65 +2,51 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ConfiguracaoEntrega;
-use App\Models\Restaurante;
 use Illuminate\Http\Request;
 
-class ConfiguracaoEntregaController extends Controller
+class ConfiguracaoEntregaController extends BaseRestaurantController
 {
     public function index()
     {
-        $restaurante = Restaurante::where(
-            'user_id',
-            auth()->id()
-        )->first();
+        $restaurante = $this->restaurante();
 
-        if (!$restaurante) {
-            return redirect()
-                ->route('restaurantes.create');
-        }
+        $configuracao = $restaurante->configuracaoEntrega()->firstOrCreate([
+            'restaurante_id' => $restaurante->id,
+        ], [
+            'ate_5km' => 0,
+            'ate_10km' => 0,
+            'acima_10km' => 0,
+        ]);
 
-        $configuracao = ConfiguracaoEntrega::firstOrCreate(
-            [
-                'restaurante_id' => $restaurante->id,
-            ],
-            [
-                'ate_5km' => 5,
-                'ate_10km' => 8,
-                'acima_10km' => 12,
-            ]
-        );
-
-        return view(
-            'configuracoes.entregas',
-            compact(
-                'configuracao'
-            )
-        );
+        return view('configuracoes.entregas', compact(
+            'restaurante',
+            'configuracao'
+        ));
     }
 
     public function salvar(Request $request)
     {
+        $restaurante = $this->restaurante();
+
         $dados = $request->validate([
-            'ate_5km' => 'required|numeric|min:0',
-            'ate_10km' => 'required|numeric|min:0',
-            'acima_10km' => 'required|numeric|min:0',
+            'ate_5km' => 'nullable|numeric|min:0',
+            'ate_10km' => 'nullable|numeric|min:0',
+            'acima_10km' => 'nullable|numeric|min:0',
         ]);
 
-        $restaurante = Restaurante::where(
-            'user_id',
-            auth()->id()
-        )->first();
-
-        $configuracao = ConfiguracaoEntrega::firstOrCreate([
-            'restaurante_id' => $restaurante->id,
-        ]);
-
-        $configuracao->update($dados);
-
-        return back()->with(
-            'success',
-            'Configurações salvas!'
+        $restaurante->configuracaoEntrega()->updateOrCreate(
+            [
+                'restaurante_id' => $restaurante->id,
+            ],
+            [
+                'ate_5km' => $dados['ate_5km'] ?? 0,
+                'ate_10km' => $dados['ate_10km'] ?? 0,
+                'acima_10km' => $dados['acima_10km'] ?? 0,
+            ]
         );
+
+        return redirect()
+            ->route('restaurante.configuracoes.entregas.index', $restaurante->slug)
+            ->with('success', 'Configurações de entrega salvas com sucesso!');
     }
 }

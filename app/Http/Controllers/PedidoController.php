@@ -8,53 +8,45 @@ use App\Models\Produto;
 use App\Models\Restaurante;
 use Illuminate\Http\Request;
 
-class PedidoController extends Controller
+class PedidoController extends BaseRestaurantController
 {
     public function index()
     {
+        $restaurante = $this->restaurante();
+
         $pedidos = Pedido::with([
             'cliente',
             'itens.produto',
         ])
-            ->whereHas('restaurante', function ($query) {
-                $query->where('user_id', auth()->id());
-            })
+            ->where('restaurante_id', $restaurante->id)
             ->orderByRaw("
-                CASE
-                    WHEN prioritario = 1
-                    AND status NOT IN ('finalizado', 'cancelado')
-                    THEN 0
-                    ELSE 1
-                END
-            ")
+            CASE
+                WHEN prioritario = 1
+                AND status NOT IN ('finalizado', 'cancelado')
+                THEN 0
+                ELSE 1
+            END
+        ")
             ->orderByRaw("
-                CASE status
-                    WHEN 'novo' THEN 1
-                    WHEN 'preparando' THEN 2
-                    WHEN 'pronto' THEN 3
-                    WHEN 'saiu_entrega' THEN 4
-                    WHEN 'finalizado' THEN 5
-                    WHEN 'cancelado' THEN 6
-                    ELSE 7
-                END
-            ")
+            CASE status
+                WHEN 'novo' THEN 1
+                WHEN 'preparando' THEN 2
+                WHEN 'pronto' THEN 3
+                WHEN 'saiu_entrega' THEN 4
+                WHEN 'finalizado' THEN 5
+                WHEN 'cancelado' THEN 6
+                ELSE 7
+            END
+        ")
             ->latest()
             ->get();
 
-        return view('pedidos.index', compact('pedidos'));
+        return view('pedidos.index', compact('pedidos', 'restaurante'));
     }
 
     public function create()
     {
-        $restaurante = Restaurante::where('user_id', auth()->id())
-            ->where('ativo', true)
-            ->first();
-
-        if (!$restaurante) {
-            return redirect()
-                ->route('restaurantes.create')
-                ->with('success', 'Cadastre um restaurante primeiro.');
-        }
+        $restaurante = $this->restaurante();
 
         Cliente::firstOrCreate(
             [
@@ -91,13 +83,7 @@ class PedidoController extends Controller
 
     public function store(Request $request)
     {
-        $restaurante = Restaurante::where('user_id', auth()->id())
-            ->where('ativo', true)
-            ->first();
-
-        if (!$restaurante) {
-            abort(403);
-        }
+        $restaurante = $this->restaurante();
 
         $dados = $request->validate([
             'cliente_id' => 'required|exists:clientes,id',
@@ -148,11 +134,11 @@ class PedidoController extends Controller
         }
 
         return redirect()
-            ->route('dashboard')
+            ->route('restaurante.dashboard', $restaurante->slug)
             ->with('success', 'Pedido criado com sucesso!');
     }
 
-    public function show(Pedido $pedido)
+    public function show(string $slug, Pedido $pedido)
     {
         $pedido->load([
             'cliente',
@@ -160,18 +146,14 @@ class PedidoController extends Controller
             'restaurante',
         ]);
 
-        if ($pedido->restaurante->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->autorizarPedido($pedido);
 
         return view('pedidos.show', compact('pedido'));
     }
 
-    public function edit(Pedido $pedido)
+    public function edit(string $slug, Pedido $pedido)
     {
-        if ($pedido->restaurante->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->autorizarPedido($pedido);
 
         $restaurante = $pedido->restaurante;
 
@@ -198,17 +180,14 @@ class PedidoController extends Controller
         ));
     }
 
-    public function update(Request $request, Pedido $pedido)
+    public function update(Request $request, string $slug, Pedido $pedido)
     {
-        $pedido->load('restaurante');
-
-        if ($pedido->restaurante->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $restaurante = $this->restaurante();
+        $this->autorizarPedido($pedido);
 
         if (in_array($pedido->status, ['cancelado', 'finalizado'])) {
             return redirect()
-                ->route('pedidos.index')
+                ->route('restaurante.pedidos.index', $restaurante->slug)
                 ->with('success', 'Pedido finalizado ou cancelado não pode ser editado.');
         }
 
@@ -261,21 +240,33 @@ class PedidoController extends Controller
         }
 
         return redirect()
-            ->route('pedidos.index')
+            ->route('restaurante.pedidos.index', $restaurante->slug)
             ->with('success', 'Pedido atualizado com sucesso!');
     }
 
-    public function alterarStatus(Request $request, Pedido $pedido)
+    public function alterarStatus(Request $request, $slugOrPedido, Pedido $pedido = null)
     {
-        $pedido->load('restaurante');
+        if ($pedido === null) {
+            $pedido = $slugOrPedido;
+            $pedido->load('restaurante');
 
-        if ($pedido->restaurante->user_id !== auth()->id()) {
-            abort(403);
+            if ($pedido->restaurante->user_id !== auth()->id()) {
+                abort(403);
+            }
+
+            $redirectRoute = 'pedidos.index';
+            $redirectParams = [];
+        } else {
+            $pedido->load('restaurante');
+
+            $this->autorizarPedido($pedido);
+
+            $redirectRoute = 'restaurante.pedidos.index';
+            $redirectParams = [$pedido->restaurante->slug];
         }
 
         if (in_array($pedido->status, ['cancelado', 'finalizado'])) {
-            return back()
-                ->with('success', 'Este pedido já foi finalizado ou cancelado e não pode ser alterado.');
+            return back()->with('success', 'Este pedido já foi finalizado ou cancelado e não pode ser alterado.');
         }
 
         $request->validate([
@@ -300,17 +291,16 @@ class PedidoController extends Controller
 
         $pedido->update($dadosAtualizacao);
 
-        return back()
+        return redirect()
+            ->route($redirectRoute, $redirectParams)
             ->with('success', 'Status atualizado!');
     }
 
-    public function cancelar(Pedido $pedido)
+    public function cancelar(string $slug, Pedido $pedido)
     {
         $pedido->load('restaurante');
 
-        if ($pedido->restaurante->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->autorizarPedido($pedido);
 
         if ($pedido->status === 'finalizado') {
             return back()
@@ -330,11 +320,9 @@ class PedidoController extends Controller
             ->with('success', 'Pedido cancelado com sucesso!');
     }
 
-    public function imprimir(Pedido $pedido)
+    public function imprimir(string $slug, Pedido $pedido)
     {
-        if ($pedido->restaurante->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->autorizarPedido($pedido);
 
         $pedido->load([
             'cliente',
@@ -379,5 +367,12 @@ class PedidoController extends Controller
         }
 
         return (float) ($dados['taxa_entrega'] ?? 0);
+    }
+
+    private function autorizarPedido(Pedido $pedido): void
+    {
+        if ($pedido->restaurante_id !== $this->restaurante()->id) {
+            abort(403);
+        }
     }
 }

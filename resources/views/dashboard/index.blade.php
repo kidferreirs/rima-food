@@ -8,7 +8,7 @@
                 🍔 Dashboard
             </h1>
 
-            <a href="{{ route('pedidos.create') }}"
+            <a href="{{ route('restaurante.pedidos.create', $restaurante->slug) }}"
                 class="bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-xl font-semibold shadow-sm transition">
                 + Novo Pedido
             </a>
@@ -162,6 +162,11 @@
                                 <button onclick="abrirModal('pedido{{ $pedido->id }}')"
                                     class="text-blue-600 hover:underline font-bold">
                                     #{{ $pedido->id }}
+                                    @if($pedido->token)
+                                        <div class="text-xs text-gray-500 font-normal">
+                                            Token: {{ $pedido->token }}
+                                        </div>
+                                    @endif
                                 </button>
                             </td>
 
@@ -197,8 +202,9 @@
 
                                 @if($pedido->status === 'finalizado')
 
-                                    <a href="{{ route('pedidos.imprimir', $pedido) }}" target="_blank"
-                                        class="text-xl hover:scale-110 inline-block transition" title="Imprimir pedido">
+                                    <a href="{{ route('restaurante.pedidos.imprimir', [$restaurante->slug, $pedido]) }}"
+                                        target="_blank" class="text-xl hover:scale-110 inline-block transition"
+                                        title="Imprimir pedido">
                                         🖨️
                                     </a>
 
@@ -277,7 +283,8 @@
 
                     @else
 
-                        <form action="{{ route('pedidos.status', $pedido) }}" method="POST" class="mt-4">
+                        <form action="{{ route('restaurante.pedidos.status', [$restaurante->slug, $pedido]) }}" method="POST"
+                            class="mt-4">
 
                             @csrf
                             @method('PATCH')

@@ -10,7 +10,7 @@
                 @endif
             </h1>
 
-            <a href="{{ route('pedidos.index') }}" class="text-gray-600 hover:underline">
+            <a href="{{ route('restaurante.pedidos.index', $restauranteAtual->slug) }}" class="text-gray-600 hover:underline">
                 ← Voltar para pedidos
             </a>
         </div>

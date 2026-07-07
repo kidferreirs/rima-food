@@ -5,7 +5,7 @@
         <div class="flex justify-between items-center mb-8">
             <h1 class="text-4xl font-bold">✏️ Editar Pedido #{{ $pedido->id }}</h1>
 
-            <a href="{{ route('dashboard') }}" class="text-gray-600 hover:underline">
+            <a href="{{ route('restaurante.dashboard', $restaurante->slug) }}" class="text-gray-600 hover:underline">
                 🏠 Voltar ao Dashboard
             </a>
         </div>
@@ -16,7 +16,7 @@
             📦 Status atual: <strong>{{ ucfirst(str_replace('_', ' ', $pedido->status)) }}</strong>
         </div>
 
-        <form action="{{ route('pedidos.update', $pedido) }}" method="POST" class="space-y-4">
+        <form action="{{ route('restaurante.pedidos.update', [$restaurante->slug, $pedido]) }}" method="POST" class="space-y-4">
             @csrf
             @method('PUT')
 

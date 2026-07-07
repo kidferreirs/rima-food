@@ -71,7 +71,7 @@
     </div>
 
     @if($pedido->status === 'novo')
-        <form method="POST" action="{{ route('pedidos.status', $pedido) }}">
+        <form method="POST" action="{{ route('restaurante.pedidos.status', [$restauranteAtual->slug, $pedido]) }}">
             @csrf
             @method('PATCH')
 
@@ -82,7 +82,7 @@
             </button>
         </form>
     @elseif($pedido->status === 'preparando')
-        <form method="POST" action="{{ route('pedidos.status', $pedido) }}">
+        <form method="POST" action="{{ route('restaurante.pedidos.status', [$restauranteAtual->slug, $pedido]) }}">
             @csrf
             @method('PATCH')
 
@@ -93,7 +93,7 @@
             </button>
         </form>
     @elseif($pedido->status === 'pronto')
-        <form method="POST" action="{{ route('pedidos.status', $pedido) }}">
+        <form method="POST" action="{{ route('restaurante.pedidos.status', [$restauranteAtual->slug, $pedido]) }}">
             @csrf
             @method('PATCH')
 

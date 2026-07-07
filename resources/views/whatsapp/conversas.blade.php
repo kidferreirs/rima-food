@@ -52,7 +52,7 @@
                 </div>
             @else
                 @foreach($conversas as $conversa)
-                    <a href="{{ route('whatsapp.show', $conversa) }}"
+                    <a href="{{ route('restaurante.whatsapp.show', [ $restauranteAtual->slug, $conversa ]) }}"
                        class="border-b py-5 flex justify-between items-center hover:bg-gray-50 rounded-xl px-4 transition">
                         <div>
                             <div class="font-bold text-lg">

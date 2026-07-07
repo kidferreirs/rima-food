@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Restaurante;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class RestauranteController extends Controller
 {
@@ -23,23 +24,18 @@ class RestauranteController extends Controller
 
     public function store(Request $request)
     {
-        $dados = $request->validate([
-            'nome' => 'required|string|max:255',
-            'telefone' => 'nullable|string|max:50',
-            'documento' => 'nullable|string|max:18',
-            'email' => 'nullable|email|max:255',
-            'cep' => 'nullable|string|max:20',
-            'endereco' => 'nullable|string|max:255',
-            'numero' => 'nullable|string|max:20',
-            'complemento' => 'nullable|string|max:255',
-            'bairro' => 'nullable|string|max:100',
-            'cidade' => 'nullable|string|max:100',
-            'estado' => 'nullable|string|max:50',
-        ]);
+        $dados = $this->validarDados($request);
 
         $dados['user_id'] = auth()->id();
+        $dados['slug'] = $this->gerarSlugUnico($dados['nome']);
 
-        Restaurante::create($dados);
+        $restaurante = Restaurante::create($dados);
+
+        $restaurante->clientes()->create([
+            'nome' => 'Balcão',
+            'telefone' => '0000000000',
+            'ativo' => true,
+        ]);
 
         return redirect()
             ->route('restaurantes.index')
@@ -48,32 +44,16 @@ class RestauranteController extends Controller
 
     public function edit(Restaurante $restaurante)
     {
-        if ($restaurante->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->autorizarRestaurante($restaurante);
 
         return view('restaurantes.edit', compact('restaurante'));
     }
 
     public function update(Request $request, Restaurante $restaurante)
     {
-        if ($restaurante->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->autorizarRestaurante($restaurante);
 
-        $dados = $request->validate([
-            'nome' => 'required|string|max:255',
-            'telefone' => 'nullable|string|max:50',
-            'documento' => 'nullable|string|max:18',
-            'email' => 'nullable|email|max:255',
-            'cep' => 'nullable|string|max:20',
-            'endereco' => 'nullable|string|max:255',
-            'numero' => 'nullable|string|max:20',
-            'complemento' => 'nullable|string|max:255',
-            'bairro' => 'nullable|string|max:100',
-            'cidade' => 'nullable|string|max:100',
-            'estado' => 'nullable|string|max:50',
-        ]);
+        $dados = $this->validarDados($request);
 
         $restaurante->update($dados);
 
@@ -84,16 +64,66 @@ class RestauranteController extends Controller
 
     public function alterarStatus(Restaurante $restaurante)
     {
-        if ($restaurante->user_id !== auth()->id()) {
-            abort(403);
-        }
+        $this->autorizarRestaurante($restaurante);
 
         $restaurante->update([
-            'ativo' => ! $restaurante->ativo,
+            'ativo' => !$restaurante->ativo,
         ]);
 
         return redirect()
             ->route('restaurantes.index')
             ->with('success', 'Status do restaurante atualizado!');
+    }
+
+    private function validarDados(Request $request): array
+    {
+        $dados = $request->validate([
+            'nome' => 'required|string|max:255',
+            'telefone' => 'nullable|string|max:50',
+            'documento' => 'nullable|string|max:18',
+            'email' => 'nullable|email|max:255',
+            'cep' => 'nullable|string|max:20',
+            'endereco' => 'nullable|string|max:255',
+            'numero' => 'nullable|string|max:20',
+            'complemento' => 'nullable|string|max:255',
+            'bairro' => 'nullable|string|max:100',
+            'cidade' => 'nullable|string|max:100',
+            'estado' => 'nullable|string|max:50',
+            'delivery' => 'nullable|boolean',
+            'retirada' => 'nullable|boolean',
+            'consumo_local' => 'nullable|boolean',
+            'quantidade_mesas' => 'nullable|integer|min:0|max:500',
+        ]);
+
+        $dados['delivery'] = $request->boolean('delivery');
+        $dados['retirada'] = $request->boolean('retirada');
+        $dados['consumo_local'] = $request->boolean('consumo_local');
+
+        if (!$dados['consumo_local']) {
+            $dados['quantidade_mesas'] = 0;
+        }
+
+        return $dados;
+    }
+
+    private function autorizarRestaurante(Restaurante $restaurante): void
+    {
+        if ($restaurante->user_id !== auth()->id()) {
+            abort(403);
+        }
+    }
+
+    private function gerarSlugUnico(string $nome): string
+    {
+        $baseSlug = Str::slug($nome);
+        $slug = $baseSlug;
+        $contador = 1;
+
+        while (Restaurante::where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $contador;
+            $contador++;
+        }
+
+        return $slug;
     }
 }

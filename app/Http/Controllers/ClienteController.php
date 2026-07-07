@@ -3,43 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cliente;
-use App\Models\Restaurante;
 use Illuminate\Http\Request;
 
-class ClienteController extends Controller
+class ClienteController extends BaseRestaurantController
 {
     public function index()
     {
-        $clientes = Cliente::with('restaurante')
-            ->whereHas('restaurante', function ($query) {
-                $query->where('user_id', auth()->id());
-            })
+        $restaurante = $this->restaurante();
+
+        $clientes = Cliente::where('restaurante_id', $restaurante->id)
             ->latest()
             ->get();
 
-        return view('clientes.index', compact('clientes'));
+        return view('clientes.index', compact('clientes', 'restaurante'));
     }
 
     public function create()
     {
-        $restaurante = Restaurante::where('user_id', auth()->id())
-            ->where('ativo', true)
-            ->first();
+        $restaurante = $this->restaurante();
 
         return view('clientes.create', compact('restaurante'));
     }
 
     public function store(Request $request)
     {
-        $restaurante = Restaurante::where('user_id', auth()->id())
-            ->where('ativo', true)
-            ->first();
-
-        if (! $restaurante) {
-            return redirect()
-                ->route('restaurantes.create')
-                ->with('success', 'Cadastre um restaurante primeiro.');
-        }
+        $restaurante = $this->restaurante();
 
         $dados = $request->validate([
             'nome' => 'required|string|max:255',
@@ -55,7 +43,7 @@ class ClienteController extends Controller
         if ($telefoneExiste) {
             return back()
                 ->withInput()
-                ->with('error', 'Já existe um cliente com este telefone.');
+                ->with('error', 'Já existe um cliente com este telefone neste restaurante.');
         }
 
         $dados['restaurante_id'] = $restaurante->id;
@@ -63,20 +51,24 @@ class ClienteController extends Controller
         Cliente::create($dados);
 
         return redirect()
-            ->route('clientes.index')
+            ->route('restaurante.clientes.index', $restaurante->slug)
             ->with('success', 'Cliente cadastrado com sucesso!');
     }
 
     public function edit(Cliente $cliente)
     {
-        $this->validarCliente($cliente);
+        $restaurante = $this->restaurante();
 
-        return view('clientes.edit', compact('cliente'));
+        $this->autorizarCliente($cliente);
+
+        return view('clientes.edit', compact('cliente', 'restaurante'));
     }
 
     public function update(Request $request, Cliente $cliente)
     {
-        $this->validarCliente($cliente);
+        $restaurante = $this->restaurante();
+
+        $this->autorizarCliente($cliente);
 
         $dados = $request->validate([
             'nome' => 'required|string|max:255',
@@ -85,7 +77,7 @@ class ClienteController extends Controller
             'observacao' => 'nullable|string',
         ]);
 
-        $telefoneExiste = Cliente::where('restaurante_id', $cliente->restaurante_id)
+        $telefoneExiste = Cliente::where('restaurante_id', $restaurante->id)
             ->where('telefone', $dados['telefone'])
             ->where('id', '!=', $cliente->id)
             ->exists();
@@ -93,38 +85,34 @@ class ClienteController extends Controller
         if ($telefoneExiste) {
             return back()
                 ->withInput()
-                ->with('error', 'Já existe outro cliente com este telefone.');
+                ->with('error', 'Já existe outro cliente com este telefone neste restaurante.');
         }
 
         $cliente->update($dados);
 
         return redirect()
-            ->route('clientes.index')
+            ->route('restaurante.clientes.index', $restaurante->slug)
             ->with('success', 'Cliente atualizado com sucesso!');
     }
 
     public function alterarStatus(Cliente $cliente)
     {
-        $this->validarCliente($cliente);
+        $restaurante = $this->restaurante();
+
+        $this->autorizarCliente($cliente);
 
         $cliente->update([
             'ativo' => ! $cliente->ativo,
         ]);
 
         return redirect()
-            ->route('clientes.index')
+            ->route('restaurante.clientes.index', $restaurante->slug)
             ->with('success', 'Status do cliente atualizado!');
     }
 
-    private function validarCliente(Cliente $cliente)
+    private function autorizarCliente(Cliente $cliente): void
     {
-        $ok = Cliente::where('id', $cliente->id)
-            ->whereHas('restaurante', function ($query) {
-                $query->where('user_id', auth()->id());
-            })
-            ->exists();
-
-        if (! $ok) {
+        if ($cliente->restaurante_id !== $this->restaurante()->id) {
             abort(403);
         }
     }
