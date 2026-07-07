@@ -286,6 +286,7 @@
                         <form action="{{ route('restaurante.pedidos.status', [$restaurante->slug, $pedido]) }}" method="POST"
                             class="mt-4">
 
+                            <input type="hidden" name="origem" value="dashboard">
                             @csrf
                             @method('PATCH')
 
@@ -366,6 +367,10 @@
 
     @endforeach
 
+    <audio id="novoPedidoAudio" preload="auto">
+        <source src="{{ asset('novo-pedido.mp3') }}" type="audio/mpeg">
+    </audio>
+
     <script>
         function abrirModal(id) {
             document.getElementById(id).classList.remove('hidden');
@@ -375,11 +380,28 @@
             document.getElementById(id).classList.add('hidden');
         }
 
+        @if($pedidosPendentes > 0)
+            document.addEventListener('DOMContentLoaded', () => {
+                const tocou = sessionStorage.getItem('rima-pedido-tocou');
+                const audio = document.getElementById('novoPedidoAudio');
+
+                if (!tocou && audio) {
+                    audio.play().catch(() => {
+                        console.log('Áudio bloqueado pelo navegador até interação do usuário.');
+                    });
+
+                    sessionStorage.setItem('rima-pedido-tocou', '1');
+                }
+            });
+        @endif
+
+        @if($pedidosPendentes == 0)
+            sessionStorage.removeItem('rima-pedido-tocou');
+        @endif
+
         setInterval(() => {
-
             window.location.reload();
-
-        }, 60000);
+        }, 30000);
     </script>
 
 </x-rimafood.layout>

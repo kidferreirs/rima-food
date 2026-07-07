@@ -2,18 +2,32 @@
 
     <div class="p-8 max-w-5xl">
 
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex justify-between items-center mb-2">
+
             <h1 class="text-4xl font-bold">
                 👁️ Pedido #{{ $pedido->id }}
-                @if($pedido->prioritario)
-                    <span class="text-yellow-500">⭐</span>
-                @endif
             </h1>
 
-            <a href="{{ route('restaurante.pedidos.index', $restauranteAtual->slug) }}" class="text-gray-600 hover:underline">
+            <a href="{{ route('restaurante.pedidos.index', $restauranteAtual->slug) }}"
+                class="text-gray-600 hover:underline whitespace-nowrap">
                 ← Voltar para pedidos
             </a>
+
         </div>
+
+        <div class="flex items-center gap-2 mb-6 flex-wrap">
+
+            <span class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm font-semibold">
+                🔑 {{ $pedido->token }}
+            </span>
+
+            <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-sm font-semibold">
+                🌐 {{ ucfirst($pedido->origem) }}
+            </span>
+
+        </div>
+
+
 
         <div class="bg-white rounded-xl shadow p-6 mb-6">
 
@@ -68,8 +82,10 @@
 
                     @if($pedido->forma_pagamento === 'dinheiro')
                         <p class="font-semibold">💵 Dinheiro</p>
-                    @elseif($pedido->forma_pagamento === 'cartao')
-                        <p class="font-semibold">💳 Cartão</p>
+                    @elseif($pedido->forma_pagamento === 'credito')
+                        <p class="font-semibold">💳 Cartão de Crédito</p>
+                    @elseif($pedido->forma_pagamento === 'debito')
+                        <p class="font-semibold">💳 Cartão de Débito</p>
                     @elseif($pedido->forma_pagamento === 'pix')
                         <p class="font-semibold">🏦 Pix</p>
                     @else

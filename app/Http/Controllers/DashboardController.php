@@ -63,7 +63,7 @@ class DashboardController extends BaseRestaurantController
 
                 ->whereDate('created_at', today())
 
-                ->where('forma_pagamento', 'cartao')
+                ->whereIn('forma_pagamento', ['credito', 'debito', 'cartao'])
 
                 ->sum('total');
 

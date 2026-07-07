@@ -23,17 +23,6 @@
 
             @endif
 
-            <div class="absolute inset-0 bg-black/20 rounded-b-[2rem]"></div>
-
-            <div
-                class="absolute top-4 left-4 bg-white/90 rounded-full w-11 h-11 flex items-center justify-center shadow">
-                ←
-            </div>
-
-            <div
-                class="absolute top-4 right-4 bg-white/90 rounded-full w-11 h-11 flex items-center justify-center shadow">
-                🔍
-            </div>
         </section>
 
         <section class="px-5 -mt-10 relative z-10">

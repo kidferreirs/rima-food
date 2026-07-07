@@ -76,7 +76,7 @@
         </form>
 
         @if($temFiltro)
-            <div class="flex items-center gap-4 mb-4">
+            dashboard <div class="flex items-center gap-4 mb-4">
                 <h2 class="text-2xl font-bold whitespace-nowrap"> 💰 Financeiro </h2>
                 <div class="w-full border-b border-gray-300"> </div>
             </div>
@@ -134,29 +134,51 @@
                 </div>
 
             </div>
-            
-            <h2 class="text-2xl font-bold mt-10 mb-4"> 💳 Pagamentos </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+
+            <h2 class="text-2xl font-bold mt-10 mb-4">💳 Pagamentos</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mt-8">
                 <div class="bg-white rounded-xl shadow p-6">
                     <h2 class="text-gray-500">💵 Dinheiro</h2>
-                    <p class="text-3xl font-bold mt-2"> R$ {{ number_format($dinheiroPeriodo, 2, ',', '.') }} </p>
+                    <p class="text-3xl font-bold mt-2">
+                        R$ {{ number_format($dinheiroPeriodo, 2, ',', '.') }}
+                    </p>
                 </div>
 
                 <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">💳 Cartão</h2>
-                    <p class="text-3xl font-bold mt-2"> R$ {{ number_format($cartaoPeriodo, 2, ',', '.') }} </p>
+                    <h2 class="text-gray-500">💳 Crédito</h2>
+                    <p class="text-3xl font-bold mt-2">
+                        R$ {{ number_format($creditoPeriodo, 2, ',', '.') }}
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow p-6">
+                    <h2 class="text-gray-500">💳 Débito</h2>
+                    <p class="text-3xl font-bold mt-2">
+                        R$ {{ number_format($debitoPeriodo, 2, ',', '.') }}
+                    </p>
                 </div>
 
                 <div class="bg-white rounded-xl shadow p-6">
                     <h2 class="text-gray-500">🏦 Pix</h2>
-                    <p class="text-3xl font-bold mt-2"> R$ {{ number_format($pixPeriodo, 2, ',', '.') }} </p>
+                    <p class="text-3xl font-bold mt-2">
+                        R$ {{ number_format($pixPeriodo, 2, ',', '.') }}
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow p-6">
+                    <h2 class="text-gray-500">💳 Total Cartões</h2>
+                    <p class="text-3xl font-bold mt-2">
+                        R$ {{ number_format($cartaoPeriodo, 2, ',', '.') }}
+                    </p>
                 </div>
 
                 <div class="bg-white rounded-xl shadow p-6">
                     <h2 class="text-gray-500">🥇 Mais Utilizado</h2>
-                    <p class="text-2xl font-bold mt-3"> {{ $formaMaisUsada }} </p>
+                    <p class="text-2xl font-bold mt-3">
+                        {{ $formaMaisUsada }}
+                    </p>
                 </div>
-
             </div>
         @else
             <div class="bg-white rounded-xl shadow p-8 text-center text-gray-500 mt-8">

@@ -291,6 +291,14 @@ class PedidoController extends BaseRestaurantController
 
         $pedido->update($dadosAtualizacao);
 
+        if ($request->origem === 'dashboard') {
+
+            return redirect()
+                ->route('restaurante.dashboard', $pedido->restaurante->slug)
+                ->with('success', 'Status atualizado!');
+
+        }
+
         return redirect()
             ->route($redirectRoute, $redirectParams)
             ->with('success', 'Status atualizado!');

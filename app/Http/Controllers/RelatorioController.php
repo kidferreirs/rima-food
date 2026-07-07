@@ -142,9 +142,18 @@ class RelatorioController extends BaseRestaurantController
                 ->where('forma_pagamento', 'dinheiro')
                 ->sum('total');
 
-            $cartaoPeriodo = (clone $queryFinanceiro)
-                ->where('forma_pagamento', 'cartao')
-                ->sum('total');
+            $creditoPeriodo =
+                (clone $queryFinanceiro)
+                    ->where('forma_pagamento', 'credito')
+                    ->sum('total');
+
+            $debitoPeriodo =
+                (clone $queryFinanceiro)
+                    ->where('forma_pagamento', 'debito')
+                    ->sum('total');
+
+            $cartaoPeriodo =
+                $creditoPeriodo + $debitoPeriodo;
 
             $pixPeriodo = (clone $queryFinanceiro)
                 ->where('forma_pagamento', 'pix')
@@ -152,7 +161,8 @@ class RelatorioController extends BaseRestaurantController
 
             $formas = [
                 '💵 Dinheiro' => $dinheiroPeriodo,
-                '💳 Cartão' => $cartaoPeriodo,
+                '💳 Crédito' => $creditoPeriodo,
+                '💳 Débito' => $debitoPeriodo,
                 '🏦 Pix' => $pixPeriodo,
             ];
 
@@ -189,6 +199,8 @@ class RelatorioController extends BaseRestaurantController
             'erroPeriodo',
             'dinheiroPeriodo',
             'cartaoPeriodo',
+            'creditoPeriodo',
+            'debitoPeriodo',
             'pixPeriodo',
             'formaMaisUsada',
             'temFiltro',
