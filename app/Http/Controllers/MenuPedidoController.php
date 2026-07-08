@@ -55,6 +55,8 @@ class MenuPedidoController extends Controller
                 ]
             );
 
+            $numeroPedido = Pedido::proximoNumero($restaurante->id);
+
             $pedido = Pedido::create([
                 'restaurante_id' => $restaurante->id,
                 'cliente_id' => $cliente->id,
@@ -66,6 +68,7 @@ class MenuPedidoController extends Controller
                 'total' => 0,
                 'novo_em' => now(),
                 'token' => Str::upper(Str::random(10)),
+                'numero_pedido' => $numeroPedido,
             ]);
 
             $total = 0;

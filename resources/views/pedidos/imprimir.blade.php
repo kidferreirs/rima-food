@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Pedido #{{ $pedido->id }}</title>
+    <title>Pedido #{{ $pedido->numero_pedido ?? $pedido->id  }}</title>
 
     <style>
         body {
@@ -69,7 +69,7 @@
 
     <p>
         <strong>Pedido:</strong>
-        #{{ $pedido->id }}
+        #{{ $pedido->numero_pedido ?? $pedido->id  }}
     </p>
 
     <p>

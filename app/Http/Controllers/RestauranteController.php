@@ -46,7 +46,9 @@ class RestauranteController extends Controller
     {
         $this->autorizarRestaurante($restaurante);
 
-        return view('restaurantes.edit', compact('restaurante'));
+        $linkMenu = route('menu.show', $restaurante->slug);
+
+        return view('restaurantes.edit', compact('restaurante', 'linkMenu'));
     }
 
     public function update(Request $request, Restaurante $restaurante)
@@ -125,5 +127,22 @@ class RestauranteController extends Controller
         }
 
         return $slug;
+    }
+
+    public function cardapioDigital(string $slug)
+    {
+        $restaurante = Restaurante::where('slug', $slug)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        $linkMenu = route('menu.show', $restaurante->slug);
+
+        return view(
+            'restaurantes.cardapio-digital',
+            compact(
+                'restaurante',
+                'linkMenu'
+            )
+        );
     }
 }

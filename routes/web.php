@@ -97,6 +97,8 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/configuracoes/entregas', [ConfiguracaoEntregaController::class, 'index'])->name('restaurante.configuracoes.entregas.index');
         Route::post('/configuracoes/entregas', [ConfiguracaoEntregaController::class, 'salvar'])->name('restaurante.configuracoes.entregas.salvar');
+
+        Route::get('/cardapio-digital', [RestauranteController::class, 'cardapioDigital'])->name('restaurante.cardapio');
     });
 });
 

@@ -1,3 +1,5 @@
+<x-rimafood.layout>
+    
 <div class="p-8 max-w-3xl">
 
     <div class="flex justify-between items-center mb-8">
@@ -47,11 +49,7 @@
             class="w-full border rounded-lg p-3"
         >
 
-        <textarea
-            name="observacao"
-            class="w-full border rounded-lg p-3"
-            rows="4"
-        >{{ old('observacao', $cliente->observacao) }}</textarea>
+<textarea name="observacao" class="w-full border rounded-lg p-3" rows="4">{{ old('observacao', $cliente->observacao) }}</textarea>
 
         <button class="bg-green-500 text-white px-6 py-3 rounded-lg">
             Salvar Alterações

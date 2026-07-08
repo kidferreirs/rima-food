@@ -88,6 +88,45 @@
 
             </div>
 
+            <hr class="my-8">
+
+            <h2 class="text-2xl font-bold mb-5">
+                📱 Cardápio Digital
+            </h2>
+
+            <div class="bg-white border rounded-2xl shadow-sm p-6">
+
+                <p class="text-gray-500 mb-2">Link do seu cardápio</p>
+
+                <div class="flex gap-2">
+                    <input id="linkMenu" type="text" readonly value="{{ $linkMenu }}"
+                        class="flex-1 border rounded-xl p-3 bg-gray-50">
+                    <button type="button" onclick="copiarLink()"
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-5 rounded-xl">
+                        Copiar
+                    </button>
+                </div>
+
+                <div class="flex justify-center my-8">
+
+                    {!! QrCode::size(220)->margin(2)->generate($linkMenu) !!}
+
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+
+                    <button type="button" onclick="compartilharMenu()"
+                        class="bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl">
+                        📲 Compartilhar
+                    </button>
+
+                    <button type="button" onclick="baixarQRCode()"
+                        class="bg-slate-700 hover:bg-slate-800 text-white py-3 rounded-xl">
+                        ⬇️ Baixar QR
+                    </button>
+                </div>
+            </div>
+
             <button class="bg-green-500 text-white px-6 py-3 rounded-lg">
                 Salvar Alterações
             </button>
@@ -128,17 +167,56 @@
 
             campo.value = valor.substring(0, 18);
         }
+        const consumo = document.getElementById('consumo_local');
+        const mesas = document.getElementById('mesas');
 
-        <script>
-            const consumo = document.getElementById('consumo_local');
-            const mesas = document.getElementById('mesas');
+        if (consumo) {
+            consumo.addEventListener('change', function () {
+                mesas.classList.toggle('hidden', !this.checked);
+            });
+        }
 
-            if (consumo) {
-                consumo.addEventListener('change', function () {
-                    mesas.classList.toggle('hidden', !this.checked);
+        function copiarLink() {
+            const campo = document.getElementById('linkMenu');
+            campo.select();
+            campo.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(campo.value);
+            alert('✅ Link copiado!');
+        }
+
+        function compartilharMenu() {
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Cardápio Digital',
+                    text: 'Confira nosso cardápio!',
+                    url: document.getElementById('linkMenu').value
                 });
-}
-    </script>
+
+            } else {
+                copiarLink();
+            }
+        }
+
+        function baixarQRCode() {
+
+            const svg = document.querySelector('svg');
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+
+            img.onload = function () {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                const a = document.createElement('a');
+                a.download = 'qrcode-cardapio.png';
+                a.href = canvas.toDataURL('image/png');
+                a.click();
+            };
+            img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+        }
     </script>
 
 </x-rimafood.layout>

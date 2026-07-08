@@ -55,7 +55,7 @@ class ClienteController extends BaseRestaurantController
             ->with('success', 'Cliente cadastrado com sucesso!');
     }
 
-    public function edit(Cliente $cliente)
+    public function edit(string $slug, Cliente $cliente)
     {
         $restaurante = $this->restaurante();
 
@@ -64,7 +64,7 @@ class ClienteController extends BaseRestaurantController
         return view('clientes.edit', compact('cliente', 'restaurante'));
     }
 
-    public function update(Request $request, Cliente $cliente)
+    public function update(Request $request, string $slug, Cliente $cliente)
     {
         $restaurante = $this->restaurante();
 

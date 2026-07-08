@@ -3,7 +3,7 @@
     <div class="p-8 max-w-4xl">
 
         <div class="flex justify-between items-center mb-8">
-            <h1 class="text-4xl font-bold">✏️ Editar Pedido #{{ $pedido->id }}</h1>
+            <h1 class="text-4xl font-bold">✏️ Editar Pedido #{{ $pedido->numero_pedido ?? $pedido->id  }}</h1>
 
             <a href="{{ route('restaurante.dashboard', $restaurante->slug) }}" class="text-gray-600 hover:underline">
                 🏠 Voltar ao Dashboard

@@ -111,7 +111,8 @@ class PedidoController extends BaseRestaurantController
 
         $taxaEntrega = $this->calcularTaxaEntrega($dados);
         $total = $totalProdutos + $taxaEntrega;
-
+        $numeroPedido = Pedido::proximoNumero($restaurante->id);
+        
         $pedido = Pedido::create([
             'restaurante_id' => $restaurante->id,
             'cliente_id' => $dados['cliente_id'],
@@ -127,6 +128,7 @@ class PedidoController extends BaseRestaurantController
             'endereco_entrega' => $dados['tipo_entrega'] === 'entrega'
                 ? ($dados['endereco_entrega'] ?? null)
                 : null,
+            'numero_pedido' => $numeroPedido,
         ]);
 
         foreach ($itens as $item) {

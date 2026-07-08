@@ -54,7 +54,7 @@
                                     @if($pedido->prioritario && !in_array($pedido->status, ['finalizado', 'cancelado']))
                                         <span class="text-yellow-500"> ⭐ </span>
                                     @endif
-                                    <span class="font-bold text-g"> #{{ $pedido->id }}
+                                    <span class="font-bold text-g"> #{{  $pedido->numero_pedido ?? $pedido->id  }}
 
                                         @if($pedido->token)
                                             <div class="text-xs text-gray-500">

@@ -161,7 +161,7 @@
                             <td class="p-3 font-bold">
                                 <button onclick="abrirModal('pedido{{ $pedido->id }}')"
                                     class="text-blue-600 hover:underline font-bold">
-                                    #{{ $pedido->id }}
+                                    #{{ $pedido->numero_pedido ?? $pedido->id }}
                                     @if($pedido->token)
                                         <div class="text-xs text-gray-500 font-normal">
                                             Token: {{ $pedido->token }}
@@ -243,7 +243,7 @@
                 </button>
 
                 <h2 class="text-3xl font-bold mb-6">
-                    🛒 Pedido #{{ $pedido->id }}
+                    🛒 Pedido #{{ $pedido->numero_pedido ?? $pedido->id }}
                 </h2>
 
                 <div class="space-y-3">

@@ -27,7 +27,7 @@
     <div class="flex justify-between items-start mb-4">
         <div>
             <div class="text-xl font-bold">
-                🍔 Pedido #{{ $pedido->id }}
+                🍔 Pedido #{{ $pedido->numero_pedido ?? $pedido->id }}
             </div>
 
             <div class="text-gray-500 mt-1">

@@ -5,7 +5,7 @@
         <div class="flex justify-between items-center mb-2">
 
             <h1 class="text-4xl font-bold">
-                👁️ Pedido #{{ $pedido->id }}
+                👁️ Pedido #{{ $pedido->numero_pedido ?? $pedido->id }}
             </h1>
 
             <a href="{{ route('restaurante.pedidos.index', $restauranteAtual->slug) }}"
