@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Restaurante;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class RestauranteController extends Controller
 {
@@ -57,6 +58,14 @@ class RestauranteController extends Controller
 
         $dados = $this->validarDados($request);
 
+        if ($request->hasFile('logo') && $restaurante->logo) {
+            Storage::disk('public')->delete($restaurante->logo);
+        }
+
+        if ($request->hasFile('banner') && $restaurante->banner) {
+            Storage::disk('public')->delete($restaurante->banner);
+        }
+
         $restaurante->update($dados);
 
         return redirect()
@@ -95,6 +104,13 @@ class RestauranteController extends Controller
             'retirada' => 'nullable|boolean',
             'consumo_local' => 'nullable|boolean',
             'quantidade_mesas' => 'nullable|integer|min:0|max:500',
+            'logo' => 'nullable|image|max:2048',
+            'banner' => 'nullable|image|max:4096',
+            'abre_as' => 'nullable|date_format:H:i',
+            'fecha_as' => 'nullable|date_format:H:i',
+            'google_rating' => 'nullable|numeric|min:0|max:5',
+            'google_reviews_total' => 'nullable|integer|min:0',
+            'google_maps_url' => 'nullable|string|max:500',
         ]);
 
         $dados['delivery'] = $request->boolean('delivery');
@@ -103,6 +119,14 @@ class RestauranteController extends Controller
 
         if (!$dados['consumo_local']) {
             $dados['quantidade_mesas'] = 0;
+        }
+
+        if ($request->hasFile('logo')) {
+            $dados['logo'] = $request->file('logo')->store('restaurantes/logos', 'public');
+        }
+
+        if ($request->hasFile('banner')) {
+            $dados['banner'] = $request->file('banner')->store('restaurantes/banners', 'public');
         }
 
         return $dados;

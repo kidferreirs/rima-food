@@ -184,14 +184,15 @@
 
 ---
 
-## Próximas Sprints
-
 ### Sprint 5 — QR Code e Compartilhamento
 - Gerar QR Code automático do cardápio.
 - Baixar QR Code em PNG.
 - Copiar link do cardápio.
 - Compartilhar no WhatsApp.
 - Criar página de divulgação do menu.
+
+
+## Próximas Sprints
 
 ### Sprint 6 — Importação de Cardápio
 - Importar por Excel/CSV.

@@ -53,6 +53,11 @@
                 📱 Cardápio Digital
             </a>
 
+            <a href="{{ route('restaurante.importacao.cardapio', $restauranteAtual->slug) }}"
+                class="block p-3 rounded hover:bg-gray-800">
+                📥 Importar Cardápio
+            </a>
+
             <a href="{{ route('restaurante.clientes.index', $restauranteAtual->slug) }}"
                 class="block p-3 rounded hover:bg-gray-800">
                 👥 Clientes

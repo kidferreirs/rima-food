@@ -10,7 +10,9 @@
             </a>
         </div>
 
-        <form action="{{ route('restaurantes.update', $restaurante) }}" method="POST" class="space-y-4">
+        <form action="{{ route('restaurantes.update', $restaurante) }}" method="POST" enctype="multipart/form-data"
+            class="space-y-4">
+
             @csrf
             @method('PUT')
 
@@ -49,6 +51,56 @@
                 class="w-full border rounded-lg p-3">
 
             <hr class="my-8">
+
+            <h2 class="text-2xl font-bold mb-4">⭐ Avaliação Google</h2>
+
+            <input type="number" step="0.1" min="0" max="5" name="google_rating"
+                value="{{ old('google_rating', $restaurante->google_rating) }}" placeholder="Nota Google. Ex: 4.8"
+                class="w-full border rounded-lg p-3">
+
+            <input type="number" name="google_reviews_total"
+                value="{{ old('google_reviews_total', $restaurante->google_reviews_total) }}"
+                placeholder="Total de avaliações. Ex: 123" class="w-full border rounded-lg p-3">
+
+            <input type="text" name="google_maps_url"
+                value="{{ old('google_maps_url', $restaurante->google_maps_url) }}" placeholder="Link do Google Maps"
+                class="w-full border rounded-lg p-3">
+
+            <hr class="my-8">
+
+            <h2 class="text-2xl font-bold mb-4">🎨 Visual do Cardápio</h2>
+
+            <label class="font-semibold">Logo</label>
+            <input type="file" name="logo" accept="image/*" class="w-full border rounded-lg p-3">
+
+            <label class="font-semibold">Banner</label>
+            <input type="file" name="banner" accept="image/*" class="w-full border rounded-lg p-3">
+
+            <hr class="my-8">
+
+            <h2 class="text-2xl font-bold mb-4">⏰ Horário de Atendimento</h2>
+
+            <div>
+                <label class="font-semibold">Abre às</label>
+
+                <input type="text" name="abre_as"
+                    value="{{ old('abre_as', $restaurante->abre_as ? \Carbon\Carbon::parse($restaurante->abre_as)->format('H:i') : '') }}"
+                    placeholder="18:00" maxlength="5" inputmode="numeric" oninput="mascaraHora(this)"
+                    class="w-full border rounded-lg p-3">
+
+                <small class="text-gray-500"> Formato 24h. Ex.: 08:00, 15:00, 23:30 </small>
+            </div>
+
+            <div>
+                <label class="font-semibold">Fecha às</label>
+
+                <input type="text" name="fecha_as"
+                    value="{{ old('fecha_as', $restaurante->fecha_as ? \Carbon\Carbon::parse($restaurante->fecha_as)->format('H:i') : '') }}"
+                    placeholder="00:00" maxlength="5" inputmode="numeric" oninput="mascaraHora(this)"
+                    class="w-full border rounded-lg p-3">
+
+                <small class="text-gray-500"> Formato 24h. Ex.: 12:00, 00:00, 02:00 </small>
+            </div>
 
             <h2 class="text-2xl font-bold mb-4">
                 🍽 Atendimento
@@ -90,50 +142,12 @@
 
             <hr class="my-8">
 
-            <h2 class="text-2xl font-bold mb-5">
-                📱 Cardápio Digital
-            </h2>
-
-            <div class="bg-white border rounded-2xl shadow-sm p-6">
-
-                <p class="text-gray-500 mb-2">Link do seu cardápio</p>
-
-                <div class="flex gap-2">
-                    <input id="linkMenu" type="text" readonly value="{{ $linkMenu }}"
-                        class="flex-1 border rounded-xl p-3 bg-gray-50">
-                    <button type="button" onclick="copiarLink()"
-                        class="bg-blue-500 hover:bg-blue-600 text-white px-5 rounded-xl">
-                        Copiar
-                    </button>
-                </div>
-
-                <div class="flex justify-center my-8">
-
-                    {!! QrCode::size(220)->margin(2)->generate($linkMenu) !!}
-
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-
-                    <button type="button" onclick="compartilharMenu()"
-                        class="bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl">
-                        📲 Compartilhar
-                    </button>
-
-                    <button type="button" onclick="baixarQRCode()"
-                        class="bg-slate-700 hover:bg-slate-800 text-white py-3 rounded-xl">
-                        ⬇️ Baixar QR
-                    </button>
-                </div>
-            </div>
-
             <button class="bg-green-500 text-white px-6 py-3 rounded-lg">
                 Salvar Alterações
             </button>
         </form>
 
     </div>
-
     <script>
         document.getElementById('cep').addEventListener('blur', async function () {
             let cep = this.value.replace(/\D/g, '');
@@ -176,46 +190,18 @@
             });
         }
 
-        function copiarLink() {
-            const campo = document.getElementById('linkMenu');
-            campo.select();
-            campo.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(campo.value);
-            alert('✅ Link copiado!');
-        }
+        function mascaraHora(campo) {
+            let valor = campo.value.replace(/\D/g, '');
 
-        function compartilharMenu() {
-
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Cardápio Digital',
-                    text: 'Confira nosso cardápio!',
-                    url: document.getElementById('linkMenu').value
-                });
-
-            } else {
-                copiarLink();
+            if (valor.length > 4) {
+                valor = valor.substring(0, 4);
             }
-        }
 
-        function baixarQRCode() {
+            if (valor.length >= 3) {
+                valor = valor.substring(0, 2) + ':' + valor.substring(2);
+            }
 
-            const svg = document.querySelector('svg');
-            const svgData = new XMLSerializer().serializeToString(svg);
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const img = new Image();
-
-            img.onload = function () {
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-                const a = document.createElement('a');
-                a.download = 'qrcode-cardapio.png';
-                a.href = canvas.toDataURL('image/png');
-                a.click();
-            };
-            img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+            campo.value = valor;
         }
     </script>
 

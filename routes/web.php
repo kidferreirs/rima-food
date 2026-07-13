@@ -15,6 +15,7 @@ use App\Http\Controllers\CozinhaController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\MenuPedidoController;
+use App\Http\Controllers\CardapioImportController;
 
 
 Route::get('/cadastro', [OnboardingController::class, 'create'])->name('saas.cadastro');
@@ -99,6 +100,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/configuracoes/entregas', [ConfiguracaoEntregaController::class, 'salvar'])->name('restaurante.configuracoes.entregas.salvar');
 
         Route::get('/cardapio-digital', [RestauranteController::class, 'cardapioDigital'])->name('restaurante.cardapio');
+
+        Route::get('/importar-cardapio', [CardapioImportController::class, 'index'])->name('restaurante.importacao.cardapio');
+        Route::post('/importar-cardapio/preview', [CardapioImportController::class, 'preview'])->name('restaurante.importacao.preview');
+        Route::post('/importar-cardapio/importar', [CardapioImportController::class, 'importar'])->name('restaurante.importacao.importar');
+
+        Route::get('/importar-cardapio/modelo', [CardapioImportController::class, 'modelo'])->name('restaurante.importacao.modelo');
     });
 });
 

@@ -10,8 +10,40 @@
 
 <body class="bg-slate-100">
 
-    <main class="max-w-md mx-auto bg-white min-h-screen pb-10">
+    @php
+        $abertoAgora = false;
+        $statusFuncionamento = '🔴 Fechado agora';
 
+        if ($restaurante->abre_as && $restaurante->fecha_as) {
+
+            $agora = now()->format('H:i');
+            $abre = \Carbon\Carbon::parse($restaurante->abre_as)->format('H:i');
+            $fecha = \Carbon\Carbon::parse($restaurante->fecha_as)->format('H:i');
+
+            if ($abre <= $fecha) {
+                $abertoAgora = $agora >= $abre && $agora <= $fecha;
+            } else {
+                $abertoAgora = $agora >= $abre || $agora <= $fecha;
+            }
+
+            if ($abertoAgora) {
+                $statusFuncionamento = '🟢 Aberto até ' . $fecha;
+            } else {
+                $statusFuncionamento = '🔴 Abre às ' . $abre;
+            }
+        }
+
+        $enderecoMaps = trim(
+            ($restaurante->endereco ?? '') . ' ' .
+            ($restaurante->numero ?? '') . ' ' .
+            ($restaurante->cidade ?? '') . ' ' .
+            ($restaurante->estado ?? '')
+        );
+
+        $linkMaps = 'https://www.google.com/maps/search/?api=1&query=' . urlencode($enderecoMaps);
+    @endphp
+
+    <main class="max-w-md mx-auto bg-white min-h-screen pb-10" data-restaurante-slug="{{ $restaurante->slug }}">
         <section class="relative">
             @if($restaurante->banner)
 
@@ -26,11 +58,11 @@
         </section>
 
         <section class="px-5 -mt-10 relative z-10">
-            <div class="w-20 h-20 bg-white rounded-3xl shadow-xl p-2 flex items-center justify-center">
+            <div class="w-24 h-24 bg-white rounded-3xl shadow-xl flex items-center justify-center overflow-hidden">
                 @if($restaurante->logo)
-                    <img src="{{ Storage::url($restaurante->logo) }}" class="w-full h-full object-contain">
+                    <img src="{{ Storage::url($restaurante->logo) }}" class="w-24 h-24 object-contain scale-120">
                 @else
-                    <img src="{{ asset('images/menu/logo.png') }}" class="w-120 h-full object-contain">
+                    <img src="{{ asset('images/menu/logo.png') }}" class="w-24 h-24 object-contain scale-120">
                 @endif
             </div>
 
@@ -42,25 +74,39 @@
                 Venda mais. Compartilhe em qualquer lugar.
             </p>
 
-            <div class="flex flex-wrap gap-2 mt-4">
-                <span class="bg-yellow-100 text-yellow-700 px-3 py-2 rounded-xl font-bold text-sm">
-                    ⭐ 4.9
-                </span>
+            <div class="flex flex-wrap gap-4 mt-4">
+                @if($restaurante->google_rating)
+                    <a href="{{ $restaurante->google_maps_url ?: $linkMaps }}" target="_blank"
+                        class="bg-yellow-100 text-yellow-700 px-3 py-2 rounded-xl font-bold text-sm">
+                        ⭐ {{ number_format($restaurante->google_rating, 1) }}
+                        @if($restaurante->google_reviews_total)
+                            ({{ $restaurante->google_reviews_total }})
+                        @endif
+                    </a>
+                @endif
 
-                <span class="bg-slate-100 text-slate-600 px-3 py-2 rounded-xl font-bold text-sm">
+                <a href="{{ $linkMaps }}" target="_blank"
+                    class="bg-slate-100 text-slate-600 px-3 py-2 rounded-xl font-bold text-sm">
                     📍 {{ $restaurante->cidade }}
-                </span>
+                </a>
 
-                <span class="bg-green-100 text-green-700 px-3 py-2 rounded-xl font-bold text-sm">
-                    🟢 Aberto agora
+                <span
+                    class="{{ $abertoAgora ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} px-3 py-2 rounded-xl font-bold text-sm">
+                    {{ $statusFuncionamento }}h
                 </span>
             </div>
 
             <div class="grid grid-cols-2 gap-3 mt-5">
-                <a href="https://wa.me/55{{ preg_replace('/\D/', '', $restaurante->telefone) }}" target="_blank"
-                    class="border border-slate-200 bg-white py-3 rounded-2xl text-center font-extrabold text-green-600 shadow-sm">
-                    💬 WhatsApp
-                </a>
+                @php
+                    $mensagem = urlencode(
+                        "Olá! Vi o cardápio da {$restaurante->nome} pelo Rima Menu e gostaria de fazer um pedido."
+                    );
+                @endphp
+
+                <a href="https://wa.me/55{{ preg_replace('/\D/', '', $restaurante->telefone) }}?text={{ $mensagem }}"
+                    class="border border-slate-200 bg-white py-3 rounded-2xl text-center font-extrabold text-green-600 shadow-sm"
+                    target="_blank">
+                    💬 WhatsApp</a>
 
                 <button onclick="compartilharMenu()"
                     class="border border-slate-200 bg-white py-3 rounded-2xl text-center font-extrabold text-slate-800 shadow-sm">
@@ -70,35 +116,146 @@
         </section>
 
         <section class="px-5 mt-6">
-            <div class="bg-slate-100 rounded-2xl px-4 py-3 flex items-center gap-3">
+
+            <div class="bg-slate-100 rounded-2xl px-4 py-4 flex items-center gap-3">
                 <span class="text-xl">🔍</span>
-
-                <input id="search" type="text" placeholder="O que você procura hoje?"
-                    class="bg-transparent border-none outline-none focus:ring-0 w-full text-slate-700 placeholder:text-slate-400">
+                <input id="search" type="text" placeholder="Posso ajudar a escolher?" autocomplete="off" class="bg-transparent border-none outline-none focus:ring-0 w-full
+                   text-slate-700 placeholder:text-slate-400">
             </div>
+
+            <div id="resposta-garcom" class="hidden mt-4 bg-green-50 border border-green-100
+               rounded-2xl px-4 py-4">
+                <p class="font-bold text-green-800">
+                    🤖 Garçom Inteligente
+                </p>
+                <p id="texto-resposta-garcom" class="text-sm text-green-700 mt-1"></p>
+            </div>
+
         </section>
 
-        <section class="px-5 mt-6">
-            <div class="flex gap-3 overflow-x-auto pb-2">
+        <section id="navegacao-categorias" class="px-5 mt-7">
 
-                @foreach($restaurante->categorias as $categoria)
+            <button
+                id="abrir-menu-categorias"
+                type="button"
+                class="w-full flex items-center justify-between
+                    bg-slate-900 text-white rounded-2xl px-5 py-4
+                    shadow-sm font-extrabold"
+            >
+                <span class="flex items-center gap-3">
+                    <span class="text-xl">☰</span>
+                    Categorias
+                </span>
 
-                    <button
-                        onclick="document.getElementById('categoria-{{ $categoria->id }}').scrollIntoView({behavior:'smooth'})"
-                        class="bg-slate-100 text-slate-700 px-5 py-3 rounded-2xl font-bold whitespace-nowrap">
+                <span class="text-slate-300">
+                    {{ $restaurante->categorias->count() }}
+                </span>
+            </button>
 
-                        {{ $categoria->nome }}
-
-                    </button>
-
-                @endforeach
-
-            </div>
         </section>
+
+        @if($destaques->isNotEmpty())
+
+            <section id="destaques-section" class="px-5 mt-8">
+
+                <div class="flex items-center justify-between mb-4">
+
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-slate-900">
+                            ⭐ Destaques
+                        </h2>
+
+                        <p class="text-sm text-slate-500 mt-1">
+                            Os favoritos da casa para você.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="flex gap-4 overflow-x-auto pb-3">
+
+                    @foreach($destaques as $produto)
+
+                        <article class="min-w-[190px] max-w-[190px] bg-white border
+                                                   rounded-3xl overflow-hidden shadow-sm">
+
+                            <div class="h-32 bg-orange-100 flex items-center justify-center
+                                                        text-5xl overflow-hidden">
+
+                                @if($produto->imagem)
+
+                                    <img src="{{ Storage::url($produto->imagem) }}" class="w-full h-full object-cover"
+                                        alt="{{ $produto->nome }}">
+
+                                @else
+
+                                    🍔
+
+                                @endif
+
+                            </div>
+
+                            <div class="p-4">
+
+                                <span class="inline-block bg-orange-50 text-orange-700
+                                      rounded-full px-2 py-1 text-xs font-bold mb-2">
+                                    ⭐ Destaque
+                                </span>
+
+                                <h3 class="font-extrabold text-slate-900">
+                                    {{ $produto->nome }}
+                                </h3>
+
+                                <p class="text-xs text-slate-500 mt-1 line-clamp-2">
+                                    {{ $produto->descricao }}
+                                </p>
+
+                                <div class="flex justify-between items-center mt-4">
+
+                                    <span class="font-extrabold text-green-600">
+                                        R$ {{ number_format($produto->preco, 2, ',', '.') }}
+                                    </span>
+
+                                    <button type="button" class="add-cart w-9 h-9 bg-green-500 text-white
+                                                               rounded-full font-bold text-xl" data-id="{{ $produto->id }}"
+                                        data-nome="{{ $produto->nome }}" data-preco="{{ $produto->preco }}">
+                                        +
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+
+                    @endforeach
+
+                </div>
+
+            </section>
+
+        @endif
+
+        <section id="favoritos-section" class="hidden px-5 mt-8">
+            <h2 class="text-2xl font-extrabold text-slate-900"> ❤️ Seus favoritos </h2>
+
+            <p class="text-sm text-slate-500 mt-1 mb-4">
+                Produtos que você salvou neste dispositivo.
+            </p>
+
+            <div id="favoritos-lista" class="space-y-3"></div>
+
+        </section>
+
+        <div id="nenhum-produto-encontrado" class="hidden mx-5 mt-8 bg-slate-50 rounded-2xl p-8 text-center">
+            <div class="text-4xl mb-3"> 😕 </div>
+            <p class="font-bold text-slate-800"> Nenhum produto encontrado </p>
+            <p class="text-sm text-slate-500 mt-2"> Tente outro produto, ingrediente ou categoria. </p>
+        </div>
 
         @foreach($restaurante->categorias as $categoria)
 
-            <section id="categoria-{{ $categoria->id }}" class="px-5 mt-8">
+            <section id="categoria-{{ $categoria->id }}" class="categoria-section px-5 mt-8">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-2xl font-extrabold text-slate-900">
                         {{ $categoria->nome }}
@@ -108,8 +265,24 @@
                 <div class="grid grid-cols-2 gap-4">
                     @foreach($categoria->produtos as $produto)
 
-                        <div class="produto-card bg-white border rounded-3xl overflow-hidden shadow-sm"
-                            data-nome="{{ strtolower($produto->nome) }}" data-descricao="{{ strtolower($produto->descricao) }}">
+                    <div class="produto-card relative bg-white border rounded-3xl overflow-hidden shadow-sm"
+                         data-produto-id="{{ $produto->id }}"
+                         data-produto-preco="{{ $produto->preco }}"
+                         data-nome="{{ strtolower($produto->nome ?? '') }}"
+                         data-descricao="{{ strtolower($produto->descricao ?? '') }}"
+                         data-palavras="{{ strtolower($produto->palavras_chave ?? '') }}"
+                         data-sinonimos="{{ strtolower($produto->sinonimos ?? '') }}"
+                         data-ingredientes="{{ strtolower($produto->ingredientes ?? '') }}"
+                         data-tags="{{ strtolower($produto->tags ?? '') }}"
+                         data-categoria="{{ strtolower($categoria->nome ?? '') }}">
+
+                         <button type="button" class="toggle-favorito absolute top-3 right-3 z-10
+                                                      w-9 h-9 bg-white/90 rounded-full shadow
+                                                      flex items-center justify-center text-xl"
+                                 data-produto-id="{{ $produto->id }}"
+                                 aria-label="Favoritar {{ $produto->nome }}">
+                            🤍
+                        </button>
 
                             <div class="h-36 bg-orange-100 flex items-center justify-center text-5xl relative overflow-hidden">
 
@@ -139,7 +312,7 @@
                                     <button type="button"
                                         class="add-cart w-9 h-9 bg-green-500 text-white rounded-full font-bold text-xl"
                                         data-id="{{ $produto->id }}" data-nome="{{ $produto->nome }}"
-                                        data-preco="{{ $produto->preco }}+id="search">
+                                        data-preco="{{ $produto->preco }}">
                                         +
                                     </button>
 
@@ -152,6 +325,111 @@
             </section>
 
         @endforeach
+
+        <div id="menu-categorias-overlay" class="hidden fixed inset-0 z-[80]" aria-hidden="true">
+            <button id="fundo-menu-categorias" type="button" class="absolute inset-0 bg-slate-950/50" aria-label="Fechar categorias"></button>
+
+            <aside id="menu-categorias-painel" class="absolute left-0 top-0 h-full w-[85%] max-w-sm bg-white shadow-2xl p-5 -translate-x-full transition-transform duration-300">
+                <div class="flex items-center justify-between pb-5 border-b">
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-slate-900"> ☰ Categorias </h2>
+
+                        <p class="text-sm text-slate-500 mt-1"> Escolha uma seção do cardápio. </p>
+                    </div>
+
+                    <button
+                        id="fechar-menu-categorias"
+                        type="button"
+                        class="w-10 h-10 rounded-full bg-slate-100
+                            text-slate-700 font-bold"
+                        aria-label="Fechar categorias"
+                    >
+                        ✕
+                    </button>
+
+                </div>
+
+                <nav class="space-y-2 mt-5">
+
+                    @foreach($restaurante->categorias as $categoria)
+
+                        <button
+                            type="button"
+                            class="categoria-menu-link w-full flex items-center
+                                justify-between bg-slate-50 hover:bg-green-50
+                                rounded-2xl px-4 py-4 text-left transition"
+                            data-categoria-alvo="categoria-{{ $categoria->id }}"
+                        >
+                            <span class="font-bold text-slate-800">
+                                {{ $categoria->nome }}
+                            </span>
+
+                            <span class="text-slate-400">
+                                →
+                            </span>
+                        </button>
+
+                    @endforeach
+
+                </nav>
+            </aside>
+        </div>
+
+        @if($maisVendidos->isNotEmpty())
+
+            <section id="mais-vendidos-section" class="px-5 mt-8">
+                <h2 class="text-2xl font-extrabold text-slate-900"> 🔥 Mais vendidos </h2>
+                <p class="text-sm text-slate-500 mt-1 mb-4"> Os produtos que os clientes mais pedem. </p>
+
+                <div class="flex gap-4 overflow-x-auto pb-3">
+
+                    @foreach($maisVendidos as $produto)
+
+                        <article class="min-w-[190px] max-w-[190px] bg-white border rounded-3xl overflow-hidden shadow-sm">
+
+                            <div class="h-32 bg-orange-100 flex items-center justify-center overflow-hidden">
+
+                                @if($produto->imagem)
+                                    <img src="{{ Storage::url($produto->imagem) }}" class="w-full h-full object-cover" alt="{{ $produto->nome }}">
+                                @else
+                                    <span class="text-5xl">🍔</span>
+                                @endif
+                            </div>
+
+                            <div class="p-4">
+
+                                <span class="inline-block bg-red-50 text-red-700 rounded-full px-2 py-1 text-xs font-bold mb-2">
+                                    🔥 {{ $produto->total_vendido }} vendidos
+                                </span>
+
+                                <h3 class="font-extrabold text-slate-900">{{ $produto->nome }}</h3>
+
+                                <p class="text-xs text-slate-500 mt-1 line-clamp-2">
+                                    {{ $produto->descricao }}
+                                </p>
+
+                                <div class="flex justify-between items-center mt-4">
+                                 
+                                    <span class="font-extrabold text-green-600">
+                                        R$ {{ number_format($produto->preco, 2, ',', '.') }}
+                                    </span>
+                                    
+                                    <button
+                                        type="button"
+                                        class="add-cart w-9 h-9 bg-green-500 text-white rounded-full font-bold text-xl"
+                                        data-id="{{ $produto->id }}"
+                                        data-nome="{{ $produto->nome }}"
+                                        data-preco="{{ $produto->preco }}"
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+            </section>
+        @endif
 
         <div id="cart-bar"
             class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-slate-900 text-white rounded-2xl shadow-2xl p-4 z-50">
@@ -177,12 +455,15 @@
     </main>
 
     <script>
-        let cart = JSON.parse(localStorage.getItem('rima-cart-{{ $restaurante->slug }}')) || [];
+        let cart = JSON.parse(
+            localStorage.getItem('rima-cart-{{ $restaurante->slug }}')
+        ) || [];
 
         const buttons = document.querySelectorAll('.add-cart');
         const cartBar = document.getElementById('cart-bar');
         const cartItems = document.getElementById('cart-items');
         const cartTotal = document.getElementById('cart-total');
+        //   const searchInput = document.getElementById('search');
 
         buttons.forEach(button => {
             button.addEventListener('click', () => {
@@ -208,12 +489,20 @@
         });
 
         function atualizarCarrinho() {
+            const totalItens = cart.reduce(
+                (soma, item) => soma + item.quantidade,
+                0
+            );
 
-            const totalItens = cart.reduce((soma, item) => soma + item.quantidade, 0);
-            const totalValor = cart.reduce((soma, item) => soma + (item.preco * item.quantidade), 0);
+            const totalValor = cart.reduce(
+                (soma, item) => soma + (item.preco * item.quantidade),
+                0
+            );
 
             cartItems.innerText = totalItens;
-            cartTotal.innerText = totalValor.toFixed(2).replace('.', ',');
+            cartTotal.innerText = totalValor
+                .toFixed(2)
+                .replace('.', ',');
 
             if (totalItens > 0) {
                 cartBar.classList.remove('hidden');
@@ -221,66 +510,38 @@
                 cartBar.classList.add('hidden');
             }
 
-            // Salva o carrinho atualizado
-            localStorage.setItem('rima-cart-{{ $restaurante->slug }}', JSON.stringify(cart));
+            localStorage.setItem(
+                'rima-cart-{{ $restaurante->slug }}',
+                JSON.stringify(cart)
+            );
         }
+
         atualizarCarrinho();
 
         cartBar.addEventListener('click', () => {
-            window.location.href = "{{ route('menu.checkout', $restaurante->slug) }}";
+            window.location.href =
+                "{{ route('menu.checkout', $restaurante->slug) }}";
         });
 
         function compartilharMenu() {
-
             if (navigator.share) {
-
                 navigator.share({
                     title: document.title,
                     text: 'Confira nosso cardápio!',
                     url: window.location.href
+                }).catch(() => {
+                    // Usuário pode cancelar o compartilhamento.
                 });
 
-            } else {
-
-                navigator.clipboard.writeText(window.location.href);
-
-                alert('✅ Link copiado!');
-
+                return;
             }
 
+            navigator.clipboard
+                .writeText(window.location.href)
+                .then(() => {
+                    alert('✅ Link copiado!');
+                });
         }
-
-        document
-            .getElementById('search')
-            .addEventListener('input', function () {
-
-                const texto = this.value.toLowerCase();
-
-                document
-                    .querySelectorAll('.produto-card')
-                    .forEach(card => {
-
-                        const nome = card.dataset.nome;
-
-                        const descricao = card.dataset.descricao;
-
-                        if (
-                            nome.includes(texto)
-                            ||
-                            descricao.includes(texto)
-                        ) {
-
-                            card.style.display = '';
-
-                        } else {
-
-                            card.style.display = 'none';
-
-                        }
-
-                    });
-
-            });
     </script>
 </body>
 

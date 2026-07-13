@@ -45,11 +45,21 @@ class ProdutoController extends BaseRestaurantController
             'descricao' => 'nullable|string',
             'preco' => 'required|numeric|min:0',
             'imagem' => 'nullable|image|max:2048',
+            'palavras_chave' => 'nullable|string',
+            'sinonimos' => 'nullable|string',
+            'ingredientes' => 'nullable|string',
+            'restricoes' => 'nullable|string',
+            'tags' => 'nullable|array',
+            'tags.*' => 'string|max:50',
         ]);
 
         $this->autorizarCategoria($dados['categoria_id']);
+        $dados['tags'] = implode(',', $dados['tags'] ?? []);
+
         if ($request->hasFile('imagem')) {
-            $dados['imagem'] = $request->file('imagem')->store('produtos', 'public');
+            $dados['imagem'] = $request
+                ->file('imagem')
+                ->store('produtos', 'public');
         }
 
         Produto::create($dados);
@@ -85,9 +95,19 @@ class ProdutoController extends BaseRestaurantController
             'descricao' => 'nullable|string',
             'preco' => 'required|numeric|min:0',
             'imagem' => 'nullable|image|max:2048',
+
+            'palavras_chave' => 'nullable|string',
+            'sinonimos' => 'nullable|string',
+            'ingredientes' => 'nullable|string',
+            'restricoes' => 'nullable|string',
+
+            'tags' => 'nullable|array',
+            'tags.*' => 'string|max:50',
         ]);
 
         $this->autorizarCategoria($dados['categoria_id']);
+
+        $dados['tags'] = implode(',', $dados['tags'] ?? []);
 
         if ($request->hasFile('imagem')) {
             if ($produto->imagem) {
