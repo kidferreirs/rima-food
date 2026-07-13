@@ -237,7 +237,9 @@
         @endif
 
         <section id="favoritos-section" class="hidden px-5 mt-8">
-            <h2 class="text-2xl font-extrabold text-slate-900"> ❤️ Seus favoritos </h2>
+            <h2 class="text-2xl font-extrabold text-slate-900"> ❤️ Seus favoritos 
+                <span id="favoritos-contador" class="text-base text-slate-400"> (0) </span>
+            </h2>
 
             <p class="text-sm text-slate-500 mt-1 mb-4">
                 Produtos que você salvou neste dispositivo.
@@ -430,6 +432,8 @@
                 </div>
             </section>
         @endif
+
+        <div id="toast" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl z-50"></div>
 
         <div id="cart-bar"
             class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-slate-900 text-white rounded-2xl shadow-2xl p-4 z-50">

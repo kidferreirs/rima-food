@@ -15,6 +15,12 @@ function iniciarFavoritos() {
     const secao = document.getElementById('favoritos-section');
     const lista = document.getElementById('favoritos-lista');
 
+    const toast = document.getElementById('toast');
+
+    const contador = document.getElementById(
+        'favoritos-contador'
+    );
+
     function salvar() {
         localStorage.setItem(
             chave,
@@ -22,46 +28,80 @@ function iniciarFavoritos() {
         );
     }
 
-    function atualizarBotoes() {
-        document
-            .querySelectorAll('.toggle-favorito')
-            .forEach(botao => {
-                const id = botao.dataset.produtoId;
+    function mostrarToast(texto) {
 
-                botao.textContent = favoritos.includes(id)
-                    ? '❤️'
-                    : '🤍';
-            });
-    }
+        if (!toast) return;
 
-    function atualizarLista() {
-        if (!secao || !lista) {
-            return;
-        }
+        toast.textContent = texto;
 
-        lista.innerHTML = '';
+        toast.classList.remove(
+            'hidden',
+            'opacity-0'
+        );
 
-        favoritos.forEach(id => {
-            const card = document.querySelector(
-                `.produto-card[data-produto-id="${id}"]`
+        toast.classList.add(
+            'opacity-100'
+        );
+
+        clearTimeout(
+            toast.dataset.timer
+        );
+
+        toast.dataset.timer = setTimeout(() => {
+
+            toast.classList.add(
+                'opacity-0'
             );
 
-            if (!card) {
+            setTimeout(() => {
+                toast.classList.add(
+                    'hidden'
+                );
+            }, 250);
+
+        }, 1500);
+    }
+
+        function atualizarBotoes() {
+            document
+                .querySelectorAll('.toggle-favorito')
+                .forEach(botao => {
+                    const id = botao.dataset.produtoId;
+
+                    botao.textContent = favoritos.includes(id)
+                        ? '❤️'
+                        : '🤍';
+                });
+        }
+
+        function atualizarLista() {
+            if (!secao || !lista) {
                 return;
             }
 
-            const nome = card.dataset.nome;
-            const preco = Number(
-                card.dataset.produtoPreco
-            );
+            lista.innerHTML = '';
 
-            const item = document.createElement('button');
+            favoritos.forEach(id => {
+                const card = document.querySelector(
+                    `.produto-card[data-produto-id="${id}"]`
+                );
 
-            item.type = 'button';
-            item.className =
-                'w-full flex justify-between items-center bg-red-50 border border-red-100 rounded-2xl p-4 text-left';
+                if (!card) {
+                    return;
+                }
 
-            item.innerHTML = `
+                const nome = card.dataset.nome;
+                const preco = Number(
+                    card.dataset.produtoPreco
+                );
+
+                const item = document.createElement('button');
+
+                item.type = 'button';
+                item.className =
+                    'w-full flex justify-between items-center bg-red-50 border border-red-100 rounded-2xl p-4 text-left';
+
+                item.innerHTML = `
                 <span>
                     <strong class="block text-slate-800">
                         ❤️ ${nome}
@@ -77,51 +117,79 @@ function iniciarFavoritos() {
                 </strong>
             `;
 
-            item.addEventListener('click', () => {
-                card.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
+                item.addEventListener('click', () => {
+                    card.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
                 });
+
+                lista.appendChild(item);
             });
 
-            lista.appendChild(item);
+            secao.classList.toggle(
+                'hidden',
+                favoritos.length === 0
+            );
+
+            if (contador) {
+                contador.textContent =
+                    `(${favoritos.length})`;
+            }
+        }
+
+        document.addEventListener('click', event => {
+            const botao = event.target.closest(
+                '.toggle-favorito'
+            );
+
+            if (!botao) {
+                return;
+            }
+
+            const id = botao.dataset.produtoId;
+            const coracao = botao;
+
+            if (favoritos.includes(id)) {
+
+                favoritos = favoritos.filter(
+                    favoritoId => favoritoId !== id
+                );
+
+                mostrarToast(
+                    '🤍 Removido dos favoritos'
+                );
+
+            } else {
+
+                favoritos.push(id);
+
+                mostrarToast(
+                    '❤️ Adicionado aos favoritos'
+                );
+            }
+
+            coracao.animate(
+                [
+                    { transform: 'scale(1)' },
+                    { transform: 'scale(1.25)' },
+                    { transform: 'scale(1)' }
+                ],
+                {
+                    duration: 250
+                }
+            );
+
+            salvar();
+            atualizarBotoes();
+            atualizarLista();
         });
 
-        secao.classList.toggle(
-            'hidden',
-            favoritos.length === 0
-        );
-    }
-
-    document.addEventListener('click', event => {
-        const botao = event.target.closest(
-            '.toggle-favorito'
-        );
-
-        if (!botao) {
-            return;
-        }
-
-        const id = botao.dataset.produtoId;
-
-        if (favoritos.includes(id)) {
-            favoritos = favoritos.filter(
-                favoritoId => favoritoId !== id
-            );
-        } else {
-            favoritos.push(id);
-        }
-
-        salvar();
         atualizarBotoes();
         atualizarLista();
-    });
+    }
 
-    atualizarBotoes();
-    atualizarLista();
-}
-
-document.addEventListener(
-    'DOMContentLoaded',
-    iniciarFavoritos
-);
+    document.addEventListener(
+        'DOMContentLoaded',
+        iniciarFavoritos
+    );

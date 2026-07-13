@@ -70,6 +70,7 @@ class MenuController extends Controller
             })
             ->take(6)
             ->values();
+        $destaquesIds = $destaques->pluck('id');
 
         /*
         |--------------------------------------------------------------------------
@@ -97,6 +98,7 @@ class MenuController extends Controller
             ->take(6)
             ->get()
             ->filter(fn($produto) => (int) $produto->total_vendido > 0)
+            ->reject(fn($produto) => $destaquesIds->contains($produto->id))
             ->values();
 
         return view('menu.show', compact(
