@@ -23,7 +23,7 @@
         @endif
 
         <form
-            action="{{ route('configuracoes.entregas.salvar') }}"
+            action="{{ route('restaurante.configuracoes.entregas.salvar', $restauranteAtual->slug) }}"
             method="POST"
             class="bg-white rounded-xl shadow p-8"
         >

@@ -7,13 +7,11 @@ use App\Models\Pedido;
 use App\Models\Produto;
 use App\Models\Restaurante;
 
-class DashboardController extends Controller
+class DashboardController extends BaseRestaurantController
 {
     public function index()
     {
-        $restaurante = Restaurante::where('user_id', auth()->id())
-            ->first();
-
+        $restaurante = $this->restaurante();
         $produtos = 0;
         $clientes = 0;
         $totalPedidos = 0;
@@ -65,7 +63,7 @@ class DashboardController extends Controller
 
                 ->whereDate('created_at', today())
 
-                ->where('forma_pagamento', 'cartao')
+                ->whereIn('forma_pagamento', ['credito', 'debito', 'cartao'])
 
                 ->sum('total');
 

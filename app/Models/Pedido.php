@@ -22,6 +22,8 @@ class Pedido extends Model
         'tipo_entrega',
         'taxa_entrega',
         'endereco_entrega',
+        'token',
+        'numero_pedido',
     ];
 
     public function restaurante()
@@ -37,5 +39,12 @@ class Pedido extends Model
     public function itens()
     {
         return $this->hasMany(ItemPedido::class);
+    }
+
+    public static function proximoNumero(int $restauranteId): int
+    {
+        return ((int) self::where('restaurante_id', $restauranteId)
+            ->lockForUpdate()
+            ->max('numero_pedido')) + 1;
     }
 }

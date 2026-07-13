@@ -9,12 +9,10 @@ class ItemPedido extends Model
     protected $fillable = [
 
         'pedido_id',
-
         'produto_id',
-
         'quantidade',
-
         'preco_unitario',
+        'observacao',
     ];
 
     public function pedido()

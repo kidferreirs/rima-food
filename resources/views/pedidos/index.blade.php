@@ -9,7 +9,7 @@
                     <span>Pedidos prioritários possuem atendimento preferencial</span>
                 </div>
             </div>
-            <a href="{{ route('pedidos.create') }}"
+            <a href="{{ route('restaurante.pedidos.create', $restauranteAtual->slug) }}"
                 class="bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-lg transition">
                 + Novo Pedido
             </a>
@@ -54,7 +54,14 @@
                                     @if($pedido->prioritario && !in_array($pedido->status, ['finalizado', 'cancelado']))
                                         <span class="text-yellow-500"> ⭐ </span>
                                     @endif
-                                    <span class="font-bold text-g"> #{{ $pedido->id }} </span>
+                                    <span class="font-bold text-g"> #{{  $pedido->numero_pedido ?? $pedido->id  }}
+
+                                        @if($pedido->token)
+                                            <div class="text-xs text-gray-500">
+                                                {{ $pedido->token }}
+                                            </div>
+                                        @endif
+                                    </span>
                                 </div>
                             </td>
 
@@ -95,87 +102,88 @@
 
                                 @else
 
-                                                                <div class="mb-2">
-                                                                    @php
-                                                                        $inicioStatus = match ($pedido->status) {
-                                                                            'novo' => $pedido->novo_em ?? $pedido->created_at,
-                                                                            'preparando' => $pedido->preparando_em,
-                                                                            'pronto' => $pedido->pronto_em,
-                                                                            'saiu_entrega' => $pedido->pronto_em,
-                                                                            default => null,
-                                                                        };
-                                                                    @endphp
-
-                                    @if($inicioStatus)
-
+                                    <div class="mb-2">
                                         @php
-
-                                            $minutos = \Carbon\Carbon::parse($inicioStatus)
-                                                ->diffInMinutes(now());
-
+                                            $inicioStatus = match ($pedido->status) {
+                                                'novo' => $pedido->novo_em ?? $pedido->created_at,
+                                                'preparando' => $pedido->preparando_em,
+                                                'pronto' => $pedido->pronto_em,
+                                                'saiu_entrega' => $pedido->pronto_em,
+                                                default => null,
+                                            };
                                         @endphp
 
-                                        @if($minutos < 20)
+                                        @if($inicioStatus)
 
-                                            <div class="text-xs font-semibold text-green-600 mt-1">
+                                            @php
 
-                                                🟢 {{ floor($minutos) }} min
+                                                $minutos = \Carbon\Carbon::parse($inicioStatus)
+                                                    ->diffInMinutes(now());
 
-                                            </div>
+                                            @endphp
 
-                                        @elseif($minutos < 40)
+                                            @if($minutos < 20)
 
-                                            <div class="text-xs font-semibold text-orange-500 mt-1">
+                                                <div class="text-xs font-semibold text-green-600 mt-1">
 
-                                                🟠 {{ floor($minutos) }} min
+                                                    🟢 {{ floor($minutos) }} min
 
-                                            </div>
+                                                </div>
 
-                                        @else
+                                            @elseif($minutos < 40)
 
-                                            <div class="text-xs font-semibold text-red-600 mt-1">
+                                                <div class="text-xs font-semibold text-orange-500 mt-1">
 
-                                                🔴 {{ floor($minutos) }} min
+                                                    🟠 {{ floor($minutos) }} min
 
-                                            </div>
+                                                </div>
+
+                                            @else
+
+                                                <div class="text-xs font-semibold text-red-600 mt-1">
+
+                                                    🔴 {{ floor($minutos) }} min
+
+                                                </div>
+
+                                            @endif
 
                                         @endif
 
-                                    @endif
+                                    </div>
 
-                                                                </div>
+                                    <form action="{{ route('restaurante.pedidos.status', [$restauranteAtual->slug, $pedido]) }}"
+                                        method="POST">
+                                        @csrf
+                                        @method('PATCH')
 
-                                                                <form action="{{ route('pedidos.status', $pedido) }}" method="POST">
-                                                                    @csrf
-                                                                    @method('PATCH')
+                                        <select name="status" onchange="this.form.submit()"
+                                            class="border rounded-lg px-3 py-2 bg-white">
+                                            <option value="novo" @selected($pedido->status === 'novo')>
+                                                🟡 Novo
+                                            </option>
 
-                                                                    <select name="status" onchange="this.form.submit()"
-                                                                        class="border rounded-lg px-3 py-2 bg-white">
-                                                                        <option value="novo" @selected($pedido->status === 'novo')>
-                                                                            🟡 Novo
-                                                                        </option>
+                                            <option value="preparando" @selected($pedido->status === 'preparando')>
+                                                🔵 Preparando
+                                            </option>
 
-                                                                        <option value="preparando" @selected($pedido->status === 'preparando')>
-                                                                            🔵 Preparando
-                                                                        </option>
+                                            <option value="pronto" @selected($pedido->status === 'pronto')>
+                                                🟣 Pronto
+                                            </option>
 
-                                                                        <option value="pronto" @selected($pedido->status === 'pronto')>
-                                                                            🟣 Pronto
-                                                                        </option>
+                                            <option value="saiu_entrega" @selected($pedido->status === 'saiu_entrega')>
+                                                🚚 Saiu para entrega
+                                            </option>
 
-                                                                        <option value="saiu_entrega" @selected($pedido->status === 'saiu_entrega')>
-                                                                            🚚 Saiu para entrega
-                                                                        </option>
+                                            <option value="finalizado" @selected($pedido->status === 'finalizado')>
+                                                🟢 Finalizado
+                                            </option>
 
-                                                                        <option value="finalizado" @selected($pedido->status === 'finalizado')>
-                                                                            🟢 Finalizado
-                                                                        </option>
-
-                                                                        <option value="cancelado" @selected($pedido->status === 'cancelado')>
-                                                                            🔴 Cancelado
-                                                                        </option>
-                                                                    </select>
-                                                                </form>
+                                            <option value="cancelado" @selected($pedido->status === 'cancelado')>
+                                                🔴 Cancelado
+                                            </option>
+                                        </select>
+                                    </form>
 
                                 @endif
                             </td>
@@ -196,22 +204,26 @@
 
                             <td class="p-4">
                                 <div class="flex gap-3">
-                                    <a href="{{ route('pedidos.show', $pedido) }}" class="text-blue-500">
+                                    <a href="{{ route('restaurante.pedidos.show', [$restauranteAtual->slug, $pedido]) }}"
+                                        class="text-blue-500">
                                         👁️
                                     </a>
 
-                                    <a href="{{ route('pedidos.imprimir', $pedido) }}" target="_blank"
-                                        class="text-gray-600 hover:text-black">
+                                    <a href="{{ route('restaurante.pedidos.imprimir', [$restauranteAtual->slug, $pedido]) }}"
+                                        target="_blank" class="text-gray-600 hover:text-black">
                                         🖨️
                                     </a>
 
                                     @if(in_array($pedido->status, ['novo', 'preparando']))
 
-                                        <a href="{{ route('pedidos.edit', $pedido) }}" class="text-yellow-500">
+                                        <a href="{{ route('restaurante.pedidos.edit', [$restauranteAtual->slug, $pedido]) }}"
+                                            class="text-yellow-500">
                                             🖊️
                                         </a>
 
-                                        <form action="{{ route('pedidos.cancelar', $pedido) }}" method="POST">
+                                        <form
+                                            action="{{ route('restaurante.pedidos.cancelar', [$restauranteAtual->slug, $pedido]) }}"
+                                            method="POST">
                                             @csrf
                                             @method('PATCH')
 

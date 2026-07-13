@@ -25,6 +25,18 @@ class Restaurante extends Model
         'tempo_medio',
         'logo',
         'ativo',
+        'delivery',
+        'retirada',
+        'consumo_local',
+        'quantidade_mesas',
+        'slug',
+        'banner',
+        'abre_as',
+        'fecha_as',
+        'google_rating',
+        'google_reviews_total',
+        'google_maps_url',
+        'plano',
     ];
 
     public function categorias()
@@ -53,5 +65,28 @@ class Restaurante extends Model
     public function campanhas()
     {
         return $this->hasMany(Campanha::class);
+    }
+
+    public function configuracaoEntrega()
+    {
+        return $this->hasOne(ConfiguracaoEntrega::class);
+    }
+
+    public function temIA(): bool
+    {
+        return in_array($this->plano, [
+            'MENU_IA',
+            'FOOD'
+        ]);
+    }
+
+    public function ehFood(): bool
+    {
+        return $this->plano === 'FOOD';
+    }
+
+    public function ehMenu(): bool
+    {
+        return $this->plano === 'MENU';
     }
 }

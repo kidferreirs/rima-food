@@ -3,17 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;
-use App\Models\Restaurante;
 use Illuminate\Http\Request;
 
-class CategoriaController extends Controller
+class CategoriaController extends BaseRestaurantController
 {
     public function index()
     {
-        $categorias = Categoria::with('restaurante')
-            ->whereHas('restaurante', function ($query) {
-                $query->where('user_id', auth()->id());
-            })
+        $restaurante = $this->restaurante();
+
+        $categorias = Categoria::where('restaurante_id', $restaurante->id)
             ->latest()
             ->get();
 
@@ -22,78 +20,72 @@ class CategoriaController extends Controller
 
     public function create()
     {
-        $restaurantes = Restaurante::where('user_id', auth()->id())
-            ->where('ativo', true)
-            ->get();
+        $restaurante = $this->restaurante();
 
-        return view('categorias.create', compact('restaurantes'));
+        return view('categorias.create', compact('restaurante'));
     }
 
     public function store(Request $request)
     {
+        $restaurante = $this->restaurante();
+
         $dados = $request->validate([
-            'restaurante_id' => 'required|exists:restaurantes,id',
             'nome' => 'required|string|max:255',
         ]);
 
-        $this->validarRestauranteDoUsuario($dados['restaurante_id']);
+        $dados['restaurante_id'] = $restaurante->id;
 
         Categoria::create($dados);
 
         return redirect()
-            ->route('categorias.index')
+            ->route('restaurante.categorias.index', $restaurante->slug)
             ->with('success', 'Categoria cadastrada com sucesso!');
     }
 
     public function edit(Categoria $categoria)
     {
-        $this->validarRestauranteDoUsuario($categoria->restaurante_id);
+        $restaurante = $this->restaurante();
 
-        $restaurantes = Restaurante::where('user_id', auth()->id())
-            ->where('ativo', true)
-            ->get();
+        $this->autorizarCategoria($categoria);
 
-        return view('categorias.edit', compact('categoria', 'restaurantes'));
+        return view('categorias.edit', compact('categoria', 'restaurante'));
     }
 
     public function update(Request $request, Categoria $categoria)
     {
-        $this->validarRestauranteDoUsuario($categoria->restaurante_id);
+        $restaurante = $this->restaurante();
+
+        $this->autorizarCategoria($categoria);
 
         $dados = $request->validate([
-            'restaurante_id' => 'required|exists:restaurantes,id',
             'nome' => 'required|string|max:255',
         ]);
-
-        $this->validarRestauranteDoUsuario($dados['restaurante_id']);
 
         $categoria->update($dados);
 
         return redirect()
-            ->route('categorias.index')
+            ->route('restaurante.categorias.index', $restaurante->slug)
             ->with('success', 'Categoria atualizada com sucesso!');
     }
 
     public function alterarStatus(Categoria $categoria)
     {
-        $this->validarRestauranteDoUsuario($categoria->restaurante_id);
+        $restaurante = $this->restaurante();
+
+        $this->autorizarCategoria($categoria);
 
         $categoria->update([
             'ativo' => ! $categoria->ativo,
         ]);
 
         return redirect()
-            ->route('categorias.index')
+            ->route('restaurante.categorias.index', $restaurante->slug)
             ->with('success', 'Status da categoria atualizado!');
     }
 
-    private function validarRestauranteDoUsuario($restauranteId)
+    private function autorizarCategoria(Categoria $categoria): void
     {
-        $existe = Restaurante::where('id', $restauranteId)
-            ->where('user_id', auth()->id())
-            ->exists();
-
-        if (! $existe) {
+        if ($categoria->restaurante_id !== $this->restaurante()->id) {
             abort(403);
         }
     }

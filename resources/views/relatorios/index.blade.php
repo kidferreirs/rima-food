@@ -19,22 +19,22 @@
             </div>
 
             <div class="flex flex-wrap gap-3 mb-6">
-                <a href="{{ route('relatorios.index', ['atalho' => 'hoje']) }}"
+                <a href="{{ route('restaurante.relatorios.index', [$restauranteAtual->slug, 'atalho' => 'hoje']) }}"
                     class="bg-white border px-4 py-2 rounded-xl shadow-sm hover:bg-gray-100 transition">
                     Hoje
                 </a>
 
-                <a href="{{ route('relatorios.index', ['atalho' => 'ontem']) }}"
+                <a href="{{ route('restaurante.relatorios.index', [$restauranteAtual->slug, 'atalho' => 'ontem']) }}"
                     class="bg-white border px-4 py-2 rounded-xl shadow-sm hover:bg-gray-100 transition">
                     Ontem
                 </a>
 
-                <a href="{{ route('relatorios.index', ['atalho' => 'semana']) }}"
+                <a href="{{ route('restaurante.relatorios.index', [$restauranteAtual->slug, 'atalho' => 'semana']) }}"
                     class="bg-white border px-4 py-2 rounded-xl shadow-sm hover:bg-gray-100 transition">
                     Esta semana
                 </a>
 
-                <a href="{{ route('relatorios.index', ['atalho' => 'mes']) }}"
+                <a href="{{ route('restaurante.relatorios.index', [$restauranteAtual->slug, 'atalho' => 'mes']) }}"
                     class="bg-white border px-4 py-2 rounded-xl shadow-sm hover:bg-gray-100 transition">
                     Este mês
                 </a>
@@ -59,14 +59,14 @@
                     <span>Filtrar</span>
                 </button>
 
-                <a href="{{ route('relatorios.index') }}"
+                <a href="{{ route('restaurante.relatorios.index', $restauranteAtual->slug) }}"
                     class="w-[100px] h-[44px] bg-gray-800 hover:bg-gray-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-sm transition">
                     🧹
                     <span>Limpar</span>
                 </a>
 
                 @if($temFiltro)
-                    <a href="{{ route('relatorios.exportar', request()->query()) }}"
+                    <a href="{{ route('restaurante.relatorios.exportar', array_merge([$restauranteAtual->slug], request()->query())) }}"
                         class="h-[44px] bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-sm transition px-5">
                         📤
                         <span>Exportar CSV</span>
@@ -76,7 +76,7 @@
         </form>
 
         @if($temFiltro)
-            <div class="flex items-center gap-4 mb-4">
+            dashboard <div class="flex items-center gap-4 mb-4">
                 <h2 class="text-2xl font-bold whitespace-nowrap"> 💰 Financeiro </h2>
                 <div class="w-full border-b border-gray-300"> </div>
             </div>
@@ -134,29 +134,51 @@
                 </div>
 
             </div>
-            
-            <h2 class="text-2xl font-bold mt-10 mb-4"> 💳 Pagamentos </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+
+            <h2 class="text-2xl font-bold mt-10 mb-4">💳 Pagamentos</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mt-8">
                 <div class="bg-white rounded-xl shadow p-6">
                     <h2 class="text-gray-500">💵 Dinheiro</h2>
-                    <p class="text-3xl font-bold mt-2"> R$ {{ number_format($dinheiroPeriodo, 2, ',', '.') }} </p>
+                    <p class="text-3xl font-bold mt-2">
+                        R$ {{ number_format($dinheiroPeriodo, 2, ',', '.') }}
+                    </p>
                 </div>
 
                 <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">💳 Cartão</h2>
-                    <p class="text-3xl font-bold mt-2"> R$ {{ number_format($cartaoPeriodo, 2, ',', '.') }} </p>
+                    <h2 class="text-gray-500">💳 Crédito</h2>
+                    <p class="text-3xl font-bold mt-2">
+                        R$ {{ number_format($creditoPeriodo, 2, ',', '.') }}
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow p-6">
+                    <h2 class="text-gray-500">💳 Débito</h2>
+                    <p class="text-3xl font-bold mt-2">
+                        R$ {{ number_format($debitoPeriodo, 2, ',', '.') }}
+                    </p>
                 </div>
 
                 <div class="bg-white rounded-xl shadow p-6">
                     <h2 class="text-gray-500">🏦 Pix</h2>
-                    <p class="text-3xl font-bold mt-2"> R$ {{ number_format($pixPeriodo, 2, ',', '.') }} </p>
+                    <p class="text-3xl font-bold mt-2">
+                        R$ {{ number_format($pixPeriodo, 2, ',', '.') }}
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow p-6">
+                    <h2 class="text-gray-500">💳 Total Cartões</h2>
+                    <p class="text-3xl font-bold mt-2">
+                        R$ {{ number_format($cartaoPeriodo, 2, ',', '.') }}
+                    </p>
                 </div>
 
                 <div class="bg-white rounded-xl shadow p-6">
                     <h2 class="text-gray-500">🥇 Mais Utilizado</h2>
-                    <p class="text-2xl font-bold mt-3"> {{ $formaMaisUsada }} </p>
+                    <p class="text-2xl font-bold mt-3">
+                        {{ $formaMaisUsada }}
+                    </p>
                 </div>
-
             </div>
         @else
             <div class="bg-white rounded-xl shadow p-8 text-center text-gray-500 mt-8">

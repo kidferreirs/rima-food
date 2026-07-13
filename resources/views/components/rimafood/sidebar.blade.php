@@ -3,54 +3,89 @@
     <div class="p-6 border-b border-gray-700">
         <h1 class="text-2xl font-bold">🍔 Rima Food</h1>
         <p class="text-sm text-gray-400">by Rimatech</p>
+
+        @isset($restauranteAtual)
+            <p class="text-xs text-green-400 mt-3">
+                🟢 {{ $restauranteAtual->nome }}
+            </p>
+        @endisset
     </div>
 
     <nav class="p-4 space-y-2">
 
-        <a href="/dashboard" class="block p-3 rounded hover:bg-gray-800">
-            🏠 Dashboard
-        </a>
+        @php
+            $account = auth()->user()->account;
+        @endphp
 
-        <a href="{{ route('whatsapp.conversas.index') }}" class="block p-3 rounded hover:bg-gray-800">
-            📱 WhatsApp
-        </a>
+        @isset($restauranteAtual)
 
-        <a href="{{ route('cozinha.index') }}" class="block p-3 rounded hover:bg-gray-800">
-            🍳 Cozinha
-        </a>
+            <a href="{{ route('restaurante.dashboard', $restauranteAtual->slug) }}"
+                class="block p-3 rounded hover:bg-gray-800">
+                🏠 Dashboard
+            </a>
 
-        <a href="/pedidos" class="block p-3 rounded hover:bg-gray-800">
-            🛒 Pedidos
-        </a>
+            @if($account?->hasModule('cozinha'))
+                <a href="{{ route('restaurante.cozinha.index', $restauranteAtual->slug) }}"
+                    class="block p-3 rounded hover:bg-gray-800">
+                    🍳 Cozinha
+                </a>
+            @endif
 
-        <a href="/categorias" class="block p-3 rounded hover:bg-gray-800">
-            📂 Categorias
-        </a>
+            @if($account?->hasModule('pedidos'))
+                <a href="{{ route('restaurante.pedidos.index', $restauranteAtual->slug) }}"
+                    class="block p-3 rounded hover:bg-gray-800">
+                    🛒 Pedidos
+                </a>
+            @endif
 
-        <a href="/produtos" class="block p-3 rounded hover:bg-gray-800">
-            🍔 Produtos
-        </a>
+            <a href="{{ route('restaurante.categorias.index', $restauranteAtual->slug) }}"
+                class="block p-3 rounded hover:bg-gray-800">
+                📂 Categorias
+            </a>
 
-        <a href="{{ route('configuracoes.entregas.index') }}" class="block p-3 rounded hover:bg-gray-800">
-            🚚 Entregas
-        </a>
+            <a href="{{ route('restaurante.produtos.index', $restauranteAtual->slug) }}"
+                class="block p-3 rounded hover:bg-gray-800">
+                🍔 Produtos
+            </a>
 
-        
-        <a href="/restaurantes" class="block p-3 rounded hover:bg-gray-800">
-            🏪 Restaurante
-        </a>
-    
-        <a href="/clientes" class="block p-3 rounded hover:bg-gray-800">
-            👥 Clientes
-        </a>
+            <a href="{{ route('restaurante.cardapio', $restauranteAtual->slug) }}"
+                class="block p-3 rounded hover:bg-gray-800">
+                📱 Cardápio Digital
+            </a>
 
-        <a href="/relatorios" class="block p-3 rounded hover:bg-gray-800">
-            📊 Relatórios
-        </a>
+            <a href="{{ route('restaurante.importacao.cardapio', $restauranteAtual->slug) }}"
+                class="block p-3 rounded hover:bg-gray-800">
+                📥 Importar Cardápio
+            </a>
 
-        <a href="#" class="block p-3 rounded hover:bg-gray-800">
-            📢 Campanhas
-        </a>
+            <a href="{{ route('restaurante.clientes.index', $restauranteAtual->slug) }}"
+                class="block p-3 rounded hover:bg-gray-800">
+                👥 Clientes
+            </a>
+
+            @if($account?->hasModule('relatorios'))
+                <a href="{{ route('restaurante.relatorios.index', $restauranteAtual->slug) }}"
+                    class="block p-3 rounded hover:bg-gray-800">
+                    📊 Relatórios
+                </a>
+            @endif
+
+            <a href="{{ route('restaurantes.index') }}"
+                class="block p-3 rounded hover:bg-gray-800 border-t border-gray-700 mt-4 pt-4">
+                🏪 Trocar Restaurante
+            </a>
+
+        @else
+
+            <a href="{{ route('dashboard') }}" class="block p-3 rounded hover:bg-gray-800">
+                🏠 Dashboard
+            </a>
+
+            <a href="{{ route('restaurantes.index') }}" class="block p-3 rounded hover:bg-gray-800">
+                🏪 Restaurantes
+            </a>
+
+        @endisset
 
     </nav>
 </div>

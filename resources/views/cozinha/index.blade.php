@@ -8,6 +8,7 @@
             </h1>
 
             <p class="text-gray-500 mb-8">
+                Restaurante: <strong>{{ $restaurante->nome }}</strong><br>
                 Acompanhe todos os pedidos em tempo real.
             </p>
 

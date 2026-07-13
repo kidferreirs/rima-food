@@ -8,7 +8,7 @@
                 🍔 Dashboard
             </h1>
 
-            <a href="{{ route('pedidos.create') }}"
+            <a href="{{ route('restaurante.pedidos.create', $restaurante->slug) }}"
                 class="bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-xl font-semibold shadow-sm transition">
                 + Novo Pedido
             </a>
@@ -161,7 +161,12 @@
                             <td class="p-3 font-bold">
                                 <button onclick="abrirModal('pedido{{ $pedido->id }}')"
                                     class="text-blue-600 hover:underline font-bold">
-                                    #{{ $pedido->id }}
+                                    #{{ $pedido->numero_pedido ?? $pedido->id }}
+                                    @if($pedido->token)
+                                        <div class="text-xs text-gray-500 font-normal">
+                                            Token: {{ $pedido->token }}
+                                        </div>
+                                    @endif
                                 </button>
                             </td>
 
@@ -197,8 +202,9 @@
 
                                 @if($pedido->status === 'finalizado')
 
-                                    <a href="{{ route('pedidos.imprimir', $pedido) }}" target="_blank"
-                                        class="text-xl hover:scale-110 inline-block transition" title="Imprimir pedido">
+                                    <a href="{{ route('restaurante.pedidos.imprimir', [$restaurante->slug, $pedido]) }}"
+                                        target="_blank" class="text-xl hover:scale-110 inline-block transition"
+                                        title="Imprimir pedido">
                                         🖨️
                                     </a>
 
@@ -237,7 +243,7 @@
                 </button>
 
                 <h2 class="text-3xl font-bold mb-6">
-                    🛒 Pedido #{{ $pedido->id }}
+                    🛒 Pedido #{{ $pedido->numero_pedido ?? $pedido->id }}
                 </h2>
 
                 <div class="space-y-3">
@@ -277,8 +283,10 @@
 
                     @else
 
-                        <form action="{{ route('pedidos.status', $pedido) }}" method="POST" class="mt-4">
+                        <form action="{{ route('restaurante.pedidos.status', [$restaurante->slug, $pedido]) }}" method="POST"
+                            class="mt-4">
 
+                            <input type="hidden" name="origem" value="dashboard">
                             @csrf
                             @method('PATCH')
 
@@ -359,6 +367,10 @@
 
     @endforeach
 
+    <audio id="novoPedidoAudio" preload="auto">
+        <source src="{{ asset('novo-pedido.mp3') }}" type="audio/mpeg">
+    </audio>
+
     <script>
         function abrirModal(id) {
             document.getElementById(id).classList.remove('hidden');
@@ -368,11 +380,28 @@
             document.getElementById(id).classList.add('hidden');
         }
 
+        @if($pedidosPendentes > 0)
+            document.addEventListener('DOMContentLoaded', () => {
+                const tocou = sessionStorage.getItem('rima-pedido-tocou');
+                const audio = document.getElementById('novoPedidoAudio');
+
+                if (!tocou && audio) {
+                    audio.play().catch(() => {
+                        console.log('Áudio bloqueado pelo navegador até interação do usuário.');
+                    });
+
+                    sessionStorage.setItem('rima-pedido-tocou', '1');
+                }
+            });
+        @endif
+
+        @if($pedidosPendentes == 0)
+            sessionStorage.removeItem('rima-pedido-tocou');
+        @endif
+
         setInterval(() => {
-
             window.location.reload();
-
-        }, 60000);
+        }, 30000);
     </script>
 
 </x-rimafood.layout>
