@@ -111,14 +111,6 @@ function iniciarGarcomInteligente() {
         'nenhum-produto-encontrado'
     );
 
-    const respostaGarcom = document.getElementById(
-        'resposta-garcom'
-    );
-
-    const textoResposta = document.getElementById(
-        'texto-resposta-garcom'
-    );
-
     const navegacaoCategorias = document.getElementById(
         'navegacao-categorias'
     );
@@ -135,11 +127,70 @@ function iniciarGarcomInteligente() {
         'favoritos-section'
     );
 
+    let modoChatAtivo = false;
+
+    function atualizarFavoritos() {
+        if (!favoritos) {
+            return;
+        }
+
+        const lista = document.getElementById(
+            'favoritos-lista'
+        );
+
+        const possuiFavoritos =
+            lista &&
+            lista.children.length > 0;
+
+        favoritos.classList.toggle(
+            'hidden',
+            !possuiFavoritos
+        );
+    }
+
+    function restaurarCardapio() {
+        cards.forEach(card => {
+            card.classList.remove('hidden');
+        });
+
+        categorias.forEach(categoria => {
+            categoria.classList.remove('hidden');
+        });
+
+        navegacaoCategorias?.classList.remove('hidden');
+        destaques?.classList.remove('hidden');
+        maisVendidos?.classList.remove('hidden');
+
+        mensagemVazia?.classList.add('hidden');
+
+        atualizarFavoritos();
+    }
+
+    document.addEventListener(
+        'rima:modo-chat',
+        event => {
+            modoChatAtivo = Boolean(
+                event.detail?.ativo
+            );
+
+            if (modoChatAtivo) {
+                restaurarCardapio();
+            }
+        }
+    );
+
     searchInput.addEventListener('input', function () {
+        if (modoChatAtivo) {
+            return;
+        }
+
         const textoOriginal = this.value.trim();
         const pesquisando = textoOriginal !== '';
 
-        const intencao = interpretarIntencao(textoOriginal);
+        const intencao = interpretarIntencao(
+            textoOriginal
+        );
+
         const consulta = intencao.termo;
 
         let encontrados = 0;
@@ -159,35 +210,28 @@ function iniciarGarcomInteligente() {
                 !pesquisando ||
                 conteudoProduto.includes(consulta);
 
-            card.classList.toggle('hidden', !encontrado);
+            card.classList.toggle(
+                'hidden',
+                !encontrado
+            );
 
             if (pesquisando && encontrado) {
                 encontrados++;
             }
         });
 
-        /*
-        |--------------------------------------------------------------------------
-        | Esconde categorias sem produtos visíveis
-        |--------------------------------------------------------------------------
-        */
-
         categorias.forEach(categoria => {
-            const produtosVisiveis = categoria.querySelectorAll(
-                '.produto-card:not(.hidden)'
-            );
+            const produtosVisiveis =
+                categoria.querySelectorAll(
+                    '.produto-card:not(.hidden)'
+                );
 
             categoria.classList.toggle(
                 'hidden',
-                pesquisando && produtosVisiveis.length === 0
+                pesquisando &&
+                produtosVisiveis.length === 0
             );
         });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Estado normal ou resultado da busca
-        |--------------------------------------------------------------------------
-        */
 
         navegacaoCategorias?.classList.toggle(
             'hidden',
@@ -204,32 +248,16 @@ function iniciarGarcomInteligente() {
             pesquisando
         );
 
-        if (favoritos && !favoritos.dataset.semFavoritos) {
-            favoritos.classList.toggle(
-                'hidden',
-                pesquisando
-            );
+        if (pesquisando) {
+            favoritos?.classList.add('hidden');
+        } else {
+            atualizarFavoritos();
         }
-
-        respostaGarcom?.classList.toggle(
-            'hidden',
-            !pesquisando || encontrados === 0
-        );
 
         mensagemVazia?.classList.toggle(
             'hidden',
             !pesquisando || encontrados > 0
         );
-
-        if (pesquisando && encontrados > 0 && textoResposta) {
-            const produtoTexto =
-                encontrados === 1
-                    ? intencao.rotulo.replace(/s$/, '')
-                    : intencao.rotulo;
-
-            textoResposta.textContent =
-                `Encontrei ${encontrados} ${produtoTexto} para você.`;
-        }
     });
 }
 

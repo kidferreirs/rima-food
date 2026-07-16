@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'ai' => [
+        'provider' => env('AI_PROVIDER', 'local'),
+        'key' => env('AI_API_KEY'),
+        'model' => env('AI_MODEL'),
+        'timeout' => (int) env('AI_TIMEOUT', 20),
+    ],
+
 ];

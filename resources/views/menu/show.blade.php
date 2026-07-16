@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rima Menu</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body class="bg-slate-100">
@@ -43,8 +44,10 @@
         $linkMaps = 'https://www.google.com/maps/search/?api=1&query=' . urlencode($enderecoMaps);
     @endphp
 
-    <main class="max-w-md mx-auto bg-white min-h-screen pb-10" data-restaurante-slug="{{ $restaurante->slug }}">
-        <section class="relative">
+        <main class="max-w-md mx-auto bg-white min-h-screen pb-10" data-restaurante-slug="{{ $restaurante->slug }}"
+            data-garcom-url="{{ route('menu.garcom.conversar', $restaurante->slug) }}"
+            data-garcom-liberado="{{ $restaurante->temIA() ? '1' : '0' }}"
+        >
             @if($restaurante->banner)
 
                 <img src="{{ Storage::url($restaurante->banner) }}" class="w-full h-52 object-cover rounded-b-[2rem]">
@@ -119,18 +122,79 @@
 
             <div class="bg-slate-100 rounded-2xl px-4 py-4 flex items-center gap-3">
                 <span class="text-xl">🔍</span>
-                <input id="search" type="text" placeholder="Posso ajudar a escolher?" autocomplete="off" class="bg-transparent border-none outline-none focus:ring-0 w-full
+                <input id="search" type="text" placeholder="Pesquise produtos, ingredientes ou categorias..." autocomplete="off" class="bg-transparent border-none outline-none focus:ring-0 w-full
                    text-slate-700 placeholder:text-slate-400">
             </div>
 
-            <div id="resposta-garcom" class="hidden mt-4 bg-green-50 border border-green-100
-               rounded-2xl px-4 py-4">
-                <p class="font-bold text-green-800">
-                    🤖 Garçom Inteligente
-                </p>
-                <p id="texto-resposta-garcom" class="text-sm text-green-700 mt-1"></p>
-            </div>
+            <div id="garcom-container" class="hidden opacity-0 translate-y-2 transition-all duration-300 mt-4">
 
+                <div class="flex gap-2 overflow-x-auto pb-3">
+
+                    <button
+                        class="garcom-pergunta bg-white border rounded-full px-4 py-2 whitespace-nowrap"
+                        data-pergunta="Quais pizzas vocês têm?"
+                    >
+                        🍕 Pizzas
+                    </button>
+
+                    <button
+                        class="garcom-pergunta bg-white border rounded-full px-4 py-2 whitespace-nowrap"
+                        data-pergunta="Qual é o produto mais barato?"
+                    >
+                        💰 Mais barato
+                    </button>
+
+                    <button
+                        class="garcom-pergunta bg-white border rounded-full px-4 py-2 whitespace-nowrap"
+                        data-pergunta="Tem algo sem lactose?"
+                    >
+                        🥛 Sem lactose
+                    </button>
+
+                </div>
+
+                <div id="chat-garcom">
+
+                    <div class="bg-green-600 text-white px-4 py-3 flex items-start justify-between gap-3">
+
+                            <div>
+                            <h3 class="font-extrabold">
+                                🤖 Garçom Inteligente
+                            </h3>
+                        </div>
+
+                        <button
+                            id="fechar-chat-garcom"
+                            type="button"
+                            class="w-9 h-9 shrink-0 rounded-full bg-white/15 hover:bg-white/25"
+                            aria-label="Recolher Garçom Inteligente"
+                        >
+                            ✕
+                        </button>
+
+                    </div>
+
+                    <div id="chat-mensagens" class="max-h-72 overflow-y-auto p-4 space-y-3 bg-slate-50 rounded-b-2xl">
+
+                        <div class="flex">
+                            <div class="bg-white rounded-2xl px-4 py-3 shadow-sm max-w-[90%]">
+
+                                <p class="font-bold text-green-700"> Garçom </p>
+
+                                <p class="text-sm text-slate-700 mt-1">
+                                    Olá! 👋
+                                    Posso ajudar você a escolher.
+                                    Pergunte, por exemplo:
+                                        • Quais pizzas vocês têm?
+                                        • Qual é o produto mais barato?
+                                        • Tem algo sem lactose?
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         </section>
 
         <section id="navegacao-categorias" class="px-5 mt-7">
@@ -546,6 +610,7 @@
                     alert('✅ Link copiado!');
                 });
         }
+        
     </script>
 </body>
 
