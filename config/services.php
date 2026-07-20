@@ -42,4 +42,12 @@ return [
         'timeout' => (int) env('AI_TIMEOUT', 20),
     ],
 
+    'n8n' => [
+        'webhook_novo_pedido' => env('N8N_WEBHOOK_NOVO_PEDIDO'),
+    ],
+
+    'openrouteservice' => [
+        'key' => env('OPENROUTESERVICE_API_KEY'),
+    ],
+
 ];

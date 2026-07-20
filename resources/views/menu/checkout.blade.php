@@ -47,11 +47,28 @@
 
         <div id="lista-produtos" class="space-y-4"></div>
 
-        <div class="border-t pt-5 mt-6 mb-6">
-            <div class="flex justify-between text-xl font-bold">
+        <div class="border-t pt-5 mt-6 mb-6 space-y-3">
+            <div class="flex justify-between font-semibold">
                 <span>Subtotal</span>
+                <span id="subtotal">R$ 0,00</span>
+            </div>
+
+            <div id="linha-entrega" class="hidden flex justify-between font-semibold">
+                <span>Entrega</span>
+                <span id="taxa-entrega">R$ 0,00</span>
+            </div>
+
+            <div id="linha-distancia" class="hidden flex justify-between text-sm text-slate-500">
+                <span>Distância</span>
+                <span id="distancia-entrega">0 km</span>
+            </div>
+
+            <div class="flex justify-between text-xl font-bold border-t pt-3">
+                <span>Total</span>
                 <span id="total">R$ 0,00</span>
             </div>
+
+            <div id="mensagem-entrega" class="hidden text-sm rounded-xl p-3"></div>
         </div>
 
         <div class="grid grid-cols-2 gap-3 mb-6">
@@ -82,11 +99,52 @@
 
             <div>
                 <label class="font-semibold text-sm">🚚 Tipo de entrega *</label>
-                <select name="tipo_entrega" required class="w-full border rounded-xl p-3 mt-1">
+                <select id="tipo_entrega" name="tipo_entrega" required class="w-full border rounded-xl p-3 mt-1">
                     <option value="retirada">Retirada no balcão</option>
                     <option value="balcao">Consumo no local / Mesa</option>
                     <option value="entrega">Delivery</option>
                 </select>
+            </div>
+
+            <div id="bloco-endereco" class="hidden space-y-3">
+                <div>
+                    <label>CEP</label>
+                    <input id="cep" name="cep" class="w-full border rounded-xl p-3" placeholder="99999-999">
+                </div>
+
+                <div>
+                    <label>Endereço</label>
+                    <input id="logradouro" name="logradouro" readonly class="w-full border rounded-xl p-3 bg-gray-100">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label>Número</label>
+                        <input id="numero" name="numero" class="w-full border rounded-xl p-3">
+                    </div>
+
+                    <div>
+                        <label>Complemento</label>
+                        <input id="complemento" name="complemento" class="w-full border rounded-xl p-3">
+                    </div>
+                </div>
+
+                <div>
+                    <label>Bairro</label>
+                    <input id="bairro" name="bairro" readonly class="w-full border rounded-xl p-3 bg-gray-100">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label>Cidade</label>
+                        <input id="cidade" name="cidade" readonly class="w-full border rounded-xl p-3 bg-gray-100">
+                    </div>
+
+                    <div>
+                        <label>Estado</label>
+                        <input id="estado" name="estado" readonly class="w-full border rounded-xl p-3 bg-gray-100">
+                    </div>
+                </div>
             </div>
 
             <div>
@@ -116,22 +174,56 @@
         const cartKey = 'rima-cart-{{ $restaurante->slug }}';
 
         let cart = JSON.parse(localStorage.getItem(cartKey)) || [];
+        let subtotalCarrinho = 0;
+        let taxaEntregaAtual = 0;
+        let entregaCalculada = false;
 
         const lista = document.getElementById('lista-produtos');
-        const total = document.getElementById('total');
+        const subtotalEl = document.getElementById('subtotal');
+        const totalEl = document.getElementById('total');
+        const taxaEntregaEl = document.getElementById('taxa-entrega');
+        const distanciaEntregaEl = document.getElementById('distancia-entrega');
+        const linhaEntrega = document.getElementById('linha-entrega');
+        const linhaDistancia = document.getElementById('linha-distancia');
+        const mensagemEntrega = document.getElementById('mensagem-entrega');
+
         const form = document.querySelector('form');
         const inputCarrinho = document.getElementById('carrinho');
+
+        const tipoEntrega = document.getElementById('tipo_entrega');
+        const blocoEndereco = document.getElementById('bloco-endereco');
+
+        const cep = document.getElementById('cep');
+        const logradouro = document.getElementById('logradouro');
+        const numero = document.getElementById('numero');
+        const complemento = document.getElementById('complemento');
+        const bairro = document.getElementById('bairro');
+        const cidade = document.getElementById('cidade');
+        const estado = document.getElementById('estado');
 
         function salvarCarrinho() {
             localStorage.setItem(cartKey, JSON.stringify(cart));
         }
 
         function formatarMoeda(valor) {
-            return 'R$ ' + valor.toFixed(2).replace('.', ',');
+            return 'R$ ' + Number(valor).toFixed(2).replace('.', ',');
+        }
+
+        function atualizarResumo() {
+            subtotalEl.innerText = formatarMoeda(subtotalCarrinho);
+
+            const isEntrega = tipoEntrega.value === 'entrega';
+            const totalFinal = subtotalCarrinho + (isEntrega ? taxaEntregaAtual : 0);
+
+            totalEl.innerText = formatarMoeda(totalFinal);
+
+            linhaEntrega.classList.toggle('hidden', !isEntrega || !entregaCalculada);
+            linhaDistancia.classList.toggle('hidden', !isEntrega || !entregaCalculada);
         }
 
         function renderCarrinho() {
             lista.innerHTML = '';
+            subtotalCarrinho = 0;
 
             if (cart.length === 0) {
                 lista.innerHTML = `
@@ -140,14 +232,13 @@
                 </div>
             `;
 
-                total.innerText = 'R$ 0,00';
+                subtotalEl.innerText = 'R$ 0,00';
+                totalEl.innerText = 'R$ 0,00';
                 return;
             }
 
-            let valorTotal = 0;
-
             cart.forEach((item, index) => {
-                valorTotal += item.preco * item.quantidade;
+                subtotalCarrinho += item.preco * item.quantidade;
 
                 lista.innerHTML += `
                 <div class="border rounded-2xl p-4">
@@ -192,7 +283,7 @@
             `;
             });
 
-            total.innerText = formatarMoeda(valorTotal);
+            atualizarResumo();
         }
 
         function aumentarItem(index) {
@@ -228,6 +319,186 @@
             renderCarrinho();
         }
 
+        function atualizarBlocoEndereco() {
+            const isEntrega = tipoEntrega.value === 'entrega';
+
+            blocoEndereco.classList.toggle('hidden', !isEntrega);
+
+            blocoEndereco.querySelectorAll('input').forEach(input => {
+                input.required = isEntrega && input.name !== 'complemento';
+            });
+
+            if (!isEntrega) {
+                taxaEntregaAtual = 0;
+                entregaCalculada = false;
+                mensagemEntrega.classList.add('hidden');
+            }
+
+            atualizarResumo();
+        }
+
+        function limparEndereco() {
+            logradouro.value = '';
+            bairro.value = '';
+            cidade.value = '';
+            estado.value = '';
+            taxaEntregaAtual = 0;
+            entregaCalculada = false;
+            mensagemEntrega.classList.add('hidden');
+            atualizarResumo();
+        }
+
+        async function calcularEntrega() {
+            if (
+                tipoEntrega.value !== 'entrega' ||
+                !cep.value ||
+                !logradouro.value ||
+                !numero.value ||
+                !bairro.value ||
+                !cidade.value ||
+                !estado.value
+            ) {
+                return;
+            }
+
+            mensagemEntrega.className =
+                'text-sm rounded-xl p-3 bg-blue-50 text-blue-700';
+
+            mensagemEntrega.innerText = 'Calculando entrega...';
+            mensagemEntrega.classList.remove('hidden');
+
+            entregaCalculada = false;
+            atualizarResumo();
+
+            try {
+                const response = await fetch(
+                    `{{ route('menu.delivery.quote', $restaurante->slug) }}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            cep: cep.value,
+                            logradouro: logradouro.value,
+                            numero: numero.value,
+                            complemento: complemento.value,
+                            bairro: bairro.value,
+                            cidade: cidade.value,
+                            estado: estado.value
+                        })
+                    }
+                );
+
+                const json = await response.json();
+
+                if (!response.ok || !json.success) {
+                    throw new Error(
+                        json.message || 'Não foi possível calcular a entrega.'
+                    );
+                }
+
+                taxaEntregaAtual = Number(json.data.taxa);
+                entregaCalculada = true;
+
+                taxaEntregaEl.innerText = formatarMoeda(taxaEntregaAtual);
+                distanciaEntregaEl.innerText =
+                    Number(json.data.distancia_km).toFixed(2).replace('.', ',') + ' km';
+
+                mensagemEntrega.className =
+                    'text-sm rounded-xl p-3 bg-green-50 text-green-700';
+
+                mensagemEntrega.innerText =
+                    `Entrega calculada: ${json.data.faixa}.`;
+
+                atualizarResumo();
+            } catch (error) {
+                taxaEntregaAtual = 0;
+                entregaCalculada = false;
+
+                mensagemEntrega.className =
+                    'text-sm rounded-xl p-3 bg-red-50 text-red-700';
+
+                mensagemEntrega.innerText =
+                    error.message || 'Não foi possível calcular a entrega.';
+
+                atualizarResumo();
+            }
+        }
+
+        tipoEntrega.addEventListener('change', atualizarBlocoEndereco);
+
+        cep.addEventListener('input', function () {
+            let valor = cep.value.replace(/\D/g, '').slice(0, 8);
+
+            if (valor.length > 5) {
+                valor = valor.replace(/^(\d{5})(\d+)/, '$1-$2');
+            }
+
+            cep.value = valor;
+        });
+
+        cep.addEventListener('blur', async () => {
+            const valor = cep.value.replace(/\D/g, '');
+
+            limparEndereco();
+
+            if (valor.length !== 8) {
+                if (valor.length > 0) {
+                    alert('Digite um CEP válido com 8 números.');
+                }
+
+                return;
+            }
+
+            cep.disabled = true;
+            cep.classList.add('bg-slate-100');
+            cep.value = 'Buscando...';
+
+            try {
+                const response = await fetch(
+                    `{{ route('viacep.buscar', ['cep' => '__CEP__']) }}`
+                        .replace('__CEP__', valor),
+                    {
+                        headers: {
+                            Accept: 'application/json'
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error('CEP não encontrado.');
+                }
+
+                const json = await response.json();
+
+                if (!json.success || !json.data) {
+                    throw new Error('CEP não encontrado.');
+                }
+
+                cep.value = json.data.cep ?? valor;
+                logradouro.value = json.data.logradouro ?? '';
+                bairro.value = json.data.bairro ?? '';
+                cidade.value = json.data.cidade ?? '';
+                estado.value = json.data.estado ?? '';
+
+                numero.focus();
+            } catch (error) {
+                cep.value = valor.replace(/^(\d{5})(\d{3})$/, '$1-$2');
+                limparEndereco();
+
+                alert(error.message || 'Não foi possível consultar o CEP.');
+            } finally {
+                cep.disabled = false;
+                cep.classList.remove('bg-slate-100');
+            }
+        });
+
+        numero.addEventListener('blur', calcularEntrega);
+        complemento.addEventListener('blur', calcularEntrega);
+
         form.addEventListener('submit', function (event) {
             if (cart.length === 0) {
                 event.preventDefault();
@@ -235,11 +506,36 @@
                 return;
             }
 
+            if (
+                tipoEntrega.value === 'entrega' &&
+                (
+                    !logradouro.value ||
+                    !numero.value ||
+                    !bairro.value ||
+                    !cidade.value ||
+                    !estado.value
+                )
+            ) {
+                event.preventDefault();
+                alert('Preencha o endereço completo para entrega.');
+                return;
+            }
+
+            if (
+                tipoEntrega.value === 'entrega' &&
+                !entregaCalculada
+            ) {
+                event.preventDefault();
+                alert('Aguarde o cálculo da taxa de entrega.');
+                calcularEntrega();
+                return;
+            }
+
             inputCarrinho.value = JSON.stringify(cart);
-            localStorage.removeItem(cartKey);
         });
 
         renderCarrinho();
+        atualizarBlocoEndereco();
     </script>
 
 </body>

@@ -9,6 +9,7 @@ use App\Models\Restaurante;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Services\WhatsappNotificacaoService;
 
 class MenuPedidoController extends Controller
 {
@@ -21,7 +22,7 @@ class MenuPedidoController extends Controller
         return view('menu.checkout', compact('restaurante'));
     }
 
-    public function store(Request $request, string $slug)
+    public function store( Request $request, string $slug,WhatsappNotificacaoService $whatsappNotificacao)
     {
 
         $restaurante = Restaurante::where('slug', $slug)
@@ -98,6 +99,8 @@ class MenuPedidoController extends Controller
 
             return $pedido;
         });
+
+        $whatsappNotificacao->notificarNovoPedido($pedido);
 
         return redirect()->route('pedido.sucesso', $pedido->token);
     }

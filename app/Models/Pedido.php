@@ -9,6 +9,7 @@ class Pedido extends Model
     protected $fillable = [
         'restaurante_id',
         'cliente_id',
+        'subtotal',
         'total',
         'status',
         'observacao',

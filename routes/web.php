@@ -17,6 +17,8 @@ use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\MenuPedidoController;
 use App\Http\Controllers\CardapioImportController;
 use App\Http\Controllers\GarcomCardapioController;
+use App\Http\Controllers\ViaCepController;
+use App\Http\Controllers\DeliveryQuoteController;
 
 
 Route::get('/cadastro', [OnboardingController::class, 'create'])->name('saas.cadastro');
@@ -114,7 +116,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/menu/{slug}/garcom', [GarcomCardapioController::class, 'conversar'])->name('menu.garcom.conversar');
     Route::get('/menu/{slug}/checkout', [MenuPedidoController::class, 'checkout'])->name('menu.checkout');
     Route::post('/menu/{slug}/pedido', [MenuPedidoController::class, 'store'])->name('menu.pedido.store');
+    Route::post('/menu/{slug}/delivery/quote', DeliveryQuoteController::class)->name('menu.delivery.quote');
 
     Route::get('/pedido/{token}/sucesso', [MenuPedidoController::class, 'sucesso'])->name('pedido.sucesso');
+
+    Route::get('/viacep/{cep}', ViaCepController::class)->name('viacep.buscar');
 
 require __DIR__ . '/auth.php';
