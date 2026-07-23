@@ -292,8 +292,8 @@
                             data-categoria="{{ strtolower($categoria->nome ?? '') }}">
 
                             <button type="button" class="toggle-favorito absolute top-3 right-3 z-10 w-9 h-9 bg-white/90 rounded-full shadow
-                                            flex items-center justify-center text-xl" data-produto-id="{{ $produto->id }}"
-                                aria-label="Favoritar {{ $produto->nome }}">
+                                                                                    flex items-center justify-center text-xl"
+                                data-produto-id="{{ $produto->id }}" aria-label="Favoritar {{ $produto->nome }}">
                                 🤍
                             </button>
 
@@ -321,7 +321,7 @@
                                     </button>
                                 </div>
                             </div>
-                        </div>    
+                        </div>
                     @endforeach
                 </div>
             </section>
@@ -349,7 +349,7 @@
                 <nav class="space-y-2 mt-5">
                     @foreach($restaurante->categorias as $categoria)
                         <button type="button" class="categoria-menu-link w-full flex items-center justify-between bg-slate-50 hover:bg-green-50
-                                    rounded-2xl px-4 py-4 text-left transition"
+                                                        rounded-2xl px-4 py-4 text-left transition"
                             data-categoria-alvo="categoria-{{ $categoria->id }}">
                             <span class="font-bold text-slate-800">
                                 {{ $categoria->nome }}
@@ -450,6 +450,7 @@
         const headerCompactoContador = document.getElementById(
             'header-compacto-contador'
         );
+        const toast = document.getElementById('toast');
 
 
         buttons.forEach(button => {
@@ -515,14 +516,31 @@
 
         atualizarCarrinho();
 
-        cartBar.addEventListener('click', () => {
-            window.location.href =
-                "{{ route('menu.checkout', $restaurante->slug) }}";
-        });
+        function abrirCheckout() {
 
-        headerCompactoCarrinho.addEventListener('click', () => {
+            if (cart.length === 0) {
+                mostrarToast('🛒 Seu carrinho está vazio.');
+                return;
+            }
             window.location.href = "{{ route('menu.checkout', $restaurante->slug) }}";
-        });
+        }
+
+        cartBar.addEventListener('click', abrirCheckout);
+        headerCompactoCarrinho.addEventListener('click', abrirCheckout);
+
+        function mostrarToast(texto) {
+
+            toast.innerText = texto;
+
+            toast.classList.remove('hidden');
+
+            clearTimeout(window.toastTimer);
+
+            window.toastTimer = setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2500);
+
+        }
 
         function compartilharMenu() {
             if (navigator.share) {

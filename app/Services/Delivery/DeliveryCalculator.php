@@ -8,8 +8,9 @@ use RuntimeException;
 class DeliveryCalculator
 {
     public function __construct(
-        private readonly OpenRouteService $routeService
+        private readonly GoogleMapsService $routeService
     ) {
+
     }
 
     public function calcular(
@@ -26,43 +27,46 @@ class DeliveryCalculator
             );
         }
 
-        $enderecoRestaurante = $this->enderecoRestaurante(
-            $restaurante
-        );
+        if (
+            blank($restaurante->latitude) ||
+            blank($restaurante->longitude)
+        ) {
+            throw new RuntimeException(
+                'O restaurante ainda não possui coordenadas cadastradas.'
+            );
+        }
 
-        $origem = $this->routeService->geocodificar(
-            $enderecoRestaurante
-        );
+        $origem = [
+            'latitude' => (float) $restaurante->latitude,
+            'longitude' => (float) $restaurante->longitude,
+        ];
 
         $destino = $this->routeService->geocodificar(
             $enderecoCliente
         );
 
-        $distanciaKm = $this->routeService->calcularDistancia(
+        $rota = $this->routeService->calcularRota(
             $origem,
             $destino
         );
 
-        if ($distanciaKm <= 5) {
-            return new DeliveryResult(
-                distanciaKm: $distanciaKm,
-                taxa: (float) $configuracao->ate_5km,
-                faixa: 'Até 5 km',
-            );
-        }
+        $distanciaKm = $rota['distanciaKm'];
 
-        if ($distanciaKm <= 10) {
-            return new DeliveryResult(
-                distanciaKm: $distanciaKm,
-                taxa: (float) $configuracao->ate_10km,
-                faixa: 'De 5 a 10 km',
-            );
+        if ($distanciaKm <= 5) {
+            $taxa = (float) $configuracao->ate_5km;
+            $faixa = 'Até 5 km';
+        } elseif ($distanciaKm <= 10) {
+            $taxa = (float) $configuracao->ate_10km;
+            $faixa = 'De 5 a 10 km';
+        } else {
+            $taxa = (float) $configuracao->acima_10km;
+            $faixa = 'Acima de 10 km';
         }
 
         return new DeliveryResult(
             distanciaKm: $distanciaKm,
-            taxa: (float) $configuracao->acima_10km,
-            faixa: 'Acima de 10 km',
+            taxa: $taxa,
+            faixa: $faixa,
         );
     }
 

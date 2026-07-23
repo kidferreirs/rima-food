@@ -6,9 +6,16 @@ use App\Models\Restaurante;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use App\Services\Delivery\GoogleMapsService;
+use App\Services\Delivery\Address;
 
 class RestauranteController extends Controller
 {
+    public function __construct(
+        private GoogleMapsService $googleMapsService
+    ) {
+    }
+
     public function index()
     {
         $restaurantes = Restaurante::where('user_id', auth()->id())
@@ -31,6 +38,7 @@ class RestauranteController extends Controller
         $dados['slug'] = $this->gerarSlugUnico($dados['nome']);
 
         $restaurante = Restaurante::create($dados);
+        $this->atualizarCoordenadas($restaurante);
 
         $restaurante->clientes()->create([
             'nome' => 'Balcão',
@@ -66,7 +74,29 @@ class RestauranteController extends Controller
             Storage::disk('public')->delete($restaurante->banner);
         }
 
+        $enderecoAntigo = implode('|', [
+            $restaurante->cep,
+            $restaurante->endereco,
+            $restaurante->numero,
+            $restaurante->bairro,
+            $restaurante->cidade,
+            $restaurante->estado,
+        ]);
+
         $restaurante->update($dados);
+
+        $enderecoNovo = implode('|', [
+            $restaurante->cep,
+            $restaurante->endereco,
+            $restaurante->numero,
+            $restaurante->bairro,
+            $restaurante->cidade,
+            $restaurante->estado,
+        ]);
+
+        if ($enderecoAntigo !== $enderecoNovo) {
+            $this->atualizarCoordenadas($restaurante);
+        }
 
         return redirect()
             ->route('restaurantes.index')
@@ -168,5 +198,34 @@ class RestauranteController extends Controller
                 'linkMenu'
             )
         );
+    }
+
+    private function atualizarCoordenadas(Restaurante $restaurante): void
+    {
+        try {
+            $address = new Address(
+                logradouro: $restaurante->endereco,
+                numero: $restaurante->numero,
+                complemento: $restaurante->complemento,
+                bairro: $restaurante->bairro,
+                cidade: $restaurante->cidade,
+                estado: $restaurante->estado,
+                cep: $restaurante->cep,
+            );
+
+            $coordenadas = $this->googleMapsService->geocodificar($address);
+
+            $restaurante->forceFill([
+                'latitude' => $coordenadas['latitude'],
+                'longitude' => $coordenadas['longitude'],
+                'google_place_id' => $coordenadas['place_id'],
+            ])->save();
+
+        } catch (\Throwable $e) {
+            logger()->error('Erro ao geocodificar restaurante', [
+                'restaurante_id' => $restaurante->id,
+                'erro' => $e->getMessage(),
+            ]);
+        }
     }
 }

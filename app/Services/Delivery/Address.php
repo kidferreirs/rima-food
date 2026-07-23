@@ -28,8 +28,50 @@ class Address
 
         return implode(', ', array_filter(
             $partes,
-            fn ($parte) => filled($parte)
+            fn($parte) => filled($parte)
         ));
+    }
+
+    public function tentativasGeocodificacao(): array
+    {
+        $tentativas = [
+            $this->textoCompleto(),
+
+            implode(', ', array_filter([
+                trim($this->logradouro . ', ' . $this->numero),
+                $this->cidade,
+                $this->estado,
+                'Brasil',
+            ], fn($parte) => filled($parte))),
+
+            implode(', ', array_filter([
+                $this->logradouro,
+                $this->bairro,
+                $this->cidade,
+                $this->estado,
+                'Brasil',
+            ], fn($parte) => filled($parte))),
+
+            implode(', ', array_filter([
+                $this->logradouro,
+                $this->cidade,
+                $this->estado,
+                'Brasil',
+            ], fn($parte) => filled($parte))),
+
+            implode(', ', array_filter([
+                $this->cep,
+                $this->cidade,
+                $this->estado,
+                'Brasil',
+            ], fn($parte) => filled($parte))),
+        ];
+
+        return array_values(
+            array_unique(
+                array_filter($tentativas)
+            )
+        );
     }
 
     public function textoParaPedido(): string

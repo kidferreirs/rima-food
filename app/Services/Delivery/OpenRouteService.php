@@ -32,39 +32,51 @@ class OpenRouteService
     public function geocodificar(Address $endereco): array
     {
         try {
-            $response = Http::acceptJson()
-                ->timeout(15)
-                ->retry(2, 500)
-                ->withHeaders([
-                    'Authorization' => $this->apiKey,
-                ])
-                ->get($this->baseUrl . '/geocode/search', [
-                    'text' => $endereco->textoCompleto(),
-                    'boundary.country' => 'BR',
-                    'size' => 1,
+            foreach ($endereco->tentativasGeocodificacao() as $tentativa) {
+
+                logger()->info('Tentando geocodificar endereço', [
+                    'endereco' => $tentativa,
                 ]);
 
-            $response->throw();
+                $response = Http::acceptJson()
+                    ->timeout(15)
+                    ->retry(2, 500)
+                    ->withHeaders([
+                        'Authorization' => $this->apiKey,
+                    ])
+                    ->get($this->baseUrl . '/geocode/search', [
+                        'text' => $tentativa,
+                        'boundary.country' => 'BR',
+                        'size' => 5,
+                    ]);
 
-            $coordenadas = data_get(
-                $response->json(),
-                'features.0.geometry.coordinates'
-            );
+                $response->throw();
 
-            if (
-                !is_array($coordenadas) ||
-                count($coordenadas) !== 2
-            ) {
-                throw new RuntimeException(
-                    'Não foi possível localizar o endereço: '
-                    . $endereco->textoCompleto()
+                $coordenadas = data_get(
+                    $response->json(),
+                    'features.0.geometry.coordinates'
                 );
+
+                if (
+                    is_array($coordenadas) &&
+                    count($coordenadas) === 2
+                ) {
+
+                    logger()->info('Endereço localizado com sucesso', [
+                        'endereco' => $tentativa,
+                        'coordenadas' => $coordenadas,
+                    ]);
+
+                    return [
+                        (float) $coordenadas[0],
+                        (float) $coordenadas[1],
+                    ];
+                }
             }
 
-            return [
-                (float) $coordenadas[0],
-                (float) $coordenadas[1],
-            ];
+            throw new RuntimeException(
+                'Não foi possível localizar o endereço informado.'
+            );
         } catch (ConnectionException $exception) {
             report($exception);
 
@@ -89,11 +101,6 @@ class OpenRouteService
                 )
             );
 
-
-
-
-
-
             throw new RuntimeException(
                 $this->mensagemErroApi(
                     $exception->response?->status()
@@ -110,6 +117,15 @@ class OpenRouteService
         array $origem,
         array $destino
     ): float {
+
+
+    logger()->error('ENTROU NO CALCULAR DISTANCIA', [
+    'origem' => $origem,
+    'destino' => $destino,
+]);
+
+
+
         try {
             $response = Http::acceptJson()
                 ->asJson()

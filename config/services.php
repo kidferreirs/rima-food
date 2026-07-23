@@ -46,8 +46,12 @@ return [
         'webhook_novo_pedido' => env('N8N_WEBHOOK_NOVO_PEDIDO'),
     ],
 
-    'openrouteservice' => [
-        'key' => env('OPENROUTESERVICE_API_KEY'),
+    // 'openrouteservice' => [
+    //     'key' => env('OPENROUTESERVICE_API_KEY'),
+    // ],
+
+    'google_maps' => [
+        'key' => env('GOOGLE_MAPS_API_KEY'),
     ],
 
 ];

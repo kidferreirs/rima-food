@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Services\WhatsappNotificacaoService;
+use App\Services\Delivery\Address;
+use App\Services\Delivery\DeliveryCalculator;
 
 class MenuPedidoController extends Controller
 {
@@ -22,7 +24,7 @@ class MenuPedidoController extends Controller
         return view('menu.checkout', compact('restaurante'));
     }
 
-    public function store( Request $request, string $slug,WhatsappNotificacaoService $whatsappNotificacao)
+    public function store(Request $request, string $slug, WhatsappNotificacaoService $whatsappNotificacao, DeliveryCalculator $deliveryCalculator)
     {
 
         $restaurante = Restaurante::where('slug', $slug)
@@ -36,6 +38,13 @@ class MenuPedidoController extends Controller
             'forma_pagamento' => 'required|in:pix,dinheiro,credito,debito',
             'observacao' => 'nullable|string',
             'carrinho' => 'required|string',
+            'cep' => 'required_if:tipo_entrega,entrega',
+            'logradouro' => 'required_if:tipo_entrega,entrega',
+            'numero' => 'required_if:tipo_entrega,entrega',
+            'complemento' => 'nullable|string',
+            'bairro' => 'required_if:tipo_entrega,entrega',
+            'cidade' => 'required_if:tipo_entrega,entrega',
+            'estado' => 'required_if:tipo_entrega,entrega',
         ]);
 
         $carrinho = json_decode($dados['carrinho'], true);
@@ -44,7 +53,7 @@ class MenuPedidoController extends Controller
             return back()->with('error', 'Seu carrinho está vazio.');
         }
 
-        $pedido = DB::transaction(function () use ($dados, $carrinho, $restaurante) {
+        $pedido = DB::transaction(function () use ($dados, $carrinho, $restaurante, $deliveryCalculator) {
             $cliente = Cliente::firstOrCreate(
                 [
                     'restaurante_id' => $restaurante->id,
@@ -92,9 +101,35 @@ class MenuPedidoController extends Controller
                 ]);
             }
 
+            $subtotalPedido = $total;
+            $taxaEntrega = 0;
+
+            if ($dados['tipo_entrega'] === 'entrega') {
+
+                $address = new Address(
+                    logradouro: $dados['logradouro'],
+                    numero: $dados['numero'],
+                    complemento: $dados['complemento'] ?? null,
+                    bairro: $dados['bairro'],
+                    cidade: $dados['cidade'],
+                    estado: strtoupper($dados['estado']),
+                    cep: $dados['cep'],
+                );
+
+                $resultadoEntrega = $deliveryCalculator->calcular(
+                    $restaurante,
+                    $address
+                );
+
+                $taxaEntrega = $resultadoEntrega->taxa;
+            }
+
+            $totalPedido = $subtotalPedido + $taxaEntrega;
+
             $pedido->update([
-                'subtotal' => $total,
-                'total' => $total,
+                'subtotal' => $subtotalPedido,
+                'taxa_entrega' => $taxaEntrega,
+                'total' => $totalPedido,
             ]);
 
             return $pedido;

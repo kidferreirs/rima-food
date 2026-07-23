@@ -63,6 +63,11 @@
                 <span id="distancia-entrega">0 km</span>
             </div>
 
+            <div id="linha-tempo" class="hidden flex justify-between text-sm text-slate-500">
+                <span>Tempo estimado</span>
+                <span id="tempo-entrega">0 min</span>
+            </div>
+
             <div class="flex justify-between text-xl font-bold border-t pt-3">
                 <span>Total</span>
                 <span id="total">R$ 0,00</span>
@@ -183,6 +188,8 @@
         const totalEl = document.getElementById('total');
         const taxaEntregaEl = document.getElementById('taxa-entrega');
         const distanciaEntregaEl = document.getElementById('distancia-entrega');
+        const tempoEntregaEl = document.getElementById('tempo-entrega');
+        const linhaTempo = document.getElementById('linha-tempo');
         const linhaEntrega = document.getElementById('linha-entrega');
         const linhaDistancia = document.getElementById('linha-distancia');
         const mensagemEntrega = document.getElementById('mensagem-entrega');
@@ -216,7 +223,7 @@
             const totalFinal = subtotalCarrinho + (isEntrega ? taxaEntregaAtual : 0);
 
             totalEl.innerText = formatarMoeda(totalFinal);
-
+            linhaTempo.classList.toggle('hidden', !isEntrega || !entregaCalculada);
             linhaEntrega.classList.toggle('hidden', !isEntrega || !entregaCalculada);
             linhaDistancia.classList.toggle('hidden', !isEntrega || !entregaCalculada);
         }
@@ -391,7 +398,6 @@
                         })
                     }
                 );
-
                 const json = await response.json();
 
                 if (!response.ok || !json.success) {
@@ -399,31 +405,19 @@
                         json.message || 'Não foi possível calcular a entrega.'
                     );
                 }
-
                 taxaEntregaAtual = Number(json.data.taxa);
                 entregaCalculada = true;
-
                 taxaEntregaEl.innerText = formatarMoeda(taxaEntregaAtual);
-                distanciaEntregaEl.innerText =
-                    Number(json.data.distancia_km).toFixed(2).replace('.', ',') + ' km';
-
-                mensagemEntrega.className =
-                    'text-sm rounded-xl p-3 bg-green-50 text-green-700';
-
-                mensagemEntrega.innerText =
-                    `Entrega calculada: ${json.data.faixa}.`;
-
+                distanciaEntregaEl.innerText = Number(json.data.distancia_km).toFixed(2).replace('.', ',') + ' km';
+                // tempoEntregaEl.innerText = json.data.tempo_minutos + ' min';
+                mensagemEntrega.className = 'text-sm rounded-xl p-3 bg-green-50 text-green-700';
+                mensagemEntrega.innerText = `Entrega calculada: ${json.data.faixa}.`;
                 atualizarResumo();
             } catch (error) {
                 taxaEntregaAtual = 0;
                 entregaCalculada = false;
-
-                mensagemEntrega.className =
-                    'text-sm rounded-xl p-3 bg-red-50 text-red-700';
-
-                mensagemEntrega.innerText =
-                    error.message || 'Não foi possível calcular a entrega.';
-
+                mensagemEntrega.className = 'text-sm rounded-xl p-3 bg-red-50 text-red-700';
+                mensagemEntrega.innerText = error.message || 'Não foi possível calcular a entrega.';
                 atualizarResumo();
             }
         }
