@@ -51,29 +51,21 @@ class DashboardController extends BaseRestaurantController
                 ->get();
 
             $dinheiroHoje = Pedido::where('restaurante_id', $restaurante->id)
-
                 ->whereDate('created_at', today())
-
+                ->where('status', 'finalizado')
                 ->where('forma_pagamento', 'dinheiro')
-
                 ->sum('total');
-
 
             $cartaoHoje = Pedido::where('restaurante_id', $restaurante->id)
-
                 ->whereDate('created_at', today())
-
+                ->where('status', 'finalizado')
                 ->whereIn('forma_pagamento', ['credito', 'debito', 'cartao'])
-
                 ->sum('total');
 
-
             $pixHoje = Pedido::where('restaurante_id', $restaurante->id)
-
                 ->whereDate('created_at', today())
-
+                ->where('status', 'finalizado')
                 ->where('forma_pagamento', 'pix')
-
                 ->sum('total');
         }
 

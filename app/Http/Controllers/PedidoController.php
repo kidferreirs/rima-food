@@ -19,25 +19,7 @@ class PedidoController extends BaseRestaurantController
             'itens.produto',
         ])
             ->where('restaurante_id', $restaurante->id)
-            ->orderByRaw("
-            CASE
-                WHEN prioritario = 1
-                AND status NOT IN ('finalizado', 'cancelado')
-                THEN 0
-                ELSE 1
-            END
-        ")
-            ->orderByRaw("
-            CASE status
-                WHEN 'novo' THEN 1
-                WHEN 'preparando' THEN 2
-                WHEN 'pronto' THEN 3
-                WHEN 'saiu_entrega' THEN 4
-                WHEN 'finalizado' THEN 5
-                WHEN 'cancelado' THEN 6
-                ELSE 7
-            END
-        ")
+            ->orderByDesc('numero_pedido')
             ->latest()
             ->get();
 
@@ -112,7 +94,7 @@ class PedidoController extends BaseRestaurantController
         $taxaEntrega = $this->calcularTaxaEntrega($dados);
         $total = $totalProdutos + $taxaEntrega;
         $numeroPedido = Pedido::proximoNumero($restaurante->id);
-        
+
         $pedido = Pedido::create([
             'restaurante_id' => $restaurante->id,
             'cliente_id' => $dados['cliente_id'],
