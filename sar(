@@ -1,0 +1,39 @@
+[90m= [39m[
+    [34m"[39m[34mmensagem[39m[34m"[39m => [32m"[39m[32m1x X-Burger adicionado ao pedido. Deseja mais alguma coisa?[39m[32m"[39m,
+    [34m"[39m[34macao[39m[34m"[39m => [32m"[39m[32mproduto_adicionado[39m[32m"[39m,
+    [34m"[39m[34mproduto_ids[39m[34m"[39m => [
+      [35m1[39m,
+    ],
+    [34m"[39m[34mdados[39m[34m"[39m => [
+      [
+        [34m"[39m[34mid[39m[34m"[39m => [35m1[39m,
+        [34m"[39m[34mnome[39m[34m"[39m => [32m"[39m[32mX-Burger[39m[32m"[39m,
+        [34m"[39m[34mdescricao[39m[34m"[39m => [32m"[39m[32mPão, hambúrguer, queijo e molho especial.[39m[32m"[39m,
+        [34m"[39m[34mpreco[39m[34m"[39m => [35m28.9[39m,
+        [34m"[39m[34mcategoria[39m[34m"[39m => [32m"[39m[32mHambúrgueres[39m[32m"[39m,
+      ],
+    ],
+    [34m"[39m[34mcontexto[39m[34m"[39m => [34;4mApp\Services\AI\Conversation\ConversationContext[39;24m {#8656
+      +[1mintent[22m: [32m"[39m[32madicionar_produto[39m[32m"[39m,
+      +[1mestado[22m: [32m"[39m[32mmontando_pedido[39m[32m"[39m,
+      +[1mproduto[22m: [
+        [34m"[39m[34mid[39m[34m"[39m => [35m1[39m,
+        [34m"[39m[34mnome[39m[34m"[39m => [32m"[39m[32mX-Burger[39m[32m"[39m,
+        [34m"[39m[34mdescricao[39m[34m"[39m => [32m"[39m[32mPão, hambúrguer, queijo e molho especial.[39m[32m"[39m,
+        [34m"[39m[34mpreco[39m[34m"[39m => [35m28.9[39m,
+        [34m"[39m[34mcategoria[39m[34m"[39m => [32m"[39m[32mHambúrgueres[39m[32m"[39m,
+      ],
+      +[1mitens[22m: [
+        [
+          [34m"[39m[34mproduto_id[39m[34m"[39m => [35m1[39m,
+          [34m"[39m[34mnome[39m[34m"[39m => [32m"[39m[32mX-Burger[39m[32m"[39m,
+          [34m"[39m[34mquantidade[39m[34m"[39m => [35m1[39m,
+          [34m"[39m[34mpreco_unitario[39m[34m"[39m => [35m28.9[39m,
+          [34m"[39m[34msubtotal[39m[34m"[39m => [35m28.9[39m,
+          [34m"[39m[34mobservacao[39m[34m"[39m => [36mnull[39m,
+        ],
+      ],
+      +[1mfaltando[22m: [],
+      +[1mpedidoFinalizado[22m: [36mfalse[39m,
+    },
+  ]
