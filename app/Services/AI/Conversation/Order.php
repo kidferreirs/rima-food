@@ -10,30 +10,17 @@ class Order
     {
         $quantidade = max(1, $quantidade);
 
-        foreach ($this->itens as &$item) {
-            if ($item['produto_id'] === $produto['id']) {
-                $item['quantidade'] += $quantidade;
-                $item['subtotal'] = round(
-                    $item['quantidade'] * $item['preco_unitario'],
-                    2
-                );
-
+        foreach ($this->itens as $item) {
+            if ($item->produtoId() === $produto['id']) {
+                $item->adicionarQuantidade($quantidade);
                 return;
             }
         }
 
-        unset($item);
-
-        $preco = (float) $produto['preco'];
-
-        $this->itens[] = [
-            'produto_id' => $produto['id'],
-            'nome' => $produto['nome'],
-            'quantidade' => $quantidade,
-            'preco_unitario' => $preco,
-            'subtotal' => round($preco * $quantidade, 2),
-            'observacao' => null,
-        ];
+        $this->itens[] = new OrderItem(
+            $produto,
+            $quantidade
+        );
     }
 
     public function adicionarObservacaoUltimoProduto(string $observacao): bool
@@ -44,7 +31,7 @@ class Order
 
         $indice = array_key_last($this->itens);
 
-        $this->itens[$indice]['observacao'] = trim($observacao);
+        $this->itens[$indice]->adicionarObservacao($observacao);
 
         return true;
     }
@@ -55,7 +42,10 @@ class Order
             return null;
         }
 
-        return array_pop($this->itens);
+        /** @var OrderItem $itemRemovido */
+        $itemRemovido = array_pop($this->itens);
+
+        return $itemRemovido->toArray();
     }
 
     public function estaVazio(): bool
@@ -65,7 +55,10 @@ class Order
 
     public function itens(): array
     {
-        return $this->itens;
+        return array_map(
+            fn(OrderItem $item) => $item->toArray(),
+            $this->itens
+        );
     }
 
     public function quantidadeItens(): int
@@ -77,10 +70,14 @@ class Order
 
     public function subtotal(): float
     {
-        return round(
-            array_sum(array_column($this->itens, 'subtotal')),
-            2
+        $subtotal = array_reduce(
+            $this->itens,
+            fn(float $total, OrderItem $item): float =>
+            $total + $item->subtotal(),
+            0.0
         );
+
+        return round($subtotal, 2);
     }
 
     public function total(): float
@@ -97,15 +94,23 @@ class Order
         $linhas = [];
 
         foreach ($this->itens as $item) {
+
+            $dados = $item->toArray();
+
             $linha = sprintf(
                 '%dx %s - R$ %s',
-                $item['quantidade'],
-                $item['nome'],
-                number_format($item['subtotal'], 2, ',', '.')
+                $dados['quantidade'],
+                $dados['nome'],
+                number_format(
+                    $dados['subtotal'],
+                    2,
+                    ',',
+                    '.'
+                )
             );
 
-            if (!empty($item['observacao'])) {
-                $linha .= ' (' . $item['observacao'] . ')';
+            if (!empty($dados['observacao'])) {
+                $linha .= ' (' . $dados['observacao'] . ')';
             }
 
             $linhas[] = $linha;
@@ -113,7 +118,12 @@ class Order
 
         $linhas[] = sprintf(
             'Subtotal: R$ %s',
-            number_format($this->subtotal(), 2, ',', '.')
+            number_format(
+                $this->subtotal(),
+                2,
+                ',',
+                '.'
+            )
         );
 
         return implode(PHP_EOL, $linhas);
