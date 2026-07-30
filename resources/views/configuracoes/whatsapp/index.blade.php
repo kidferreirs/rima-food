@@ -86,7 +86,7 @@
 
         </div>
 
-        @if($qrCode)
+        @if($qrCode && !$conectado)
 
             <div class="rounded-xl bg-white shadow p-8 text-center mb-8">
 

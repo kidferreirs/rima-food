@@ -109,8 +109,8 @@ class Restaurante extends Model
     {
         return in_array($this->plano, [
             'MENU_IA',
-            'FOOD'
-        ]);
+            'FOOD',
+        ], true);
     }
 
     public function ehFood(): bool

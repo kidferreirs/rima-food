@@ -29,13 +29,13 @@ class WhatsappConfiguracaoController extends BaseRestaurantController
             'configuracoes.whatsapp.index',
             [
                 'restauranteAtual' => $restaurante->fresh(),
-                'qrCode' => null,
-                'pairingCode' => null,
+                'qrCode' => session('qrCode'),
+                'pairingCode' => session('pairingCode'),
             ]
         );
     }
 
-    public function conectar(): View|RedirectResponse
+    public function conectar(): RedirectResponse
     {
         $restaurante = $this->restaurante();
 
@@ -64,35 +64,36 @@ class WhatsappConfiguracaoController extends BaseRestaurantController
             $qrCode = $this->extrairQrCode(
                 $respostaConexao
             ) ?: $this->extrairQrCode(
-                $respostaCriacao
-            );
+                        $respostaCriacao
+                    );
 
             $pairingCode = $this->extrairPairingCode(
                 $respostaConexao
             ) ?: $this->extrairPairingCode(
-                $respostaCriacao
-            );
+                        $respostaCriacao
+                    );
 
             $restaurante->update([
                 'evolution_status' => 'connecting',
                 'evolution_last_sync_at' => now(),
             ]);
 
-            return view(
-                'configuracoes.whatsapp.index',
-                [
-                    'restauranteAtual' => $restaurante->fresh(),
+            return redirect()
+                ->route(
+                    'restaurante.configuracoes.whatsapp.index',
+                    ['slug' => $restaurante->slug]
+                )
+                ->with([
                     'qrCode' => $qrCode,
                     'pairingCode' => $pairingCode,
-                ]
-            );
+                ]);
         } catch (Throwable $exception) {
             report($exception);
 
             return redirect()
                 ->route(
                     'restaurante.configuracoes.whatsapp.index',
-                    $restaurante->slug
+                    ['slug' => $restaurante->slug]
                 )
                 ->with(
                     'error',
@@ -108,10 +109,15 @@ class WhatsappConfiguracaoController extends BaseRestaurantController
         $this->garantirPlanoComIa($restaurante);
 
         if (!$restaurante->evolution_instance) {
-            return back()->with(
-                'error',
-                'Este restaurante ainda não possui uma instância do WhatsApp.'
-            );
+            return redirect()
+                ->route(
+                    'restaurante.configuracoes.whatsapp.index',
+                    ['slug' => $restaurante->slug]
+                )
+                ->with(
+                    'error',
+                    'Este restaurante ainda não possui uma instância do WhatsApp.'
+                );
         }
 
         try {
@@ -123,17 +129,27 @@ class WhatsappConfiguracaoController extends BaseRestaurantController
                 ? 'WhatsApp conectado com sucesso.'
                 : 'Status atualizado: ' . $estado;
 
-            return back()->with(
-                'success',
-                $mensagem
-            );
+            return redirect()
+                ->route(
+                    'restaurante.configuracoes.whatsapp.index',
+                    ['slug' => $restaurante->slug]
+                )
+                ->with(
+                    'success',
+                    $mensagem
+                );
         } catch (Throwable $exception) {
             report($exception);
 
-            return back()->with(
-                'error',
-                $exception->getMessage()
-            );
+            return redirect()
+                ->route(
+                    'restaurante.configuracoes.whatsapp.index',
+                    ['slug' => $restaurante->slug]
+                )
+                ->with(
+                    'error',
+                    $exception->getMessage()
+                );
         }
     }
 
@@ -144,10 +160,15 @@ class WhatsappConfiguracaoController extends BaseRestaurantController
         $this->garantirPlanoComIa($restaurante);
 
         if (!$restaurante->evolution_instance) {
-            return back()->with(
-                'error',
-                'Nenhuma instância foi encontrada.'
-            );
+            return redirect()
+                ->route(
+                    'restaurante.configuracoes.whatsapp.index',
+                    ['slug' => $restaurante->slug]
+                )
+                ->with(
+                    'error',
+                    'Nenhuma instância foi encontrada.'
+                );
         }
 
         try {
@@ -158,20 +179,31 @@ class WhatsappConfiguracaoController extends BaseRestaurantController
             $restaurante->update([
                 'evolution_status' => 'close',
                 'evolution_phone' => null,
+                'evolution_connected_at' => null,
                 'evolution_last_sync_at' => now(),
             ]);
 
-            return back()->with(
-                'success',
-                'WhatsApp desconectado.'
-            );
+            return redirect()
+                ->route(
+                    'restaurante.configuracoes.whatsapp.index',
+                    ['slug' => $restaurante->slug]
+                )
+                ->with(
+                    'success',
+                    'WhatsApp desconectado com sucesso.'
+                );
         } catch (Throwable $exception) {
             report($exception);
 
-            return back()->with(
-                'error',
-                $exception->getMessage()
-            );
+            return redirect()
+                ->route(
+                    'restaurante.configuracoes.whatsapp.index',
+                    ['slug' => $restaurante->slug]
+                )
+                ->with(
+                    'error',
+                    $exception->getMessage()
+                );
         }
     }
 
@@ -182,10 +214,15 @@ class WhatsappConfiguracaoController extends BaseRestaurantController
         $this->garantirPlanoComIa($restaurante);
 
         if (!$restaurante->evolution_instance) {
-            return back()->with(
-                'error',
-                'Nenhuma instância foi encontrada.'
-            );
+            return redirect()
+                ->route(
+                    'restaurante.configuracoes.whatsapp.index',
+                    ['slug' => $restaurante->slug]
+                )
+                ->with(
+                    'error',
+                    'Nenhuma instância foi encontrada.'
+                );
         }
 
         try {
@@ -201,17 +238,27 @@ class WhatsappConfiguracaoController extends BaseRestaurantController
                 'evolution_last_sync_at' => now(),
             ]);
 
-            return back()->with(
-                'success',
-                'Instância do WhatsApp excluída.'
-            );
+            return redirect()
+                ->route(
+                    'restaurante.configuracoes.whatsapp.index',
+                    ['slug' => $restaurante->slug]
+                )
+                ->with(
+                    'success',
+                    'Instância do WhatsApp excluída com sucesso.'
+                );
         } catch (Throwable $exception) {
             report($exception);
 
-            return back()->with(
-                'error',
-                $exception->getMessage()
-            );
+            return redirect()
+                ->route(
+                    'restaurante.configuracoes.whatsapp.index',
+                    ['slug' => $restaurante->slug]
+                )
+                ->with(
+                    'error',
+                    $exception->getMessage()
+                );
         }
     }
 
@@ -253,13 +300,12 @@ class WhatsappConfiguracaoController extends BaseRestaurantController
             $dadosAtualizacao['evolution_phone'] =
                 $telefone;
         }
-
         if ($estado === 'open') {
-            $dadosAtualizacao[
-                'evolution_connected_at'
-            ] = $restaurante
-                ->evolution_connected_at
+            $dadosAtualizacao['evolution_connected_at'] =
+                $restaurante->evolution_connected_at
                 ?: now();
+        } else {
+            $dadosAtualizacao['evolution_connected_at'] = null;
         }
 
         $restaurante->update(
@@ -303,10 +349,12 @@ class WhatsappConfiguracaoController extends BaseRestaurantController
             return null;
         }
 
-        if (str_starts_with(
-            $qrCode,
-            'data:image'
-        )) {
+        if (
+            str_starts_with(
+                $qrCode,
+                'data:image'
+            )
+        ) {
             return $qrCode;
         }
 
@@ -319,11 +367,19 @@ class WhatsappConfiguracaoController extends BaseRestaurantController
         $codigo =
             data_get($dados, 'pairingCode')
             ?? data_get($dados, 'qrcode.pairingCode')
-            ?? data_get($dados, 'code');
+            ?? data_get($dados, 'instance.pairingCode');
 
-        return is_string($codigo) && $codigo !== ''
-            ? $codigo
-            : null;
+        if (!is_string($codigo)) {
+            return null;
+        }
+
+        $codigo = trim($codigo);
+
+        if ($codigo === '' || strlen($codigo) > 20) {
+            return null;
+        }
+
+        return $codigo;
     }
 
     private function extrairTelefone(
