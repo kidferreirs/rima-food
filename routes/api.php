@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\RimaWhatsappWebhookController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AI\RestaurantKnowledgeController;
+use Illuminate\Support\Facades\Route;
 
 Route::post(
     '/whatsapp/rima',
