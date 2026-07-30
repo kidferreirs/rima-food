@@ -19,6 +19,7 @@ use App\Http\Controllers\CardapioImportController;
 use App\Http\Controllers\GarcomCardapioController;
 use App\Http\Controllers\ViaCepController;
 use App\Http\Controllers\DeliveryQuoteController;
+use App\Http\Controllers\WhatsappConfiguracaoController;
 
 
 Route::get('/cadastro', [OnboardingController::class, 'create'])->name('saas.cadastro');
@@ -102,6 +103,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/configuracoes/entregas', [ConfiguracaoEntregaController::class, 'index'])->name('restaurante.configuracoes.entregas.index');
         Route::post('/configuracoes/entregas', [ConfiguracaoEntregaController::class, 'salvar'])->name('restaurante.configuracoes.entregas.salvar');
 
+        Route::get('/configuracoes/whatsapp', [WhatsappConfiguracaoController::class, 'index'])->name('restaurante.configuracoes.whatsapp.index');
+        Route::post('/configuracoes/whatsapp/conectar', [WhatsappConfiguracaoController::class, 'conectar'])->name('restaurante.configuracoes.whatsapp.conectar');
+        Route::post('/configuracoes/whatsapp/status', [WhatsappConfiguracaoController::class, 'status'])->name('restaurante.configuracoes.whatsapp.status');
+        Route::delete('/configuracoes/whatsapp/desconectar', [WhatsappConfiguracaoController::class, 'desconectar'])->name('restaurante.configuracoes.whatsapp.desconectar');
+        Route::delete('/configuracoes/whatsapp/excluir', [WhatsappConfiguracaoController::class, 'excluir'])->name('restaurante.configuracoes.whatsapp.excluir');
+
         Route::get('/cardapio-digital', [RestauranteController::class, 'cardapioDigital'])->name('restaurante.cardapio');
 
         Route::get('/importar-cardapio', [CardapioImportController::class, 'index'])->name('restaurante.importacao.cardapio');
@@ -112,14 +119,14 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-    Route::get('/menu/{slug}', [MenuController::class, 'show'])->name('menu.show');
-    Route::post('/menu/{slug}/garcom', [GarcomCardapioController::class, 'conversar'])->name('menu.garcom.conversar');
-    Route::get('/menu/{slug}/checkout', [MenuPedidoController::class, 'checkout'])->name('menu.checkout');
-    Route::post('/menu/{slug}/pedido', [MenuPedidoController::class, 'store'])->name('menu.pedido.store');
-    Route::post('/menu/{slug}/delivery/quote', DeliveryQuoteController::class)->name('menu.delivery.quote');
+Route::get('/menu/{slug}', [MenuController::class, 'show'])->name('menu.show');
+Route::post('/menu/{slug}/garcom', [GarcomCardapioController::class, 'conversar'])->name('menu.garcom.conversar');
+Route::get('/menu/{slug}/checkout', [MenuPedidoController::class, 'checkout'])->name('menu.checkout');
+Route::post('/menu/{slug}/pedido', [MenuPedidoController::class, 'store'])->name('menu.pedido.store');
+Route::post('/menu/{slug}/delivery/quote', DeliveryQuoteController::class)->name('menu.delivery.quote');
 
-    Route::get('/pedido/{token}/sucesso', [MenuPedidoController::class, 'sucesso'])->name('pedido.sucesso');
+Route::get('/pedido/{token}/sucesso', [MenuPedidoController::class, 'sucesso'])->name('pedido.sucesso');
 
-    Route::get('/viacep/{cep}', ViaCepController::class)->name('viacep.buscar');
+Route::get('/viacep/{cep}', ViaCepController::class)->name('viacep.buscar');
 
 require __DIR__ . '/auth.php';

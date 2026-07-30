@@ -12,6 +12,7 @@ class ConversaWhatsapp extends Model
         'nome_cliente',
         'estado',
         'carrinho',
+        'contexto_ia',
         'tipo_entrega',
         'endereco_entrega',
         'forma_pagamento',
@@ -25,6 +26,7 @@ class ConversaWhatsapp extends Model
 
     protected $casts = [
         'carrinho' => 'array',
+        'contexto_ia' => 'array',
         'pedido_confirmado' => 'boolean',
         'ultima_interacao' => 'datetime',
         'atendimento_humano' => 'boolean',

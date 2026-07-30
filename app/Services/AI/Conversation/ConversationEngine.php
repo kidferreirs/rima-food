@@ -11,6 +11,7 @@ class ConversationEngine
     public function __construct(
         private readonly KnowledgeEngine $knowledge,
         private readonly ConversationInterpreter $interpreter,
+        private readonly ProductOptionMatcher $productOptionMatcher,
     ) {
     }
 
@@ -215,15 +216,217 @@ class ConversationEngine
         }
 
         /*
-|--------------------------------------------------------------------------
-| Interpretação contextual
-|--------------------------------------------------------------------------
-*/
+    |--------------------------------------------------------------------------
+    | Resposta de grupo obrigatório
+    |--------------------------------------------------------------------------
+    */
+
+        if (
+            !empty($contexto->faltando)
+            && $contexto->produto !== null
+        ) {
+            $grupoAtual = $contexto->faltando[0];
+
+            $item = $contexto->pedido->ultimoItem();
+
+            if ($item === null) {
+                $contexto->faltando = [];
+
+                return $this->resposta(
+                    'Não consegui localizar o produto que estava sendo configurado.',
+                    $contexto,
+                    ConversationAction::RESPOSTA_DESCONHECIDA
+                );
+            }
+
+            $validacao = $this->productOptionMatcher
+                ->validarRespostaGrupo(
+                    $grupoAtual,
+                    $mensagem,
+                    $item
+                );
+
+            if (!$validacao['valido']) {
+                return $this->resposta(
+                    $validacao['mensagem'],
+                    $contexto,
+                    ConversationAction::OPCAO_OBRIGATORIA_INVALIDA
+                );
+            }
+
+            $maximo = max(
+                1,
+                (int) ($grupoAtual['maximo'] ?? 1)
+            );
+
+            /*
+             * Grupos de escolha única substituem uma seleção anterior.
+             */
+            if ($maximo === 1) {
+                $item->removerOpcoesGrupo(
+                    (int) $grupoAtual['id']
+                );
+            }
+
+            foreach ($validacao['opcoes'] as $opcao) {
+                $item->adicionarOpcao($opcao);
+            }
+
+            $contexto->itens = $contexto->pedido->itens();
+
+            if (
+                !$this->productOptionMatcher
+                    ->grupoEstaCompleto($grupoAtual, $item)
+            ) {
+                return $this->resposta(
+                    $this->productOptionMatcher
+                        ->montarPerguntaGrupo($grupoAtual),
+                    $contexto,
+                    ConversationAction::PERGUNTAR_OPCAO_OBRIGATORIA
+                );
+            }
+
+            /*
+             * Remove o grupo concluído da fila.
+             */
+            array_shift($contexto->faltando);
+
+            /*
+             * Carrega os demais grupos obrigatórios apenas na primeira conclusão.
+             */
+            if (empty($contexto->faltando)) {
+                $gruposObrigatorios = $this->productOptionMatcher
+                    ->gruposObrigatorios(
+                        (int) $contexto->produto['id']
+                    );
+
+                $contexto->faltando = array_values(
+                    array_filter(
+                        $gruposObrigatorios,
+                        fn(array $grupo): bool =>
+                        !$this->productOptionMatcher
+                            ->grupoEstaCompleto($grupo, $item)
+                    )
+                );
+            }
+
+            if (!empty($contexto->faltando)) {
+                $proximoGrupo = $contexto->faltando[0];
+
+                return $this->resposta(
+                    $this->productOptionMatcher
+                        ->montarPerguntaGrupo($proximoGrupo),
+                    $contexto,
+                    ConversationAction::PERGUNTAR_OPCAO_OBRIGATORIA
+                );
+            }
+
+            return $this->resposta(
+                "{$contexto->produto['nome']} configurado com sucesso. Deseja mais alguma coisa?",
+                $contexto,
+                ConversationAction::OPCAO_OBRIGATORIA_SELECIONADA
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Remoção de ingredientes do último produto
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            $contexto->produto !== null
+            && $this->possuiIntencaoRemoverIngrediente($texto)
+        ) {
+            $produtoCompleto = $this->knowledge
+                ->produtos()
+                ->encontrar(
+                    $restaurante,
+                    (int) $contexto->produto['id']
+                );
+
+            $ingredientes = is_array(
+                $produtoCompleto['ingredientes'] ?? null
+            )
+                ? $produtoCompleto['ingredientes']
+                : [];
+
+            $ingredientesRemovidos =
+                $this->encontrarIngredientesNaMensagem(
+                    $texto,
+                    $ingredientes
+                );
+
+            if (empty($ingredientesRemovidos)) {
+                return $this->resposta(
+                    'Qual ingrediente você deseja retirar?',
+                    $contexto,
+                    'ingrediente_nao_identificado'
+                );
+            }
+
+            foreach ($ingredientesRemovidos as $ingrediente) {
+                $contexto->pedido
+                    ->removerIngredienteUltimoProduto(
+                        $ingrediente
+                    );
+            }
+
+            $contexto->itens = $contexto->pedido->itens();
+
+            $nomes = implode(', ', $ingredientesRemovidos);
+
+            return $this->resposta(
+                "Certo! {$nomes} será removido do pedido. Deseja mais alguma coisa?",
+                $contexto,
+                'ingredientes_removidos'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Interpretação contextual
+        |--------------------------------------------------------------------------
+        */
 
         $interpretacao = $this->interpreter->interpretar(
             $mensagem,
             $contexto
         );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Opções do último produto
+        |--------------------------------------------------------------------------
+        */
+
+        if ($contexto->produto !== null) {
+
+            $opcoes = $this->productOptionMatcher
+                ->encontrarOpcoes(
+                    $contexto->produto['id'],
+                    $mensagem
+                );
+
+            if (!empty($opcoes)) {
+
+                $contexto->pedido
+                    ->adicionarOpcoesUltimoProduto($opcoes);
+
+                $contexto->itens =
+                    $contexto->pedido->itens();
+
+                $nomes = collect($opcoes)
+                    ->pluck('nome')
+                    ->implode(', ');
+
+                return $this->resposta(
+                    "{$nomes} adicionados ao pedido. Deseja mais alguma coisa?",
+                    $contexto,
+                    'opcoes_adicionadas'
+                );
+            }
+        }
 
         if (
             $interpretacao['intent']
@@ -350,6 +553,27 @@ class ConversationEngine
                 $quantidade
             );
 
+            $grupoObrigatorio = $this->productOptionMatcher
+                ->primeiroGrupoObrigatorio(
+                    $produto['id']
+                );
+
+            $contexto->faltando = $this->productOptionMatcher
+                ->gruposObrigatorios(
+                    (int) $produto['id']
+                );
+
+            $grupoObrigatorio = $contexto->faltando[0] ?? null;
+
+            if ($grupoObrigatorio !== null) {
+                return $this->resposta(
+                    $this->productOptionMatcher
+                        ->montarPerguntaGrupo($grupoObrigatorio),
+                    $contexto,
+                    ConversationAction::PERGUNTAR_OPCAO_OBRIGATORIA
+                );
+            }
+
             return $this->resposta(
                 "{$quantidade}x {$produto['nome']} adicionado ao pedido. Deseja mais alguma coisa?",
                 $contexto,
@@ -421,6 +645,22 @@ class ConversationEngine
         $contexto->estado = ConversationContext::ESTADO_MONTANDO_PEDIDO;
 
         $this->adicionarItem($contexto, $produto);
+
+        $contexto->faltando = $this->productOptionMatcher
+            ->gruposObrigatorios(
+                (int) $produto['id']
+            );
+
+        $grupoObrigatorio = $contexto->faltando[0] ?? null;
+
+        if ($grupoObrigatorio !== null) {
+            return $this->resposta(
+                $this->productOptionMatcher
+                    ->montarPerguntaGrupo($grupoObrigatorio),
+                $contexto,
+                ConversationAction::PERGUNTAR_OPCAO_OBRIGATORIA
+            );
+        }
 
         return $this->resposta(
             "{$produto['nome']} adicionado ao pedido. Deseja mais alguma coisa?",
@@ -693,6 +933,72 @@ class ConversationEngine
             ->ascii()
             ->trim()
             ->toString();
+    }
+
+    private function possuiIntencaoRemoverIngrediente(
+        string $texto
+    ): bool {
+        return Str::contains($texto, [
+            'sem ',
+            'tirar ',
+            'tira ',
+            'retirar ',
+            'remove ',
+            'remover ',
+            'nao quero ',
+            'não quero ',
+        ]);
+    }
+
+    private function encontrarIngredientesNaMensagem(
+        string $texto,
+        array $ingredientes
+    ): array {
+        $encontrados = [];
+
+        foreach ($ingredientes as $ingrediente) {
+            $nome = is_array($ingrediente)
+                ? ($ingrediente['nome'] ?? null)
+                : $ingrediente;
+
+            if (!$nome) {
+                continue;
+            }
+
+            $nomeNormalizado = $this->normalizar(
+                (string) $nome
+            );
+
+            /*
+             * Permite "sem molho" encontrar "Molho especial".
+             */
+            $palavrasIngrediente = array_values(
+                array_filter(
+                    explode(' ', $nomeNormalizado),
+                    fn(string $palavra): bool =>
+                    mb_strlen($palavra) >= 4
+                )
+            );
+
+            $encontrouNomeCompleto =
+                Str::contains($texto, $nomeNormalizado);
+
+            $encontrouPalavraPrincipal = collect(
+                $palavrasIngrediente
+            )->contains(
+                    fn(string $palavra): bool =>
+                    Str::contains($texto, $palavra)
+                );
+
+            if (
+                $encontrouNomeCompleto
+                || $encontrouPalavraPrincipal
+            ) {
+                $encontrados[] = (string) $nome;
+            }
+        }
+
+        return array_values(array_unique($encontrados));
     }
 
     private function formatarPreco(float $preco): string

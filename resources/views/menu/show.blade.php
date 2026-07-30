@@ -281,18 +281,36 @@
 
                 <div class="grid grid-cols-2 gap-4">
                     @foreach($categoria->produtos as $produto)
+
+                        @php
+                            $palavrasChave = is_array($produto->palavras_chave)
+                                ? implode(' ', $produto->palavras_chave)
+                                : ($produto->palavras_chave ?? '');
+
+                            $sinonimos = is_array($produto->sinonimos)
+                                ? implode(' ', $produto->sinonimos)
+                                : ($produto->sinonimos ?? '');
+
+                            $ingredientes = is_array($produto->ingredientes)
+                                ? implode(' ', $produto->ingredientes)
+                                : ($produto->ingredientes ?? '');
+
+                            $tags = is_array($produto->tags)
+                                ? implode(' ', $produto->tags)
+                                : ($produto->tags ?? '');
+                        @endphp
+
                         <div class="produto-card relative bg-white border rounded-3xl overflow-hidden shadow-sm"
                             data-produto-id="{{ $produto->id }}" data-produto-preco="{{ $produto->preco }}"
                             data-nome="{{ strtolower($produto->nome ?? '') }}"
                             data-descricao="{{ strtolower($produto->descricao ?? '') }}"
-                            data-palavras="{{ strtolower($produto->palavras_chave ?? '') }}"
-                            data-sinonimos="{{ strtolower($produto->sinonimos ?? '') }}"
-                            data-ingredientes="{{ strtolower($produto->ingredientes ?? '') }}"
-                            data-tags="{{ strtolower($produto->tags ?? '') }}"
+                            data-palavras="{{ strtolower($palavrasChave) }}" data-sinonimos="{{ strtolower($sinonimos) }}"
+                            data-ingredientes="{{ strtolower($ingredientes) }}" data-tags="{{ strtolower($tags) }}"
                             data-categoria="{{ strtolower($categoria->nome ?? '') }}">
 
-                            <button type="button" class="toggle-favorito absolute top-3 right-3 z-10 w-9 h-9 bg-white/90 rounded-full shadow
-                                                                                    flex items-center justify-center text-xl"
+                            <button type="button"
+                                class="toggle-favorito absolute top-3 right-3 z-10 w-9 h-9 bg-white/90 rounded-full shadow
+                                                                                                    flex items-center justify-center text-xl"
                                 data-produto-id="{{ $produto->id }}" aria-label="Favoritar {{ $produto->nome }}">
                                 🤍
                             </button>
@@ -349,7 +367,7 @@
                 <nav class="space-y-2 mt-5">
                     @foreach($restaurante->categorias as $categoria)
                         <button type="button" class="categoria-menu-link w-full flex items-center justify-between bg-slate-50 hover:bg-green-50
-                                                        rounded-2xl px-4 py-4 text-left transition"
+                                                                rounded-2xl px-4 py-4 text-left transition"
                             data-categoria-alvo="categoria-{{ $categoria->id }}">
                             <span class="font-bold text-slate-800">
                                 {{ $categoria->nome }}

@@ -77,19 +77,77 @@
         {{ $pedido->cliente->nome }}
     </p>
 
+    @if($pedido->cliente?->telefone)
+
+        <p>
+            <strong>Telefone:</strong>
+
+            {{ $pedido->cliente->telefone }}
+
+        </p>
+
+    @endif
+
     <p>
         <strong>Data:</strong>
         {{ $pedido->created_at->format('d/m/Y H:i') }}
+    </p>
+
+    <p>
+
+        <strong>Entrega:</strong>
+
+        {{ ucfirst($pedido->tipo_entrega) }}
+
+    </p>
+
+    @if($pedido->endereco_entrega)
+
+        <p>
+
+            {{ $pedido->endereco_entrega }}
+
+        </p>
+
+    @endif
+
+    <p>
+
+        <strong>Pagamento:</strong>
+
+        {{ ucfirst($pedido->forma_pagamento) }}
+
     </p>
 
     <hr>
 
     @foreach($pedido->itens as $item)
 
-        <p>
-            {{ $item->quantidade }}x
-            {{ $item->produto->nome }}
-        </p>
+        <div style="margin-bottom:12px;">
+
+            <strong>
+                {{ $item->quantidade }}x
+                {{ $item->produto->nome }}
+            </strong>
+
+            <span style="float:right">
+                R$ {{ number_format($item->preco_unitario * $item->quantidade, 2, ',', '.') }}
+            </span>
+
+            @if($item->observacao)
+
+                <div style="
+                                                    margin-left:12px;
+                                                    margin-top:4px;
+                                                    white-space:pre-line;
+                                                    font-size:13px;
+                                                ">
+                    {{ $item->observacao }}
+                </div>
+
+            @endif
+
+        </div>
 
     @endforeach
 
@@ -109,10 +167,67 @@
 
     @endif
 
-    <div class="total">R$ {{ number_format($pedido->total, 2, ',', '.') }} </div>
+    <hr>
+
+    <p>
+
+        Subtotal
+
+        <span style="float:right">
+
+            R$ {{ number_format($pedido->subtotal, 2, ',', '.') }}
+
+        </span>
+
+    </p>
+
+    @if($pedido->taxa_entrega > 0)
+
+        <p>
+
+            Entrega
+
+            <span style="float:right">
+
+                R$ {{ number_format($pedido->taxa_entrega, 2, ',', '.') }}
+
+            </span>
+
+        </p>
+
+    @endif
 
     <hr>
-    
+
+    <div class="total">
+
+        TOTAL
+
+        <span style="float:right">
+
+            R$ {{ number_format($pedido->total, 2, ',', '.') }}
+
+        </span>
+
+    </div>
+
+    <hr>
+
+    @if($pedido->token)
+
+        <hr>
+
+        <p>
+
+            Token:
+
+            <strong>{{ $pedido->token }}</strong>
+
+        </p>
+
+    @endif
+
     <div class="center">Obrigado ❤️</div>
 </body>
+
 </html>

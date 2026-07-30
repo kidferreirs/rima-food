@@ -236,7 +236,7 @@
 
         <div id="pedido{{ $pedido->id }}" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
 
-            <div class="bg-white rounded-2xl w-[600px] max-w-[95%] p-8 shadow-2xl relative">
+            <div class="bg-white rounded-2xl w-[600px] max-w-[95%] max-h-[90vh] overflow-y-auto p-8 shadow-2xl relative">
 
                 <button onclick="fecharModal('pedido{{ $pedido->id }}')" class="absolute top-4 right-4 text-2xl">
                     ✖
@@ -343,13 +343,24 @@
                     <h3 class="font-bold mb-3">🍔 Itens</h3>
 
                     @foreach($pedido->itens as $item)
+                        <div class="border-b py-3">
+                            <div class="flex items-center justify-between gap-4">
+                                <span class="font-medium">
+                                    {{ $item->quantidade }}x {{ $item->produto->nome }}
+                                </span>
 
-                        <div class="border-b py-2">
-                            {{ $item->quantidade }}x {{ $item->produto->nome }}
+                                <span class="font-semibold whitespace-nowrap">
+                                    R$ {{ number_format($item->preco_unitario * $item->quantidade, 2, ',', '.') }}
+                                </span>
+                            </div>
+
+                            @if($item->observacao)
+                                <div class="mt-2 bg-gray-50 border rounded-lg p-3 text-sm text-gray-700 whitespace-pre-line">
+                                    {{ $item->observacao }}
+                                </div>
+                            @endif
                         </div>
-
                     @endforeach
-
                 </div>
 
                 @if($pedido->observacao)

@@ -18,10 +18,8 @@ class ConversationContext
 
     public ?array $produto = null;
 
-    // Mantemos por compatibilidade temporária
     public array $itens = [];
 
-    // NOVO
     public Order $pedido;
 
     public array $faltando = [];
@@ -31,5 +29,62 @@ class ConversationContext
     public function __construct()
     {
         $this->pedido = new Order();
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'intent' => $this->intent,
+            'estado' => $this->estado,
+            'produto' => $this->produto,
+            'itens' => $this->pedido->itens(),
+            'pedido' => $this->pedido->toArray(),
+            'faltando' => $this->faltando,
+            'pedido_finalizado' => $this->pedidoFinalizado,
+        ];
+    }
+
+    public static function fromArray(?array $dados): self
+    {
+        $contexto = new self();
+
+        if (empty($dados)) {
+            return $contexto;
+        }
+
+        $contexto->intent = (string) (
+            $dados['intent'] ?? 'unknown'
+        );
+
+        $contexto->estado = (string) (
+            $dados['estado'] ?? self::ESTADO_INICIO
+        );
+
+        $contexto->produto = isset($dados['produto'])
+            && is_array($dados['produto'])
+            ? $dados['produto']
+            : null;
+
+        $contexto->faltando = is_array(
+            $dados['faltando'] ?? null
+        )
+            ? $dados['faltando']
+            : [];
+
+        $contexto->pedidoFinalizado = (bool) (
+            $dados['pedido_finalizado'] ?? false
+        );
+
+        $dadosPedido = $dados['pedido'] ?? [
+            'itens' => $dados['itens'] ?? [],
+        ];
+
+        $contexto->pedido = Order::fromArray(
+            is_array($dadosPedido) ? $dadosPedido : []
+        );
+
+        $contexto->itens = $contexto->pedido->itens();
+
+        return $contexto;
     }
 }

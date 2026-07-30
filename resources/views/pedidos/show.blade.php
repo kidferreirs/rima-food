@@ -134,7 +134,18 @@
                 <tbody>
                     @foreach($pedido->itens as $item)
                         <tr class="border-b">
-                            <td class="p-3">{{ $item->produto->nome }}</td>
+                            <td class="p-3 align-top">
+                                <div class="font-semibold">
+                                    🍔 {{ $item->produto->nome }}
+                                </div>
+
+                                @if($item->observacao)
+                                    <div
+                                        class="mt-2 bg-gray-50 border rounded-lg p-2 text-sm whitespace-pre-line text-gray-700">
+                                        {{ $item->observacao }}
+                                    </div>
+                                @endif
+                            </td>
                             <td class="p-3">{{ $item->quantidade }}</td>
                             <td class="p-3">
                                 R$ {{ number_format($item->preco_unitario, 2, ',', '.') }}

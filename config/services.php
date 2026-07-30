@@ -43,7 +43,24 @@ return [
     ],
 
     'n8n' => [
-        'webhook_novo_pedido' => env('N8N_WEBHOOK_NOVO_PEDIDO'),
+        'webhook_novo_pedido' =>
+            env('N8N_WEBHOOK_NOVO_PEDIDO'),
+
+        'webhook_whatsapp_ia' =>
+            env('N8N_WEBHOOK_WHATSAPP_IA'),
+    ],
+
+    'rima_whatsapp' => [
+        'webhook_secret' => env('RIMA_WHATSAPP_WEBHOOK_SECRET'),
+    ],
+
+    'evolution' => [
+        'url' => env('EVOLUTION_API_URL'),
+        'key' => env('EVOLUTION_API_KEY'),
+        'instance_prefix' => env(
+            'EVOLUTION_INSTANCE_PREFIX',
+            'rima_rest_'
+        ),
     ],
 
     // 'openrouteservice' => [
@@ -53,5 +70,6 @@ return [
     'google_maps' => [
         'key' => env('GOOGLE_MAPS_API_KEY'),
     ],
+
 
 ];

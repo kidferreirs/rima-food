@@ -37,4 +37,10 @@ final class ConversationAction
     public const PEDIDO_CONFIRMADO = 'pedido_confirmado';
 
     public const RESPOSTA_DESCONHECIDA = 'resposta_desconhecida';
+
+    public const PERGUNTAR_OPCAO_OBRIGATORIA = 'perguntar_opcao_obrigatoria';
+
+    public const OPCAO_OBRIGATORIA_INVALIDA = 'opcao_obrigatoria_invalida';
+
+    public const OPCAO_OBRIGATORIA_SELECIONADA = 'opcao_obrigatoria_selecionada';
 }

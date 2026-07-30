@@ -23,15 +23,55 @@ class Order
         );
     }
 
-    public function adicionarObservacaoUltimoProduto(string $observacao): bool
+    public function ultimoItem(): ?OrderItem
     {
         if ($this->estaVazio()) {
-            return false;
+            return null;
         }
 
         $indice = array_key_last($this->itens);
 
-        $this->itens[$indice]->adicionarObservacao($observacao);
+        return $this->itens[$indice];
+    }
+
+    public function adicionarObservacaoUltimoProduto(string $observacao): bool
+    {
+        $item = $this->ultimoItem();
+
+        if ($item === null) {
+            return false;
+        }
+
+        $item->adicionarObservacao($observacao);
+
+        return true;
+    }
+
+    public function removerIngredienteUltimoProduto(
+        string $ingrediente
+    ): bool {
+        $item = $this->ultimoItem();
+
+        if ($item === null) {
+            return false;
+        }
+
+        $item->removerIngrediente($ingrediente);
+
+        return true;
+    }
+
+    public function adicionarOpcoesUltimoProduto(array $opcoes): bool
+    {
+        $item = $this->ultimoItem();
+
+        if ($item === null || empty($opcoes)) {
+            return false;
+        }
+
+        foreach ($opcoes as $opcao) {
+            $item->adicionarOpcao($opcao);
+        }
 
         return true;
     }
@@ -47,7 +87,6 @@ class Order
 
         return $itemRemovido->toArray();
     }
-
     public function estaVazio(): bool
     {
         return empty($this->itens);
@@ -60,11 +99,13 @@ class Order
             $this->itens
         );
     }
-
     public function quantidadeItens(): int
     {
-        return array_sum(
-            array_column($this->itens, 'quantidade')
+        return array_reduce(
+            $this->itens,
+            fn(int $total, OrderItem $item): int =>
+            $total + $item->quantidade(),
+            0
         );
     }
 
@@ -127,5 +168,23 @@ class Order
         );
 
         return implode(PHP_EOL, $linhas);
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'itens' => $this->itens(),
+        ];
+    }
+
+    public static function fromArray(array $dados): self
+    {
+        $pedido = new self();
+
+        foreach ($dados['itens'] ?? [] as $dadosItem) {
+            $pedido->itens[] = OrderItem::fromArray($dadosItem);
+        }
+
+        return $pedido;
     }
 }

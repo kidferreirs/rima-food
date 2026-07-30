@@ -37,7 +37,40 @@ class Restaurante extends Model
         'google_reviews_total',
         'google_maps_url',
         'plano',
+        'evolution_instance',
+        'evolution_status',
+        'evolution_phone',
+        'evolution_connected_at',
+        'evolution_last_sync_at',
     ];
+
+    protected $casts = [
+        'ativo' => 'boolean',
+        'delivery' => 'boolean',
+        'retirada' => 'boolean',
+        'consumo_local' => 'boolean',
+        'evolution_connected_at' => 'datetime',
+        'evolution_last_sync_at' => 'datetime',
+    ];
+
+    public function possuiWhatsappConectado(): bool
+    {
+        return $this->evolution_status === 'open';
+    }
+
+    public function usaWhatsappComIA(): bool
+    {
+        return in_array($this->plano, [
+            'MENU_IA',
+            'FOOD',
+        ], true);
+    }
+
+    public function nomeInstanciaEvolution(): string
+    {
+        return $this->evolution_instance
+            ?? 'rima_rest_' . $this->id;
+    }
 
     public function categorias()
     {

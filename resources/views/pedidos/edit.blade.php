@@ -16,7 +16,8 @@
             📦 Status atual: <strong>{{ ucfirst(str_replace('_', ' ', $pedido->status)) }}</strong>
         </div>
 
-        <form action="{{ route('restaurante.pedidos.update', [$restaurante->slug, $pedido]) }}" method="POST" class="space-y-4">
+        <form action="{{ route('restaurante.pedidos.update', [$restaurante->slug, $pedido]) }}" method="POST"
+            class="space-y-4">
             @csrf
             @method('PUT')
 
@@ -31,27 +32,44 @@
             <div id="itens" class="space-y-3">
 
                 @foreach($pedido->itens as $item)
-                    <div class="item grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="item bg-white border rounded-xl p-4 space-y-3">
 
-                        <select name="produto_id[]" class="produto w-full border rounded-lg p-3" required>
-                            @foreach($produtos as $produto)
-                                <option value="{{ $produto->id }}" data-preco="{{ $produto->preco }}"
-                                    @selected($item->produto_id === $produto->id)>
-                                    {{ $produto->nome }} - R$ {{ number_format($produto->preco, 2, ',', '.') }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <input type="hidden" name="item_id[]" value="{{ $item->id }}">
 
-                        <input type="number" name="quantidade[]" class="quantidade w-full border rounded-lg p-3" min="1"
-                            value="{{ $item->quantidade }}" required>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
 
-                        <button type="button" class="remover bg-red-500 text-white rounded-lg px-4 py-3">
-                            Remover
-                        </button>
+                            <select name="produto_id[]" class="produto w-full border rounded-lg p-3" required>
+                                @foreach($produtos as $produto)
+                                    <option value="{{ $produto->id }}" data-preco="{{ $produto->preco }}"
+                                        @selected($item->produto_id === $produto->id)>
+                                        {{ $produto->nome }} —
+                                        R$ {{ number_format($produto->preco, 2, ',', '.') }}
+                                    </option>
+                                @endforeach
+                            </select>
+
+                            <input type="number" name="quantidade[]" class="quantidade w-full border rounded-lg p-3" min="1"
+                                value="{{ $item->quantidade }}" required>
+
+                            <button type="button"
+                                class="remover bg-red-500 hover:bg-red-600 text-white rounded-lg px-4 py-3">
+                                Remover
+                            </button>
+
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold mb-2">
+                                📝 Opções, adicionais e observações do item
+                            </label>
+
+                            <textarea name="item_observacao[]" rows="5"
+                                class="item-observacao w-full border rounded-lg p-3 whitespace-pre-line"
+                                placeholder="Ex.: sem cebola, adicionar bacon...">{{ $item->observacao }}</textarea>
+                        </div>
 
                     </div>
                 @endforeach
-
             </div>
 
             <button type="button" id="adicionar" class="bg-blue-500 text-white px-5 py-3 rounded-lg">
@@ -181,9 +199,20 @@
         adicionar.addEventListener('click', function () {
             const primeiroItem = document.querySelector('.item');
             const novoItem = primeiroItem.cloneNode(true);
+            const itemId = novoItem.querySelector('input[name="item_id[]"]');
 
             novoItem.querySelector('.produto').selectedIndex = 0;
             novoItem.querySelector('.quantidade').value = 1;
+
+            if (itemId) {
+                itemId.value = '';
+            }
+
+            const observacao = novoItem.querySelector('.item-observacao');
+
+            if (observacao) {
+                observacao.value = '';
+            }
 
             itens.appendChild(novoItem);
 
