@@ -123,6 +123,29 @@ class EvolutionApiService
         );
     }
 
+    public function configurarWebhook(
+        string $nomeInstancia,
+        string $webhookUrl
+    ): array {
+        $response = $this->request()
+            ->post("/webhook/set/{$nomeInstancia}", [
+                'webhook' => [
+                    'enabled' => true,
+                    'url' => $webhookUrl,
+                    'webhookByEvents' => false,
+                    'webhookBase64' => false,
+                    'events' => [
+                        'MESSAGES_UPSERT',
+                    ],
+                ],
+            ]);
+
+        return $this->processarResposta(
+            $response,
+            'Não foi possível configurar o webhook da instância.'
+        );
+    }
+
     private function request(): PendingRequest
     {
         return Http::baseUrl($this->url)

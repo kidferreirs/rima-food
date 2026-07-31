@@ -4,15 +4,18 @@ namespace App\Services;
 
 use App\Models\ConversaWhatsapp;
 use App\Models\Restaurante;
+use App\Services\AI\Context\AIContextBuilder;
 use App\Services\AI\Conversation\ConversationContext;
 use App\Services\AI\Conversation\ConversationEngine;
 use Illuminate\Support\Str;
+
 
 class RimaEngine
 {
     public function __construct(
         private readonly ConversationEngine $conversationEngine,
         private readonly PedidoAutomaticoService $pedidoService,
+        private readonly AIContextBuilder $aiContextBuilder,
     ) {
     }
 
@@ -244,6 +247,20 @@ class RimaEngine
             $conversa->restaurante_id
         );
 
+        $aiContext = $this->aiContextBuilder->build(
+            $restaurante,
+            $conversa
+        );
+
+        logger()->info('AI Context criado.', [
+            'restaurante_id' => $aiContext->restaurante['id'] ?? null,
+            'cliente' => $aiContext->cliente['nome'] ?? null,
+            'telefone' => $aiContext->cliente['telefone'] ?? null,
+            'categorias' => count($aiContext->categorias),
+            'produtos' => count($aiContext->produtos),
+            'historico' => count($aiContext->historico),
+        ]);
+
         $contexto = ConversationContext::fromArray(
             $conversa->contexto_ia
         );
@@ -316,16 +333,16 @@ class RimaEngine
 
         $tipoEntrega = match ($conversa->tipo_entrega) {
             'entrega' =>
-                "🚚 {$conversa->endereco_entrega}",
+            "🚚 {$conversa->endereco_entrega}",
 
             'retirada' =>
-                '🛍️ Retirada no restaurante',
+            '🛍️ Retirada no restaurante',
 
             'balcao' =>
-                '🏪 Consumo no balcão',
+            '🏪 Consumo no balcão',
 
             default =>
-                '📦 Recebimento não informado',
+            '📦 Recebimento não informado',
         };
 
         $pagamento = match ($conversa->forma_pagamento) {

@@ -61,6 +61,27 @@ class WhatsappConfiguracaoController extends BaseRestaurantController
             $respostaConexao = $this->evolution
                 ->conectar($nomeInstancia);
 
+            $webhookUrl = config(
+                'services.n8n.webhook_whatsapp_ia'
+            );
+
+            if (empty($webhookUrl)) {
+                throw new \RuntimeException(
+                    'N8N_WEBHOOK_WHATSAPP_IA não configurada.'
+                );
+            }
+
+            $this->evolution->configurarWebhook(
+                $nomeInstancia,
+                $webhookUrl
+            );
+
+            $qrCode = $this->extrairQrCode(
+                $respostaConexao
+            ) ?: $this->extrairQrCode(
+                        $respostaCriacao
+                    );
+
             $qrCode = $this->extrairQrCode(
                 $respostaConexao
             ) ?: $this->extrairQrCode(
