@@ -24,9 +24,6 @@ class Produto extends Model
     protected $casts = [
         'ativo' => 'boolean',
         'preco' => 'decimal:2',
-        'ingredientes' => 'array',
-        'restricoes' => 'array',
-        'tags' => 'array',
     ];
 
     public function categoria()
