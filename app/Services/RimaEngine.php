@@ -8,6 +8,7 @@ use App\Services\AI\Context\AIContext;
 use App\Services\AI\Context\AIContextBuilder;
 use App\Services\AI\Conversation\ConversationContext;
 use App\Services\AI\Conversation\ConversationEngine;
+use App\Services\AI\Conversation\Order;
 use Illuminate\Support\Str;
 
 
@@ -307,7 +308,23 @@ class RimaEngine
         */
 
         if ($this->querUltimoPedido($texto)) {
-            return $this->mostrarUltimoPedido($aiContext);
+            return $this->mostrarUltimoPedido(
+                $aiContext,
+                $contexto,
+                $conversa
+            );
+        }
+
+        if (
+            $contexto->estado
+            === ConversationContext::ESTADO_AGUARDANDO_REPETIR_PEDIDO
+            && $this->ehConfirmacao($texto)
+        ) {
+            return $this->restaurarUltimoPedido(
+                $aiContext,
+                $contexto,
+                $conversa
+            );
         }
 
         $resultado = $this->conversationEngine->processar(
@@ -497,18 +514,36 @@ class RimaEngine
     }
 
     private function mostrarUltimoPedido(
-        AIContext $contexto
+        AIContext $aiContext,
+        ConversationContext $contexto,
+        ConversaWhatsapp $conversa
     ): string {
-        $ultimoPedido = $contexto->ultimoPedido();
+        $ultimoPedido = $aiContext->ultimoPedido();
 
         if (
             $ultimoPedido === null
             || empty($ultimoPedido['itens'])
         ) {
+            $contexto->estado =
+                ConversationContext::ESTADO_OFERECENDO_CARDAPIO;
+
+            $conversa->contexto_ia = $contexto->toArray();
+            $conversa->estado = $contexto->estado;
+            $conversa->save();
+
             return
                 "Não encontrei um pedido anterior para repetir.\n\n"
                 . "Você prefere ver o nosso cardápio?";
         }
+
+        $contexto->intent = 'repetir_ultimo_pedido';
+
+        $contexto->estado =
+            ConversationContext::ESTADO_AGUARDANDO_REPETIR_PEDIDO;
+
+        $conversa->contexto_ia = $contexto->toArray();
+        $conversa->estado = $contexto->estado;
+        $conversa->save();
 
         $mensagem = "Claro! Seu último pedido foi:\n\n";
 
@@ -547,5 +582,76 @@ class RimaEngine
             . "Que bom falar com você novamente.\n\n"
             . "Você gostaria de repetir seu último pedido "
             . "ou prefere ver o nosso cardápio?";
+    }
+
+    private function restaurarUltimoPedido(
+        AIContext $aiContext,
+        ConversationContext $contexto,
+        ConversaWhatsapp $conversa
+    ): string {
+        $ultimoPedido = $aiContext->ultimoPedido();
+
+        if (
+            $ultimoPedido === null
+            || empty($ultimoPedido['itens'])
+        ) {
+            $contexto->estado =
+                ConversationContext::ESTADO_OFERECENDO_CARDAPIO;
+
+            $conversa->contexto_ia = $contexto->toArray();
+            $conversa->estado = $contexto->estado;
+            $conversa->save();
+
+            return
+                "Não encontrei um pedido anterior para repetir.\n\n"
+                . "Você prefere ver o nosso cardápio?";
+        }
+
+        $contexto->pedido = Order::fromArray([
+            'itens' => $ultimoPedido['itens'],
+        ]);
+
+        $contexto->itens = $contexto->pedido->itens();
+        $contexto->produto = null;
+        $contexto->faltando = [];
+        $contexto->intent = 'pedido_restaurado';
+        $contexto->pedidoFinalizado = false;
+
+        /*
+         * O pedido já está montado. O próximo passo é escolher
+         * a forma de recebimento.
+         */
+        $contexto->estado = 'tipo_entrega';
+
+        $conversa->contexto_ia = $contexto->toArray();
+        $conversa->estado = 'tipo_entrega';
+        $conversa->carrinho = collect($contexto->pedido->itens())
+            ->map(function (array $item): string {
+                $quantidade = (int) ($item['quantidade'] ?? 1);
+                $nome = (string) ($item['nome'] ?? 'Produto');
+
+                return "{$quantidade}x {$nome}";
+            })
+            ->values()
+            ->all();
+
+        /*
+         * Limpa dados de um eventual pedido anterior já finalizado.
+         */
+        $conversa->pedido_confirmado = false;
+        $conversa->pedido_id = null;
+        $conversa->tipo_entrega = null;
+        $conversa->endereco_entrega = null;
+        $conversa->forma_pagamento = null;
+
+        $conversa->save();
+
+        return
+            "Perfeito! 😊\n\n"
+            . "Seu último pedido foi adicionado ao carrinho.\n\n"
+            . "Como deseja receber?\n\n"
+            . "🏪 Balcão\n"
+            . "🛍️ Retirada\n"
+            . "🚚 Entrega";
     }
 }

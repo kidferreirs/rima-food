@@ -128,14 +128,29 @@ class AIContextBuilder
         Restaurante $restaurante,
         string $telefone
     ): ?Cliente {
+        $telefone = $this->normalizarTelefone($telefone);
+
+        /*
+         * Usa os últimos 11 dígitos para ignorar diferenças como:
+         * 5548999999999 e 48999999999.
+         */
+        $telefoneLocal = substr($telefone, -11);
+
         return Cliente::query()
             ->where('restaurante_id', $restaurante->id)
-            ->where(function ($query) use ($telefone) {
+            ->where(function ($query) use ($telefone, $telefoneLocal) {
+                $telefoneBanco =
+                    "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE("
+                    . "telefone, ' ', ''), '-', ''), '(', ''), ')', ''), '+', '')";
+
                 $query
-                    ->where('telefone', $telefone)
-                    ->orWhereRaw(
-                        "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(telefone, ' ', ''), '-', ''), '(', ''), ')', ''), '+', '') = ?",
+                    ->whereRaw(
+                        "{$telefoneBanco} = ?",
                         [$telefone]
+                    )
+                    ->orWhereRaw(
+                        "RIGHT({$telefoneBanco}, 11) = ?",
+                        [$telefoneLocal]
                     );
             })
             ->first();
@@ -147,6 +162,30 @@ class AIContextBuilder
         if ($pedido === null) {
             return null;
         }
+
+        $itens = $pedido->itens
+            ->map(function (ItemPedido $item): array {
+                return [
+                    'produto_id' => (int) $item->produto_id,
+
+                    'nome' => $item->produto?->nome
+                        ?? 'Produto não disponível',
+
+                    'quantidade' => (int) $item->quantidade,
+
+                    'preco_unitario' => (float) $item->preco_unitario,
+
+                    'observacao' => $item->observacao,
+
+                    'opcoes_selecionadas' => [],
+
+                    'adicionais' => [],
+
+                    'ingredientes_removidos' => [],
+                ];
+            })
+            ->values()
+            ->all();
 
         return [
             'id' => $pedido->id,
@@ -160,19 +199,7 @@ class AIContextBuilder
             'total' => (float) $pedido->total,
             'data' => $pedido->created_at?->toIso8601String(),
 
-            'itens' => $pedido->itens
-                ->map(function (ItemPedido $item): array {
-                    return [
-                        'produto_id' => $item->produto_id,
-                        'nome' => $item->produto?->nome
-                            ?? 'Produto não disponível',
-                        'quantidade' => (int) $item->quantidade,
-                        'preco_unitario' => (float) $item->preco_unitario,
-                        'observacao' => $item->observacao,
-                    ];
-                })
-                ->values()
-                ->all(),
+            'itens' => $itens,
         ];
     }
 
