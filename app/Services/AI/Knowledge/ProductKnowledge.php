@@ -25,16 +25,22 @@ class ProductKnowledge
             ->where('categorias.ativo', true)
             ->where('produtos.ativo', true)
             ->where(function ($query) use ($termo) {
-                $query->where('produtos.nome', 'like', "%{$termo}%")
+                $query
+                    ->where('produtos.nome', 'like', "%{$termo}%")
                     ->orWhere('produtos.descricao', 'like', "%{$termo}%")
                     ->orWhere('produtos.palavras_chave', 'like', "%{$termo}%")
-                    ->orWhere('produtos.sinonimos', 'like', "%{$termo}%");
+                    ->orWhere('produtos.sinonimos', 'like', "%{$termo}%")
+                    ->orWhere('produtos.tags', 'like', "%{$termo}%")
+                    ->orWhere('produtos.ingredientes', 'like', "%{$termo}%")
+                    ->orWhere('categorias.nome', 'like', "%{$termo}%")
+                    ->orWhere('categorias.sinonimos', 'like', "%{$termo}%")
+                    ->orWhere('categorias.palavras_chave', 'like', "%{$termo}%");
             })
             ->with('categoria:id,nome')
             ->orderBy('produtos.nome')
             ->limit(10)
             ->get()
-            ->map(fn ($produto) => [
+            ->map(fn($produto) => [
                 'id' => $produto->id,
                 'nome' => $produto->nome,
                 'descricao' => $produto->descricao,
@@ -64,7 +70,7 @@ class ProductKnowledge
             ->with('categoria:id,nome')
             ->orderBy('produtos.nome')
             ->get()
-            ->map(fn ($produto) => [
+            ->map(fn($produto) => [
                 'id' => $produto->id,
                 'nome' => $produto->nome,
                 'descricao' => $produto->descricao,
@@ -95,7 +101,7 @@ class ProductKnowledge
             ->with('categoria:id,nome')
             ->orderBy('produtos.nome')
             ->get()
-            ->map(fn ($produto) => [
+            ->map(fn($produto) => [
                 'id' => $produto->id,
                 'nome' => $produto->nome,
                 'descricao' => $produto->descricao,

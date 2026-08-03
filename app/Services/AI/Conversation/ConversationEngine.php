@@ -66,6 +66,88 @@ class ConversationEngine
 
         /*
         |--------------------------------------------------------------------------
+        | Confirmação para adicionar produto encontrado
+        |--------------------------------------------------------------------------
+        */
+
+        if ($contexto->estado === ConversationContext::ESTADO_AGUARDANDO_ADICIONAR_PRODUTO)
+        {
+            if ($this->ehConfirmacao($texto)) {
+                $produto = $contexto->produto;
+
+                if ($produto === null) {
+                    $contexto->estado =
+                        ConversationContext::ESTADO_ATENDIMENTO;
+
+                    return $this->resposta(
+                        'Não consegui localizar o produto. Qual item você deseja?',
+                        $contexto,
+                        'produto_nao_encontrado'
+                    );
+                }
+
+                $this->adicionarItem(
+                    $contexto,
+                    $produto,
+                    1
+                );
+
+                $contexto->intent = 'adicionar_produto';
+                $contexto->estado =
+                    ConversationContext::ESTADO_MONTANDO_PEDIDO;
+
+                /*
+                 * Verifica opções obrigatórias do produto.
+                 */
+                $contexto->faltando = $this->productOptionMatcher
+                    ->gruposObrigatorios(
+                        (int) $produto['id']
+                    );
+
+                $grupoObrigatorio =
+                    $contexto->faltando[0] ?? null;
+
+                if ($grupoObrigatorio !== null) {
+                    return $this->resposta(
+                        $this->productOptionMatcher
+                            ->montarPerguntaGrupo($grupoObrigatorio),
+                        $contexto,
+                        ConversationAction::PERGUNTAR_OPCAO_OBRIGATORIA
+                    );
+                }
+
+                return $this->resposta(
+                    "{$produto['nome']} foi adicionado ao seu pedido.\n\n"
+                    . "Deseja mais alguma coisa ou prefere finalizar?",
+                    $contexto,
+                    'produto_adicionado',
+                    [(int) $produto['id']],
+                    [$produto]
+                );
+            }
+
+            if ($this->ehNegacao($texto)) {
+                $contexto->produto = null;
+                $contexto->intent = 'recusar_produto';
+                $contexto->estado =
+                    ConversationContext::ESTADO_ATENDIMENTO;
+
+                return $this->resposta(
+                    'Sem problema. O que mais você gostaria de ver?',
+                    $contexto,
+                    'produto_recusado'
+                );
+            }
+
+            return $this->resposta(
+                'Deseja adicionar esse produto ao pedido? Responda sim ou não.',
+                $contexto,
+                'aguardando_adicao_produto'
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | Confirmação do pedido
         |--------------------------------------------------------------------------
         */
@@ -388,20 +470,27 @@ class ConversationEngine
         | Interpretação contextual
         |--------------------------------------------------------------------------
         */
+        $interpretacao = $this->interpreter->interpretar($mensagem, $contexto);
 
-        $interpretacao = $this->interpreter->interpretar(
-            $mensagem,
-            $contexto
-        );
+        /*
+        |--------------------------------------------------------------------------
+        | Consulta ao cardápio
+        |--------------------------------------------------------------------------
+        */
+        if ($interpretacao['intent'] === ConversationInterpreter::CONSULTAR_PRODUTO) {
+            return $this->responderConsultaCardapio(
+                $restaurante,
+                $contexto,
+                $interpretacao['termo_produto']
+            );
+        }
 
         /*
         |--------------------------------------------------------------------------
         | Opções do último produto
         |--------------------------------------------------------------------------
         */
-
         if ($contexto->produto !== null) {
-
             $opcoes = $this->productOptionMatcher
                 ->encontrarOpcoes(
                     $contexto->produto['id'],
@@ -409,17 +498,13 @@ class ConversationEngine
                 );
 
             if (!empty($opcoes)) {
-
                 $contexto->pedido
                     ->adicionarOpcoesUltimoProduto($opcoes);
-
                 $contexto->itens =
                     $contexto->pedido->itens();
-
                 $nomes = collect($opcoes)
                     ->pluck('nome')
                     ->implode(', ');
-
                 return $this->resposta(
                     "{$nomes} adicionados ao pedido. Deseja mais alguma coisa?",
                     $contexto,
@@ -428,10 +513,7 @@ class ConversationEngine
             }
         }
 
-        if (
-            $interpretacao['intent']
-            === ConversationInterpreter::REPETIR_PRODUTO
-        ) {
+        if ($interpretacao['intent'] === ConversationInterpreter::REPETIR_PRODUTO) {
             if ($contexto->produto === null) {
                 return $this->resposta(
                     'Qual produto você gostaria de repetir?',
@@ -439,15 +521,12 @@ class ConversationEngine
                     ConversationAction::PRODUTO_NAO_ENCONTRADO
                 );
             }
-
             $quantidade = $interpretacao['quantidade'];
-
             $this->adicionarItem(
                 $contexto,
                 $contexto->produto,
                 $quantidade
             );
-
             return $this->resposta(
                 $quantidade === 1
                 ? "Adicionei mais um {$contexto->produto['nome']}. Deseja mais alguma coisa?"
@@ -459,12 +538,8 @@ class ConversationEngine
             );
         }
 
-        if (
-            $interpretacao['intent']
-            === ConversationInterpreter::ADICIONAR_OBSERVACAO
-        ) {
+        if ($interpretacao['intent'] === ConversationInterpreter::ADICIONAR_OBSERVACAO) {
             $observacao = $interpretacao['observacao'];
-
             $this->adicionarObservacaoUltimoItem(
                 $contexto,
                 $observacao
@@ -477,12 +552,8 @@ class ConversationEngine
             );
         }
 
-        if (
-            $interpretacao['intent']
-            === ConversationInterpreter::REMOVER_ULTIMO_ITEM
-        ) {
+        if ($interpretacao['intent'] === ConversationInterpreter::REMOVER_ULTIMO_ITEM) {
             $itemRemovido = $this->removerUltimoItem($contexto);
-
             if ($itemRemovido === null) {
                 return $this->resposta(
                     'Seu pedido ainda está vazio.',
@@ -498,10 +569,7 @@ class ConversationEngine
             );
         }
 
-        if (
-            $interpretacao['intent']
-            === ConversationInterpreter::ADICIONAR_PRODUTO_QUANTIDADE
-        ) {
+        if ($interpretacao['intent'] === ConversationInterpreter::ADICIONAR_PRODUTO_QUANTIDADE) {
             $produtos = $this->knowledge
                 ->produtos()
                 ->buscar(
@@ -541,7 +609,6 @@ class ConversationEngine
 
             $produto = $produtos[0];
             $quantidade = $interpretacao['quantidade'];
-
             $contexto->produto = $produto;
             $contexto->intent = 'adicionar_produto';
             $contexto->estado =
@@ -671,9 +738,110 @@ class ConversationEngine
         );
     }
 
-    /**
-     * Adiciona um produto à memória do pedido.
-     */
+    private function responderConsultaCardapio(
+        Restaurante $restaurante,
+        ConversationContext $contexto,
+        string $termo
+    ): array {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Procura produto
+        |--------------------------------------------------------------------------
+        */
+        $produtos = $this->knowledge
+            ->produtos()
+            ->buscar($restaurante, $termo);
+
+        if (!empty($produtos)) {
+            if (count($produtos) === 1) {
+                $produto = $produtos[0];
+
+                $contexto->produto = $produto;
+                $contexto->intent = 'confirmar_adicao_produto';
+                $contexto->estado =
+                    ConversationContext::ESTADO_AGUARDANDO_ADICIONAR_PRODUTO;
+
+                return $this->resposta(
+                    "*Encontrei, temos:*\n\n"
+                    . "{$produto['nome']}\n"
+                    . $this->formatarPreco($produto['preco'])
+                    . "\n\nDeseja adicionar ao pedido?",
+                    $contexto,
+                    'produto_encontrado',
+                    [$produto['id']],
+                    [$produto]
+                );
+            }
+
+            $lista = collect($produtos)
+                ->take(8)
+                ->map(
+                    fn(array $produto) =>
+                    "{$produto['nome']} — "
+                    . $this->formatarPreco($produto['preco'])
+                )
+                ->implode("\n");
+
+            return $this->resposta(
+                "*Encontrei, temos:*\n\n{$lista}",
+                $contexto,
+                ConversationAction::MULTIPLOS_PRODUTOS,
+                array_column($produtos, 'id'),
+                $produtos
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Procura categoria
+        |--------------------------------------------------------------------------
+        */
+
+        $categoria = $this->knowledge
+            ->categorias()
+            ->buscarPorTermo(
+                $restaurante,
+                $termo
+            );
+
+        if ($categoria !== null) {
+
+            $produtosCategoria = $this->knowledge
+                ->produtos()
+                ->porCategoria(
+                    $restaurante,
+                    (int) $categoria['id']
+                );
+
+            if (!empty($produtosCategoria)) {
+
+                $lista = collect($produtosCategoria)
+                    ->map(
+                        fn(array $produto) =>
+                        "{$produto['nome']} — "
+                        . $this->formatarPreco($produto['preco'])
+                    )
+                    ->implode("\n");
+
+                return $this->resposta(
+                    "*Encontrei, temos:*\n\n{$lista}",
+                    $contexto,
+                    ConversationAction::CATEGORIAS_ENCONTRADAS,
+                    array_column($produtosCategoria, 'id'),
+                    $produtosCategoria
+                );
+            }
+        }
+
+        return $this->resposta(
+            'Não encontrei esse item no cardápio.',
+            $contexto,
+            ConversationAction::PRODUTO_NAO_ENCONTRADO
+        );
+    }
+
+    /*** Adiciona um produto à memória do pedido.*/
     private function adicionarItem(
         ConversationContext $contexto,
         array $produto,

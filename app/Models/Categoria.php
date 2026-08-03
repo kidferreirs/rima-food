@@ -9,6 +9,8 @@ class Categoria extends Model
     protected $fillable = [
         'restaurante_id',
         'nome',
+        'sinonimos',
+        'palavras_chave',
         'ativo',
     ];
 

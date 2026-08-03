@@ -9,25 +9,17 @@ class ConversationContext
     public const ESTADO_ATENDIMENTO = 'atendimento';
     public const ESTADO_ESCOLHENDO_PRODUTO = 'escolhendo_produto';
     public const ESTADO_MONTANDO_PEDIDO = 'montando_pedido';
+    public const ESTADO_AGUARDANDO_ADICIONAR_PRODUTO = 'aguardando_adicionar_produto';
     public const ESTADO_AGUARDANDO_CONFIRMACAO = 'aguardando_confirmacao';
-    public const ESTADO_AGUARDANDO_REPETIR_PEDIDO =
-        'aguardando_repetir_pedido';
+    public const ESTADO_AGUARDANDO_REPETIR_PEDIDO = 'aguardando_repetir_pedido';
     public const ESTADO_FINALIZADO = 'finalizado';
-
     public string $intent = 'unknown';
-
     public string $estado = self::ESTADO_INICIO;
-
     public ?array $produto = null;
-
     public array $itens = [];
-
     public Order $pedido;
-
     public array $faltando = [];
-
     public bool $pedidoFinalizado = false;
-
     public function __construct()
     {
         $this->pedido = new Order();

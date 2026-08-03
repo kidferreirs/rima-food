@@ -30,7 +30,23 @@ class CategoriaController extends BaseRestaurantController
         $restaurante = $this->restaurante();
 
         $dados = $request->validate([
-            'nome' => 'required|string|max:255',
+            'nome' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'sinonimos' => [
+                'nullable',
+                'string',
+                'max:2000',
+            ],
+
+            'palavras_chave' => [
+                'nullable',
+                'string',
+                'max:2000',
+            ],
         ]);
 
         $dados['restaurante_id'] = $restaurante->id;
@@ -42,7 +58,7 @@ class CategoriaController extends BaseRestaurantController
             ->with('success', 'Categoria cadastrada com sucesso!');
     }
 
-    public function edit(Categoria $categoria)
+    public function edit(string $slug, Categoria $categoria)
     {
         $restaurante = $this->restaurante();
 
@@ -51,14 +67,29 @@ class CategoriaController extends BaseRestaurantController
         return view('categorias.edit', compact('categoria', 'restaurante'));
     }
 
-    public function update(Request $request, Categoria $categoria)
+    public function update(Request $request, string $slug, Categoria $categoria)
     {
         $restaurante = $this->restaurante();
-
         $this->autorizarCategoria($categoria);
 
         $dados = $request->validate([
-            'nome' => 'required|string|max:255',
+            'nome' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'sinonimos' => [
+                'nullable',
+                'string',
+                'max:2000',
+            ],
+
+            'palavras_chave' => [
+                'nullable',
+                'string',
+                'max:2000',
+            ],
         ]);
 
         $categoria->update($dados);
@@ -68,14 +99,14 @@ class CategoriaController extends BaseRestaurantController
             ->with('success', 'Categoria atualizada com sucesso!');
     }
 
-    public function alterarStatus(Categoria $categoria)
+    public function alterarStatus(string $slug, Categoria $categoria)
     {
         $restaurante = $this->restaurante();
 
         $this->autorizarCategoria($categoria);
 
         $categoria->update([
-            'ativo' => ! $categoria->ativo,
+            'ativo' => !$categoria->ativo,
         ]);
 
         return redirect()

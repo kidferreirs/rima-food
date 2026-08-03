@@ -7,15 +7,12 @@ use Illuminate\Support\Str;
 class ConversationInterpreter
 {
     public const REPETIR_PRODUTO = 'repetir_produto';
-
     public const ADICIONAR_PRODUTO_QUANTIDADE = 'adicionar_produto_quantidade';
-
     public const ADICIONAR_OBSERVACAO = 'adicionar_observacao';
-
+    public const CONSULTAR_PRODUTO = 'consultar_produto';
+    public const CONSULTAR_CATEGORIA = 'consultar_categoria';
     public const REMOVER_ULTIMO_ITEM = 'remover_ultimo_item';
-
     public const DESCONHECIDA = 'desconhecida';
-
     public function interpretar(
         string $mensagem,
         ConversationContext $contexto
@@ -90,16 +87,24 @@ class ConversationInterpreter
 
         /*
         |--------------------------------------------------------------------------
+        | Consulta de produtos e categorias
+        |--------------------------------------------------------------------------
+        */
+        $consulta = $this->extrairConsulta($texto);
+        if ($consulta !== null) {
+            return $consulta;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | Produto com quantidade
         |--------------------------------------------------------------------------
-        |
         | Exemplos:
         | duas cocas
         | quero 3 x-burgers
         | adiciona dois x-saladas
         |
         */
-
         $produtoComQuantidade = $this->extrairProdutoComQuantidade($texto);
 
         if ($produtoComQuantidade !== null) {
@@ -110,7 +115,6 @@ class ConversationInterpreter
                 'observacao' => null,
             ];
         }
-
         return [
             'intent' => self::DESCONHECIDA,
             'quantidade' => 1,
@@ -214,6 +218,28 @@ class ConversationInterpreter
         ], true);
     }
 
+    private function extrairConsulta(string $texto): ?array
+    {
+        if (
+            preg_match(
+                '/^(?:tem|possui|vende|quero|mostra|mostrar|cardapio|cardápio|quais)\s+(.+)$/u',
+                $texto,
+                $resultado
+            )
+        ) {
+            $termo = trim($resultado[1]);
+
+            return [
+                'intent' => self::CONSULTAR_PRODUTO,
+                'quantidade' => 1,
+                'termo_produto' => $this->normalizarNomeProduto($termo),
+                'observacao' => null,
+            ];
+        }
+
+        return null;
+    }
+
     private function converterQuantidade(string $quantidade): int
     {
         return match ($quantidade) {
@@ -236,24 +262,36 @@ class ConversationInterpreter
             ->replaceMatches('/\s+/', ' ')
             ->toString();
     }
-    private function normalizarNomeProduto(string $produto): string
-    {
+    private function normalizarNomeProduto(
+        string $produto
+    ): string {
         $produto = trim($produto);
 
-        $substituicoes = [
-            'burgers' => 'burger',
-            'x burgers' => 'x burger',
-            'x-burgers' => 'x-burger',
-            'cocas' => 'coca',
-            'refrigerantes' => 'refrigerante',
-        ];
+        /*
+         * Remove somente artigos genéricos.
+         * Não conhece nenhum segmento ou tipo de alimento.
+         */
+        $produto = preg_replace(
+            '/^(?:o|a|os|as|um|uma|uns|umas)\s+/u',
+            '',
+            $produto
+        ) ?? $produto;
 
-        foreach ($substituicoes as $buscar => $trocar) {
-            if (Str::endsWith($produto, $buscar)) {
-                return Str::replaceLast($buscar, $trocar, $produto);
-            }
-        }
+        /*
+         * Remove expressões genéricas no final.
+         */
+        $produto = preg_replace(
+            '/\s+(?:tem|disponivel|disponiveis)$/u',
+            '',
+            $produto
+        ) ?? $produto;
 
-        return $produto;
+        return Str::of($produto)
+            ->lower()
+            ->ascii()
+            ->trim()
+            ->replaceMatches('/[^\pL\pN\s\-]/u', ' ')
+            ->replaceMatches('/\s+/', ' ')
+            ->toString();
     }
 }
