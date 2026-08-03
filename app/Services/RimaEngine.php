@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ConversaWhatsapp;
 use App\Models\Restaurante;
+use App\Services\AI\Context\AIContext;
 use App\Services\AI\Context\AIContextBuilder;
 use App\Services\AI\Conversation\ConversationContext;
 use App\Services\AI\Conversation\ConversationEngine;
@@ -281,6 +282,34 @@ class RimaEngine
             $conversa->forma_pagamento = null;
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Saudação personalizada pelo contexto do cliente
+        |--------------------------------------------------------------------------
+        */
+
+        if ($this->ehSaudacao($texto)) {
+            $contexto->intent = 'saudacao';
+
+            $contexto->estado =
+                ConversationContext::ESTADO_OFERECENDO_CARDAPIO;
+
+            $conversa->contexto_ia = $contexto->toArray();
+            $conversa->estado = $contexto->estado;
+
+            return $this->saudacaoPersonalizada($aiContext);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Repetir ou visualizar o último pedido
+        |--------------------------------------------------------------------------
+        */
+
+        if ($this->querUltimoPedido($texto)) {
+            return $this->mostrarUltimoPedido($aiContext);
+        }
+
         $resultado = $this->conversationEngine->processar(
             $restaurante,
             $mensagem,
@@ -435,5 +464,88 @@ class RimaEngine
             'voltar',
             'cancelar',
         ]);
+    }
+
+    private function ehSaudacao(string $texto): bool
+    {
+        return in_array(
+            trim($texto),
+            [
+                'oi',
+                'ola',
+                'bom dia',
+                'boa tarde',
+                'boa noite',
+                'e ai',
+            ],
+            true
+        );
+    }
+
+    private function querUltimoPedido(string $texto): bool
+    {
+        return Str::contains($texto, [
+            'ultimo pedido',
+            'meu ultimo pedido',
+            'repetir ultimo pedido',
+            'repetir meu pedido',
+            'quero repetir',
+            'quero o mesmo',
+            'o de sempre',
+            'mesmo pedido',
+        ]);
+    }
+
+    private function mostrarUltimoPedido(
+        AIContext $contexto
+    ): string {
+        $ultimoPedido = $contexto->ultimoPedido();
+
+        if (
+            $ultimoPedido === null
+            || empty($ultimoPedido['itens'])
+        ) {
+            return
+                "Não encontrei um pedido anterior para repetir.\n\n"
+                . "Você prefere ver o nosso cardápio?";
+        }
+
+        $mensagem = "Claro! Seu último pedido foi:\n\n";
+
+        foreach ($ultimoPedido['itens'] as $item) {
+            $quantidade = (int) (
+                $item['quantidade'] ?? 1
+            );
+
+            $nome = (string) (
+                $item['nome'] ?? 'Produto'
+            );
+
+            $mensagem .= "• {$quantidade}x {$nome}\n";
+        }
+
+        $mensagem .=
+            "\nDeseja repetir exatamente esse pedido?";
+
+        return $mensagem;
+    }
+
+    private function saudacaoPersonalizada(
+        AIContext $contexto
+    ): string {
+        if (!$contexto->clienteRecorrente()) {
+            return
+                "Olá! 👋\n\n"
+                . "Seja bem-vindo à "
+                . $contexto->restauranteNome()
+                . " 😊\n\n"
+                . "Gostaria de ver nosso cardápio?";
+        }
+
+        return
+            "Olá, {$contexto->nomeCliente()}! 😊\n\n"
+            . "Que bom falar com você novamente.\n\n"
+            . "Você gostaria de repetir seu último pedido "
+            . "ou prefere ver o nosso cardápio?";
     }
 }
