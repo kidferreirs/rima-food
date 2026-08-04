@@ -36,10 +36,14 @@ return [
     ],
 
     'ai' => [
-        'provider' => env('AI_PROVIDER', 'local'),
+        'provider' => env('AI_PROVIDER', 'openai'),
         'key' => env('AI_API_KEY'),
         'model' => env('AI_MODEL'),
-        'timeout' => (int) env('AI_TIMEOUT', 20),
+        'base_url' => env(
+            'AI_BASE_URL',
+            'https://api.openai.com/v1'
+        ),
+        'timeout' => (int) env('AI_TIMEOUT', 90),
     ],
 
     'n8n' => [

@@ -113,6 +113,9 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/importar-cardapio', [CardapioImportController::class, 'index'])->name('restaurante.importacao.cardapio');
         Route::post('/importar-cardapio/preview', [CardapioImportController::class, 'preview'])->name('restaurante.importacao.preview');
+        Route::post('/importar-cardapio/estruturar', [CardapioImportController::class, 'estruturar'])->name('restaurante.importacao.estruturar');
+        Route::post('/importar-cardapio/enriquecer', [CardapioImportController::class, 'enriquecer'])->name('restaurante.importacao.enriquecer');
+        Route::post('/importar-cardapio/analisar', [CardapioImportController::class, 'analisarInteligencia'])->name('restaurante.importacao.analisar');
         Route::post('/importar-cardapio/importar', [CardapioImportController::class, 'importar'])->name('restaurante.importacao.importar');
 
         Route::get('/importar-cardapio/modelo', [CardapioImportController::class, 'modelo'])->name('restaurante.importacao.modelo');
