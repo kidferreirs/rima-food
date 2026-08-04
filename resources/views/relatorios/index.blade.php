@@ -1,191 +1,503 @@
 <x-rimafood.layout>
 
-    <div class="p-8">
-        <h1 class="text-4xl font-bold mb-2">📊 Relatórios</h1>
-        @if($restaurante)
-            <p class="text-gray-500 mb-8">Restaurante: <strong>{{ $restaurante->nome }}</strong></p>
-        @endif
+    <div class="p-4 sm:p-6 lg:p-8">
+
+        {{-- Cabeçalho --}}
+        <div class="mb-6 sm:mb-8">
+
+            <h1 class="text-3xl font-bold sm:text-4xl">
+                Relatórios
+            </h1>
+
+            <p class="mt-2 text-sm text-gray-500 sm:text-base">
+                Acompanhe o desempenho do restaurante.
+            </p>
+
+            <p class="mt-1 text-xs text-gray-400 sm:text-sm">
+                {{ $restaurante->nome }}
+            </p>
+
+        </div>
 
         @if($erroPeriodo)
-            <div class="bg-red-100 border border-red-300 text-red-800 p-4 rounded-xl mb-6">
-                ⚠️ {{ $erroPeriodo }}
+            <div
+                class="
+                    mb-6 rounded-xl border border-red-200
+                    bg-red-50 p-4 text-sm text-red-800
+                "
+            >
+                {{ $erroPeriodo }}
             </div>
         @endif
 
-        <form method="GET" class="mb-10">
-            <div class="mb-4">
-                <h3 class="font-bold text-lg"> 📅 Período </h3>
-                <p class="text-sm text-gray-500"> Selecione o intervalo desejado. </p>
+        {{-- Filtros --}}
+        <form
+            method="GET"
+            class="mb-8 rounded-2xl bg-white p-4 shadow-sm sm:p-6"
+        >
+
+            <div class="mb-5">
+
+                <h2 class="text-xl font-bold text-gray-900">
+                    Período
+                </h2>
+
+                <p class="mt-1 text-sm text-gray-500">
+                    Escolha um atalho ou informe as datas.
+                </p>
+
             </div>
 
-            <div class="flex flex-wrap gap-3 mb-6">
-                <a href="{{ route('restaurante.relatorios.index', [$restauranteAtual->slug, 'atalho' => 'hoje']) }}"
-                    class="bg-white border px-4 py-2 rounded-xl shadow-sm hover:bg-gray-100 transition">
-                    Hoje
-                </a>
+            <div class="mb-5 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
 
-                <a href="{{ route('restaurante.relatorios.index', [$restauranteAtual->slug, 'atalho' => 'ontem']) }}"
-                    class="bg-white border px-4 py-2 rounded-xl shadow-sm hover:bg-gray-100 transition">
-                    Ontem
-                </a>
+                @php
+                    $atalhos = [
+                        'hoje' => 'Hoje',
+                        'ontem' => 'Ontem',
+                        'semana' => 'Esta semana',
+                        'mes' => 'Este mês',
+                    ];
+                @endphp
 
-                <a href="{{ route('restaurante.relatorios.index', [$restauranteAtual->slug, 'atalho' => 'semana']) }}"
-                    class="bg-white border px-4 py-2 rounded-xl shadow-sm hover:bg-gray-100 transition">
-                    Esta semana
-                </a>
+                @foreach($atalhos as $valor => $label)
 
-                <a href="{{ route('restaurante.relatorios.index', [$restauranteAtual->slug, 'atalho' => 'mes']) }}"
-                    class="bg-white border px-4 py-2 rounded-xl shadow-sm hover:bg-gray-100 transition">
-                    Este mês
-                </a>
+                    <a
+                        href="{{ route(
+                            'restaurante.relatorios.index',
+                            [
+                                $restauranteAtual->slug,
+                                'atalho' => $valor
+                            ]
+                        ) }}"
+                        class="
+                            inline-flex items-center justify-center
+                            rounded-xl border px-4 py-2.5
+                            text-sm font-semibold transition
+
+                            {{ $atalho === $valor
+                                ? 'border-green-500 bg-green-50 text-green-700'
+                                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50' }}
+                        "
+                    >
+                        {{ $label }}
+                    </a>
+
+                @endforeach
+
             </div>
 
-            <div class="flex flex-wrap items-end gap-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
                 <div>
-                    <label class="block text-sm font-semibold mb-2">📅 Data inicial</label>
-                    <input type="date" name="data_inicio" value="{{ $dataInicio }}"
-                        class="w-44 h-12 border rounded-xl px-4 shadow-sm">
+
+                    <label
+                        for="data_inicio"
+                        class="mb-2 block text-sm font-semibold text-gray-700"
+                    >
+                        Data inicial
+                    </label>
+
+                    <input
+                        type="date"
+                        id="data_inicio"
+                        name="data_inicio"
+                        value="{{ $dataInicio }}"
+                        class="
+                            h-12 w-full rounded-xl
+                            border border-gray-200 px-4
+                        "
+                    >
+
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold mb-2"> 📅 Data final </label>
-                    <input type="date" name="data_fim" value="{{ $dataFim }}"
-                        class="w-44 h-12 border rounded-xl px-4 shadow-sm">
+
+                    <label
+                        for="data_fim"
+                        class="mb-2 block text-sm font-semibold text-gray-700"
+                    >
+                        Data final
+                    </label>
+
+                    <input
+                        type="date"
+                        id="data_fim"
+                        name="data_fim"
+                        value="{{ $dataFim }}"
+                        class="
+                            h-12 w-full rounded-xl
+                            border border-gray-200 px-4
+                        "
+                    >
+
                 </div>
 
-                <button type="submit"
-                    class="w-[100px] h-[44px] bg-green-500 hover:bg-green-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-sm transition">
-                    🔎
-                    <span>Filtrar</span>
+                <button
+                    type="submit"
+                    class="
+                        h-12 self-end rounded-xl bg-green-500
+                        px-5 text-sm font-semibold text-white
+                        transition hover:bg-green-600
+                    "
+                >
+                    Filtrar
                 </button>
 
-                <a href="{{ route('restaurante.relatorios.index', $restauranteAtual->slug) }}"
-                    class="w-[100px] h-[44px] bg-gray-800 hover:bg-gray-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-sm transition">
-                    🧹
-                    <span>Limpar</span>
+                <a
+                    href="{{ route(
+                        'restaurante.relatorios.index',
+                        $restauranteAtual->slug
+                    ) }}"
+                    class="
+                        inline-flex h-12 items-center justify-center
+                        self-end rounded-xl bg-gray-900
+                        px-5 text-sm font-semibold text-white
+                        transition hover:bg-gray-800
+                    "
+                >
+                    Limpar
                 </a>
 
-                @if($temFiltro)
-                    <a href="{{ route('restaurante.relatorios.exportar', array_merge([$restauranteAtual->slug], request()->query())) }}"
-                        class="h-[44px] bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 shadow-sm transition px-5">
-                        📤
-                        <span>Exportar CSV</span>
-                    </a>
-                @endif
             </div>
+
+            @if($temFiltro)
+
+                <a
+                    href="{{ route(
+                        'restaurante.relatorios.exportar',
+                        array_merge(
+                            [$restauranteAtual->slug],
+                            request()->query()
+                        )
+                    ) }}"
+                    class="
+                        mt-4 inline-flex w-full items-center
+                        justify-center rounded-xl
+                        border border-blue-200 bg-blue-50
+                        px-5 py-3 text-sm font-semibold
+                        text-blue-700 transition hover:bg-blue-100
+                        sm:w-auto
+                    "
+                >
+                    Exportar CSV
+                </a>
+
+            @endif
+
         </form>
 
         @if($temFiltro)
-            dashboard <div class="flex items-center gap-4 mb-4">
-                <h2 class="text-2xl font-bold whitespace-nowrap"> 💰 Financeiro </h2>
-                <div class="w-full border-b border-gray-300"> </div>
-            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-4">
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">💰 Faturamento Hoje</h2>
-                    <p class="text-4xl font-bold mt-2"> R$ {{ number_format($faturamentoHoje, 2, ',', '.') }}</p>
-                </div>
+            {{-- Financeiro --}}
+            <section class="mb-8">
 
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">💰 Faturamento Semanal</h2>
-                    <p class="text-4xl font-bold mt-2"> R$ {{ number_format($faturamentoSemanal, 2, ',', '.') }} </p>
-                </div>
+                <div class="mb-4">
 
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">💰 Faturamento do Mês</h2>
-                    <p class="text-4xl font-bold mt-2"> R$ {{ number_format($faturamentoMes, 2, ',', '.') }} </p>
-                </div>
+                    <h2 class="text-2xl font-bold text-gray-900">
+                        Financeiro
+                    </h2>
 
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">📅 Faturamento no Período</h2>
-                    <p class="text-4xl font-bold mt-2"> R$ {{ number_format($faturamentoPeriodo, 2, ',', '.') }} </p>
-                </div>
-            </div>
-
-            <h2 class="text-2xl font-bold mt-10 mb-4"> 📈 Operação </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mt-8">
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">📈 Ticket Médio</h2>
-                    <p class="text-3xl font-bold mt-2"> R$ {{ number_format($ticketMedio, 2, ',', '.') }} </p>
-                </div>
-
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">🏆 Campeão de Vendas</h2>
-                    <p class="text-2xl font-bold mt-3"> {{ $produtoMaisVendido?->produto?->nome ?? 'Nenhum' }} </p>
-                    @if($produtoMaisVendido)
-                        <p class="text-sm text-gray-500 mt-2"> {{ $produtoMaisVendido->total_vendido }} unidades </p>
-                    @endif
-                </div>
-
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">👥 Clientes Cadastrados</h2>
-                    <p class="text-3xl font-bold mt-2"> {{ $novosClientes }} </p>
-                </div>
-
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">📦 Pedidos Finalizados</h2>
-                    <p class="text-3xl font-bold mt-2"> {{ $pedidosFinalizados }} </p>
-                </div>
-
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">❌ Pedidos Cancelados</h2>
-                    <p class="text-3xl font-bold mt-2"> {{ $pedidosCancelados }} </p>
-                </div>
-
-            </div>
-
-            <h2 class="text-2xl font-bold mt-10 mb-4">💳 Pagamentos</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mt-8">
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">💵 Dinheiro</h2>
-                    <p class="text-3xl font-bold mt-2">
-                        R$ {{ number_format($dinheiroPeriodo, 2, ',', '.') }}
+                    <p class="mt-1 text-sm text-gray-500">
+                        Valores dos pedidos finalizados.
                     </p>
+
                 </div>
 
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">💳 Crédito</h2>
-                    <p class="text-3xl font-bold mt-2">
-                        R$ {{ number_format($creditoPeriodo, 2, ',', '.') }}
-                    </p>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+                    <div class="rounded-2xl bg-white p-5 shadow-sm">
+
+                        <p class="text-sm text-gray-500">
+                            Hoje
+                        </p>
+
+                        <p class="mt-2 text-3xl font-bold text-gray-900">
+                            R$ {{ number_format(
+                                $faturamentoHoje,
+                                2,
+                                ',',
+                                '.'
+                            ) }}
+                        </p>
+
+                    </div>
+
+                    <div class="rounded-2xl bg-white p-5 shadow-sm">
+
+                        <p class="text-sm text-gray-500">
+                            Esta semana
+                        </p>
+
+                        <p class="mt-2 text-3xl font-bold text-gray-900">
+                            R$ {{ number_format(
+                                $faturamentoSemanal,
+                                2,
+                                ',',
+                                '.'
+                            ) }}
+                        </p>
+
+                    </div>
+
+                    <div class="rounded-2xl bg-white p-5 shadow-sm">
+
+                        <p class="text-sm text-gray-500">
+                            Este mês
+                        </p>
+
+                        <p class="mt-2 text-3xl font-bold text-gray-900">
+                            R$ {{ number_format(
+                                $faturamentoMes,
+                                2,
+                                ',',
+                                '.'
+                            ) }}
+                        </p>
+
+                    </div>
+
+                    <div
+                        class="
+                            rounded-2xl border border-green-200
+                            bg-green-50 p-5 shadow-sm
+                        "
+                    >
+
+                        <p class="text-sm text-green-700">
+                            Período selecionado
+                        </p>
+
+                        <p class="mt-2 text-3xl font-bold text-green-800">
+                            R$ {{ number_format(
+                                $faturamentoPeriodo,
+                                2,
+                                ',',
+                                '.'
+                            ) }}
+                        </p>
+
+                    </div>
+
                 </div>
 
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">💳 Débito</h2>
-                    <p class="text-3xl font-bold mt-2">
-                        R$ {{ number_format($debitoPeriodo, 2, ',', '.') }}
+            </section>
+
+            {{-- Operação --}}
+            <section class="mb-8">
+
+                <div class="mb-4">
+
+                    <h2 class="text-2xl font-bold text-gray-900">
+                        Operação
+                    </h2>
+
+                    <p class="mt-1 text-sm text-gray-500">
+                        Indicadores do período selecionado.
                     </p>
+
                 </div>
 
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">🏦 Pix</h2>
-                    <p class="text-3xl font-bold mt-2">
-                        R$ {{ number_format($pixPeriodo, 2, ',', '.') }}
-                    </p>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+
+                    <div class="rounded-2xl bg-white p-5 shadow-sm">
+
+                        <p class="text-sm text-gray-500">
+                            Ticket médio
+                        </p>
+
+                        <p class="mt-2 text-2xl font-bold text-gray-900">
+                            R$ {{ number_format(
+                                $ticketMedio,
+                                2,
+                                ',',
+                                '.'
+                            ) }}
+                        </p>
+
+                    </div>
+
+                    <div class="rounded-2xl bg-white p-5 shadow-sm">
+
+                        <p class="text-sm text-gray-500">
+                            Produto campeão
+                        </p>
+
+                        <p class="mt-2 text-xl font-bold text-gray-900">
+                            {{ $produtoMaisVendido?->produto?->nome
+                                ?? 'Nenhum' }}
+                        </p>
+
+                        @if($produtoMaisVendido)
+                            <p class="mt-1 text-sm text-gray-500">
+                                {{ $produtoMaisVendido->total_vendido }}
+                                unidades
+                            </p>
+                        @endif
+
+                    </div>
+
+                    <div class="rounded-2xl bg-white p-5 shadow-sm">
+
+                        <p class="text-sm text-gray-500">
+                            Novos clientes
+                        </p>
+
+                        <p class="mt-2 text-3xl font-bold text-gray-900">
+                            {{ $novosClientes }}
+                        </p>
+
+                    </div>
+
+                    <div class="rounded-2xl bg-white p-5 shadow-sm">
+
+                        <p class="text-sm text-gray-500">
+                            Finalizados
+                        </p>
+
+                        <p class="mt-2 text-3xl font-bold text-green-700">
+                            {{ $pedidosFinalizados }}
+                        </p>
+
+                    </div>
+
+                    <div class="rounded-2xl bg-white p-5 shadow-sm">
+
+                        <p class="text-sm text-gray-500">
+                            Cancelados
+                        </p>
+
+                        <p class="mt-2 text-3xl font-bold text-red-700">
+                            {{ $pedidosCancelados }}
+                        </p>
+
+                    </div>
+
                 </div>
 
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">💳 Total Cartões</h2>
-                    <p class="text-3xl font-bold mt-2">
-                        R$ {{ number_format($cartaoPeriodo, 2, ',', '.') }}
+            </section>
+
+            {{-- Pagamentos --}}
+            <section>
+
+                <div class="mb-4">
+
+                    <h2 class="text-2xl font-bold text-gray-900">
+                        Pagamentos
+                    </h2>
+
+                    <p class="mt-1 text-sm text-gray-500">
+                        Distribuição do faturamento por forma de pagamento.
                     </p>
+
                 </div>
 
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h2 class="text-gray-500">🥇 Mais Utilizado</h2>
-                    <p class="text-2xl font-bold mt-3">
-                        {{ $formaMaisUsada }}
-                    </p>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+                    <div class="rounded-2xl bg-white p-5 shadow-sm">
+
+                        <p class="text-sm text-gray-500">
+                            Dinheiro
+                        </p>
+
+                        <p class="mt-2 text-2xl font-bold text-gray-900">
+                            R$ {{ number_format(
+                                $dinheiroPeriodo,
+                                2,
+                                ',',
+                                '.'
+                            ) }}
+                        </p>
+
+                    </div>
+
+                    <div class="rounded-2xl bg-white p-5 shadow-sm">
+
+                        <p class="text-sm text-gray-500">
+                            Cartão
+                        </p>
+
+                        <p class="mt-2 text-2xl font-bold text-gray-900">
+                            R$ {{ number_format(
+                                $cartaoPeriodo,
+                                2,
+                                ',',
+                                '.'
+                            ) }}
+                        </p>
+
+                        <p class="mt-2 text-xs text-gray-400">
+                            Crédito:
+                            R$ {{ number_format(
+                                $creditoPeriodo,
+                                2,
+                                ',',
+                                '.'
+                            ) }}
+                            · Débito:
+                            R$ {{ number_format(
+                                $debitoPeriodo,
+                                2,
+                                ',',
+                                '.'
+                            ) }}
+                        </p>
+
+                    </div>
+
+                    <div class="rounded-2xl bg-white p-5 shadow-sm">
+
+                        <p class="text-sm text-gray-500">
+                            Pix
+                        </p>
+
+                        <p class="mt-2 text-2xl font-bold text-gray-900">
+                            R$ {{ number_format(
+                                $pixPeriodo,
+                                2,
+                                ',',
+                                '.'
+                            ) }}
+                        </p>
+
+                    </div>
+
+                    <div
+                        class="
+                            rounded-2xl border border-blue-200
+                            bg-blue-50 p-5 shadow-sm
+                        "
+                    >
+
+                        <p class="text-sm text-blue-700">
+                            Mais utilizada
+                        </p>
+
+                        <p class="mt-2 text-2xl font-bold text-blue-800">
+                            {{ $formaMaisUsada }}
+                        </p>
+
+                    </div>
+
                 </div>
-            </div>
+
+            </section>
+
         @else
-            <div class="bg-white rounded-xl shadow p-8 text-center text-gray-500 mt-8">
-                📅 Selecione um período para visualizar os relatórios.
+
+            <div class="rounded-2xl bg-white p-8 text-center shadow-sm">
+
+                <p class="font-semibold text-gray-700">
+                    Selecione um período.
+                </p>
+
+                <p class="mt-2 text-sm text-gray-500">
+                    Use os atalhos ou informe as datas para visualizar os relatórios.
+                </p>
+
             </div>
 
         @endif
 
     </div>
+
 </x-rimafood.layout>

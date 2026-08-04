@@ -1,6 +1,6 @@
 <x-rimafood.layout>
 
-    <div class="p-8">
+    <div class="p-4 sm:p-6 lg:p-8">
 
         <div class="flex justify-between items-center mb-8">
 

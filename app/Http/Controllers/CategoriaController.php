@@ -11,7 +11,9 @@ class CategoriaController extends BaseRestaurantController
     {
         $restaurante = $this->restaurante();
 
-        $categorias = Categoria::where('restaurante_id', $restaurante->id)
+        $categorias = Categoria::query()
+            ->where('restaurante_id', $restaurante->id)
+            ->withCount('produtos')
             ->latest()
             ->get();
 

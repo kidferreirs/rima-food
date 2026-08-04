@@ -1,15 +1,13 @@
 <x-rimafood.layout>
 
-    <div class="p-8">
+    <div class="p-4 sm:p-6 lg:p-8">
 
-        <div class="flex justify-between items-center mb-2">
+        <div class="mb-2 flex items-center justify-between gap-4">
 
-            <h1 class="text-4xl font-bold">
-                🍔 Dashboard
-            </h1>
+            <h1 class="text-3xl font-bold sm:text-4xl"> 🍔 Painel </h1>
 
             <a href="{{ route('restaurante.pedidos.create', $restaurante->slug) }}"
-                class="bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-xl font-semibold shadow-sm transition">
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-xl bg-green-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-600">
                 + Novo Pedido
             </a>
 
@@ -17,7 +15,7 @@
 
         @if($restaurante)
             <p class="text-gray-500 mb-8">
-                Bom dia! Restaurante ativo: <strong>{{ $restaurante->nome }}</strong>
+                Restaurante ativo: <strong>{{ $restaurante->nome }}</strong>
             </p>
         @else
             <p class="text-gray-500 mb-8">
@@ -25,28 +23,188 @@
             </p>
         @endif
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        @if(session('success'))
+            <div class="bg-green-100 border border-green-300 text-green-800 p-4 rounded-lg mb-6">
+                ✅ {{ session('success') }}
+            </div>
+        @endif
 
-            <div class="bg-white rounded-xl shadow p-6">
-                <h2 class="text-gray-500">🛒 Total de Pedidos</h2>
-                <p class="text-4xl font-bold">{{ $totalPedidos }}</p>
+        <div class="mb-8 rounded-2xl bg-white p-4 shadow sm:p-6">
+
+            <div class="mb-5 flex items-center justify-between gap-4">
+                <h2 class="text-xl font-bold sm:text-2xl"> 🕒 Últimos Pedidos </h2>
+
+                <a href="{{ route('restaurante.pedidos.index', $restaurante->slug) }}"
+                    class="text-sm font-semibold text-green-600 hover:text-green-700">
+                    Ver todos
+                </a>
             </div>
 
-            <div class="bg-white rounded-xl shadow p-6">
-                <h2 class="text-gray-500">👥 Clientes</h2>
-                <p class="text-4xl font-bold">{{ $clientes }}</p>
+            {{-- Cards mobile --}}
+            <div class="space-y-3 md:hidden">
+
+                @forelse($ultimosPedidos as $pedido)
+
+                    @php
+                        $statusLabel = match ($pedido->status) {
+                            'novo' => 'Novo',
+                            'preparando' => 'Preparando',
+                            'pronto' => 'Pronto',
+                            'saiu_entrega' => 'Saiu para entrega',
+                            'finalizado' => 'Finalizado',
+                            'cancelado' => 'Cancelado',
+                            default => ucfirst($pedido->status),
+                        };
+
+                        $statusClass = match ($pedido->status) {
+                            'novo' => 'bg-yellow-100 text-yellow-800',
+                            'preparando' => 'bg-blue-100 text-blue-800',
+                            'pronto' => 'bg-purple-100 text-purple-800',
+                            'saiu_entrega' => 'bg-orange-100 text-orange-800',
+                            'finalizado' => 'bg-green-100 text-green-800',
+                            'cancelado' => 'bg-red-100 text-red-800',
+                            default => 'bg-gray-100 text-gray-700',
+                        };
+                    @endphp
+
+                    <button type="button" onclick="abrirModal('pedido{{ $pedido->id }}')" class=" w-full rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm
+                                    transition active:scale-[0.99]">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="min-w-0">
+
+                                <p class="text-lg font-bold text-blue-600">
+                                    Pedido #{{ $pedido->numero_pedido ?? $pedido->id }}
+                                </p>
+
+                                <p class="mt-1 truncate font-semibold text-gray-900">
+                                    {{ $pedido->cliente->nome ?? 'Cliente não informado' }}
+                                </p>
+
+                                <p class="mt-1 text-sm text-gray-500">
+                                    {{ $pedido->created_at->format('d/m/Y H:i') }}
+                                </p>
+
+                                @if($pedido->token)
+                                    <p class="mt-1 text-xs text-gray-400">
+                                        Token: {{ $pedido->token }}
+                                    </p>
+                                @endif
+
+                            </div>
+
+                            <div class="flex shrink-0 flex-col items-end gap-3">
+                                <p class="font-bold text-gray-900">
+                                    R$ {{ number_format($pedido->total, 2, ',', '.') }}
+                                </p>
+                                <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $statusClass }}">
+                                    {{ $statusLabel }}
+                                </span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </div>
+                    </button>
+                @empty
+
+                    <div class="rounded-2xl bg-gray-50 p-6 text-center text-gray-500">
+                        Nenhum pedido criado ainda.
+                    </div>
+
+                @endforelse
+
             </div>
 
-            <div class="bg-white rounded-xl shadow p-6">
-                <h2 class="text-gray-500">🍔 Produtos</h2>
-                <p class="text-4xl font-bold">{{ $produtos }}</p>
-            </div>
+            {{-- Tabela desktop --}}
+            <div class="hidden overflow-x-auto md:block">
 
-            <div class="bg-white rounded-xl shadow p-6">
-                <h2 class="text-gray-500">📦 Pendentes</h2>
-                <p class="text-4xl font-bold">{{ $pedidosPendentes }}</p>
-            </div>
+                <table class="w-full">
 
+                    <thead>
+                        <tr class="border-b">
+                            <th class="p-3 text-left">Pedido</th>
+                            <th class="p-3 text-left">Cliente</th>
+                            <th class="p-3 text-left">Total</th>
+                            <th class="p-3 text-left">Status</th>
+                            <th class="p-3 text-left">Data</th>
+                            <th class="p-3 text-center">Ações</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @forelse($ultimosPedidos as $pedido)
+
+                            <tr class="border-b">
+
+                                <td class="p-3 font-bold">
+                                    <button type="button" onclick="abrirModal('pedido{{ $pedido->id }}')"
+                                        class="font-bold text-blue-600 hover:underline">
+                                        #{{ $pedido->numero_pedido ?? $pedido->id }}
+
+                                        @if($pedido->token)
+                                            <span class="block text-xs font-normal text-gray-500">
+                                                Token: {{ $pedido->token }}
+                                            </span>
+                                        @endif
+                                    </button>
+                                </td>
+
+                                <td class="p-3">
+                                    {{ $pedido->cliente->nome ?? 'Cliente não informado' }}
+                                </td>
+
+                                <td class="p-3">
+                                    R$ {{ number_format($pedido->total, 2, ',', '.') }}
+                                </td>
+
+                                <td class="p-3">
+                                    @if($pedido->status === 'novo')
+                                        Novo
+                                    @elseif($pedido->status === 'preparando')
+                                        Preparando
+                                    @elseif($pedido->status === 'pronto')
+                                        Pronto
+                                    @elseif($pedido->status === 'saiu_entrega')
+                                        Saiu para entrega
+                                    @elseif($pedido->status === 'finalizado')
+                                        Finalizado
+                                    @elseif($pedido->status === 'cancelado')
+                                        Cancelado
+                                    @endif
+                                </td>
+
+                                <td class="p-3">
+                                    {{ $pedido->created_at->format('d/m/Y H:i') }}
+                                </td>
+
+                                <td class="p-3 text-center">
+
+                                    @if($pedido->status === 'finalizado')
+                                        <a href="{{ route('restaurante.pedidos.imprimir', [$restaurante->slug, $pedido]) }}"
+                                            target="_blank"
+                                            class="inline-block text-sm font-semibold text-blue-600 hover:underline">
+                                            🖨️
+                                        </a>
+                                    @endif
+
+                                </td>
+
+                            </tr>
+
+                        @empty
+
+                            <tr>
+                                <td colspan="6" class="p-6 text-center text-gray-500">
+                                    Nenhum pedido criado ainda.
+                                </td>
+                            </tr>
+
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         {{-- Financeiro Hoje --}}
@@ -129,104 +287,27 @@
 
         </div>
 
-        @if(session('success'))
-            <div class="bg-green-100 border border-green-300 text-green-800 p-4 rounded-lg mb-6">
-                ✅ {{ session('success') }}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-gray-500">🛒 Total de Pedidos</h2>
+                <p class="text-4xl font-bold">{{ $totalPedidos }}</p>
             </div>
-        @endif
 
-        <div class="bg-white rounded-xl shadow p-6">
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-gray-500">👥 Clientes</h2>
+                <p class="text-4xl font-bold">{{ $clientes }}</p>
+            </div>
 
-            <h2 class="text-2xl font-bold mb-4">🕒 Últimos Pedidos</h2>
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-gray-500">🍔 Produtos</h2>
+                <p class="text-4xl font-bold">{{ $produtos }}</p>
+            </div>
 
-            <table class="w-full">
-
-                <thead>
-                    <tr class="border-b">
-                        <th class="p-3 text-left">Pedido</th>
-                        <th class="p-3 text-left">Cliente</th>
-                        <th class="p-3 text-left">Total</th>
-                        <th class="p-3 text-left">Status</th>
-                        <th class="p-3 text-left">Data</th>
-                        <th class="p-3 text-left">Ações</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    @forelse($ultimosPedidos as $pedido)
-
-                        <tr class="border-b">
-
-                            <td class="p-3 font-bold">
-                                <button onclick="abrirModal('pedido{{ $pedido->id }}')"
-                                    class="text-blue-600 hover:underline font-bold">
-                                    #{{ $pedido->numero_pedido ?? $pedido->id }}
-                                    @if($pedido->token)
-                                        <div class="text-xs text-gray-500 font-normal">
-                                            Token: {{ $pedido->token }}
-                                        </div>
-                                    @endif
-                                </button>
-                            </td>
-
-                            <td class="p-3">
-                                {{ $pedido->cliente->nome ?? 'Cliente não informado' }}
-                            </td>
-
-                            <td class="p-3">
-                                R$ {{ number_format($pedido->total, 2, ',', '.') }}
-                            </td>
-
-                            <td class="p-3">
-                                @if($pedido->status === 'novo')
-                                    🟡 Novo
-                                @elseif($pedido->status === 'preparando')
-                                    🔵 Preparando
-                                @elseif($pedido->status === 'pronto')
-                                    🟣 Pronto
-                                @elseif($pedido->status === 'saiu_entrega')
-                                    🚚 Saiu para entrega
-                                @elseif($pedido->status === 'finalizado')
-                                    🟢 Finalizado
-                                @elseif($pedido->status === 'cancelado')
-                                    🔴 Cancelado
-                                @endif
-                            </td>
-
-                            <td class="p-3">
-                                {{ $pedido->created_at->format('d/m/Y H:i') }}
-                            </td>
-
-                            <td class="p-3 text-center">
-
-                                @if($pedido->status === 'finalizado')
-
-                                    <a href="{{ route('restaurante.pedidos.imprimir', [$restaurante->slug, $pedido]) }}"
-                                        target="_blank" class="text-xl hover:scale-110 inline-block transition"
-                                        title="Imprimir pedido">
-                                        🖨️
-                                    </a>
-
-                                @endif
-
-                            </td>
-
-                        </tr>
-
-                    @empty
-
-                        <tr>
-                            <td colspan="5" class="p-6 text-center text-gray-500">
-                                Nenhum pedido criado ainda.
-                            </td>
-                        </tr>
-
-                    @endforelse
-
-                </tbody>
-
-            </table>
+            <div class="bg-white rounded-xl shadow p-6">
+                <h2 class="text-gray-500">📦 Pendentes</h2>
+                <p class="text-4xl font-bold">{{ $pedidosPendentes }}</p>
+            </div>
 
         </div>
 
@@ -238,13 +319,15 @@
 
             <div class="bg-white rounded-2xl w-[600px] max-w-[95%] max-h-[90vh] overflow-y-auto p-8 shadow-2xl relative">
 
-                <button onclick="fecharModal('pedido{{ $pedido->id }}')" class="absolute top-4 right-4 text-2xl">
-                    ✖
+                <button type="button" onclick="fecharModal('pedido{{ $pedido->id }}')" class="absolute right-4 top-4 inline-flex h-10 w-10
+                items-center justify-center rounded-full bg-gray-100 text-gray-600 transition hover:bg-gray-200 hover:text-gray-900" aria-label="Fechar">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
 
-                <h2 class="text-3xl font-bold mb-6">
-                    🛒 Pedido #{{ $pedido->numero_pedido ?? $pedido->id }}
-                </h2>
+                <h2 class="text-3xl font-bold mb-6"> 🛒 Pedido #{{ $pedido->numero_pedido ?? $pedido->id }} </h2>
 
                 <div class="space-y-3">
 
@@ -368,6 +451,18 @@
                     <div class="mt-6 bg-gray-100 rounded-xl p-4">
                         <strong>📝 Observação:</strong>
                         <p>{{ $pedido->observacao }}</p>
+                    </div>
+
+                @endif
+
+
+                @if($pedido->status === 'finalizado')
+
+                    <div class="mt-6 border-t border-gray-200 pt-5">
+                        <a href="{{ route('restaurante.pedidos.imprimir', [$restaurante->slug, $pedido]) }}" target="_blank"
+                            class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-800">
+                            🖨️ Imprimir pedido
+                        </a>
                     </div>
 
                 @endif

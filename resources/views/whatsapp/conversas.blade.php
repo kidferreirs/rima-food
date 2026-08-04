@@ -1,6 +1,6 @@
 <x-rimafood.layout>
 
-    <div class="p-8">
+    <div class="p-4 sm:p-6 lg:p-8">
 
         <h1 class="text-4xl font-bold mb-2">📱 Conversas WhatsApp</h1>
         <p class="text-gray-500 mb-8"> Central de atendimento automatizado. </p>

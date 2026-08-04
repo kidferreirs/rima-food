@@ -11,11 +11,18 @@ class ClienteController extends BaseRestaurantController
     {
         $restaurante = $this->restaurante();
 
-        $clientes = Cliente::where('restaurante_id', $restaurante->id)
+        $clientes = Cliente::query()
+            ->where('restaurante_id', $restaurante->id)
+            ->withCount('pedidos')
+            ->withSum('pedidos', 'total')
+            ->withMax('pedidos', 'created_at')
             ->latest()
             ->get();
 
-        return view('clientes.index', compact('clientes', 'restaurante'));
+        return view(
+            'clientes.index',
+            compact('clientes', 'restaurante')
+        );
     }
 
     public function create()
@@ -43,7 +50,10 @@ class ClienteController extends BaseRestaurantController
         if ($telefoneExiste) {
             return back()
                 ->withInput()
-                ->with('error', 'Já existe um cliente com este telefone neste restaurante.');
+                ->with(
+                    'error',
+                    'Já existe um cliente com este telefone neste restaurante.'
+                );
         }
 
         $dados['restaurante_id'] = $restaurante->id;
@@ -61,11 +71,17 @@ class ClienteController extends BaseRestaurantController
 
         $this->autorizarCliente($cliente);
 
-        return view('clientes.edit', compact('cliente', 'restaurante'));
+        return view(
+            'clientes.edit',
+            compact('cliente', 'restaurante')
+        );
     }
 
-    public function update(Request $request, string $slug, Cliente $cliente)
-    {
+    public function update(
+        Request $request,
+        string $slug,
+        Cliente $cliente
+    ) {
         $restaurante = $this->restaurante();
 
         $this->autorizarCliente($cliente);
@@ -77,7 +93,10 @@ class ClienteController extends BaseRestaurantController
             'observacao' => 'nullable|string',
         ]);
 
-        $telefoneExiste = Cliente::where('restaurante_id', $restaurante->id)
+        $telefoneExiste = Cliente::where(
+            'restaurante_id',
+            $restaurante->id
+        )
             ->where('telefone', $dados['telefone'])
             ->where('id', '!=', $cliente->id)
             ->exists();
@@ -85,7 +104,10 @@ class ClienteController extends BaseRestaurantController
         if ($telefoneExiste) {
             return back()
                 ->withInput()
-                ->with('error', 'Já existe outro cliente com este telefone neste restaurante.');
+                ->with(
+                    'error',
+                    'Já existe outro cliente com este telefone neste restaurante.'
+                );
         }
 
         $cliente->update($dados);
@@ -95,14 +117,16 @@ class ClienteController extends BaseRestaurantController
             ->with('success', 'Cliente atualizado com sucesso!');
     }
 
-    public function alterarStatus(Cliente $cliente)
-    {
+    public function alterarStatus(
+        string $slug,
+        Cliente $cliente
+    ) {
         $restaurante = $this->restaurante();
 
         $this->autorizarCliente($cliente);
 
         $cliente->update([
-            'ativo' => ! $cliente->ativo,
+            'ativo' => !$cliente->ativo,
         ]);
 
         return redirect()

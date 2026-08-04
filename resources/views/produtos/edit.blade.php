@@ -2,19 +2,17 @@
 
     <div class="p-8 max-w-3xl">
 
-        <div class="flex justify-between items-center mb-8">
-            <div>
-                <h1 class="text-4xl font-bold">
-                    ✏️ Editar Produto
-                </h1>
+        <div class="mb-6 flex items-start justify-between gap-4">
 
-                <p class="text-gray-500 mt-2">
-                    Restaurante: <strong>{{ $restaurante->nome }}</strong>
-                </p>
+            <div class="min-w-0">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">
+                    Editar Produto
+                </h1>
+                <p class="mt-1 text-sm text-gray-500">{{ $restaurante->nome }}</p>
             </div>
 
-            <a href="{{ route('restaurante.produtos.index', $restaurante->slug) }}"
-                class="text-gray-600 hover:underline">
+            <a href="{{ route('restaurante.produtos.index', $restaurante->slug) }}" 
+               class=" whitespace-nowrap text-sm font-medium text-gray-500 hover:text-gray-800 transition">
                 ← Voltar
             </a>
         </div>
@@ -151,8 +149,8 @@
                     @foreach($tagsDisponiveis as $tag)
 
                         <label class="cursor-pointer rounded-xl border bg-white
-                                           px-4 py-3 flex items-center gap-2
-                                           hover:border-green-400 transition">
+                                               px-4 py-3 flex items-center gap-2
+                                               hover:border-green-400 transition">
 
                             <input type="checkbox" class="rounded" name="tags[]" value="{{ $tag }}"
                                 @checked($tagsSelecionadas->contains($tag))>

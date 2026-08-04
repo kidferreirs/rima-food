@@ -13,7 +13,12 @@ class ProdutoController extends BaseRestaurantController
     {
         $restaurante = $this->restaurante();
 
-        $produtos = Produto::with('categoria')
+        $produtos = Produto::query()
+            ->with('categoria')
+            ->withCount([
+                'gruposOpcoes',
+                'gruposOpcoesAtivos',
+            ])
             ->whereHas('categoria', function ($query) use ($restaurante) {
                 $query->where('restaurante_id', $restaurante->id);
             })
@@ -95,12 +100,10 @@ class ProdutoController extends BaseRestaurantController
             'descricao' => 'nullable|string',
             'preco' => 'required|numeric|min:0',
             'imagem' => 'nullable|image|max:2048',
-
             'palavras_chave' => 'nullable|string',
             'sinonimos' => 'nullable|string',
             'ingredientes' => 'nullable|string',
             'restricoes' => 'nullable|string',
-
             'tags' => 'nullable|array',
             'tags.*' => 'string|max:50',
         ]);
@@ -114,7 +117,9 @@ class ProdutoController extends BaseRestaurantController
                 Storage::disk('public')->delete($produto->imagem);
             }
 
-            $dados['imagem'] = $request->file('imagem')->store('produtos', 'public');
+            $dados['imagem'] = $request
+                ->file('imagem')
+                ->store('produtos', 'public');
         }
 
         $produto->update($dados);
