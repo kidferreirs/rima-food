@@ -91,7 +91,7 @@
             min-h-screen
             w-full
             overflow-x-hidden
-            lg:pl-64
+            lg:pl-72
         "
     >
         <div class="w-full">

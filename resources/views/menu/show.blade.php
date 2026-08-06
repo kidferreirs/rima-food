@@ -47,15 +47,12 @@
            shadow-md opacity-0 -translate-y-5 pointer-events-none transition-all duration-300">
 
         <div class="flex items-center gap-3 px-4 py-3">
-            <div class="w-11 h-11 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                @if($restaurante->logo)
+            @if($restaurante->logo)
+                <div class="w-11 h-11 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                     <img src="{{ Storage::url($restaurante->logo) }}" alt="{{ $restaurante->nome }}"
-                        class="w-full h-full object-contain">
-                @else
-                    <img src="{{ asset('images/menu/logo.png') }}" alt="{{ $restaurante->nome }}"
-                        class="w-full h-full object-contain">
-                @endif
-            </div>
+                        class="w-full h-full object-cover">
+                </div>
+            @endif
 
             <div class="min-w-0 flex-1">
                 <p class="font-extrabold text-slate-900 truncate">{{ $restaurante->nome }}</p>
@@ -78,23 +75,26 @@
         data-garcom-url="{{ route('menu.garcom.conversar', $restaurante->slug) }}"
         data-garcom-liberado="{{ $restaurante->temIA() ? '1' : '0' }}">
 
-        @if($restaurante->banner)
-            <img src="{{ Storage::url($restaurante->banner) }}" class="w-full h-52 object-cover rounded-b-[2rem]">
+        @if($restaurante->banner_url)
+            <img src="{{ $restaurante->banner_url }}" alt="Banner de {{ $restaurante->nome }}"
+                class="w-full {{ $restaurante->logo ? 'h-52' : 'h-60' }} object-cover rounded-b-[2rem]">
         @else
-            <img src="{{ asset('images/menu/cover1.png') }}" class="w-full h-52 object-cover rounded-b-[2rem]">
+            <img src="{{ asset('images/menu/cover1.png') }}" alt="Banner de {{ $restaurante->nome }}"
+                class="w-full {{ $restaurante->logo ? 'h-52' : 'h-60' }} object-cover rounded-b-[2rem]">
         @endif
 
-        <section class="px-5 -mt-10 relative z-10">
+        <section class="px-5 relative z-10 {{ $restaurante->logo ? '-mt-10' : 'pt-6' }}">
 
-            <div class="w-24 h-24 bg-white rounded-3xl shadow-xl flex items-center justify-center overflow-hidden">
-                @if($restaurante->logo)
-                    <img src="{{ Storage::url($restaurante->logo) }}" class="w-24 h-24 object-contain scale-120">
-                @else
-                    <img src="{{ asset('images/menu/logo.png') }}" class="w-24 h-24 object-contain scale-120">
-                @endif
-            </div>
+            @if($restaurante->logo)
+                <div class="w-24 h-24 bg-white rounded-3xl shadow-xl flex items-center justify-center overflow-hidden">
+                    <img src="{{ Storage::url($restaurante->logo) }}" class="w-full h-full object-contain p-1"
+                        alt="{{ $restaurante->nome }}">
+                </div>
+            @endif
 
-            <h1 class="text-3xl font-extrabold mt-4 text-slate-900"> {{ $restaurante->nome }} </h1>
+            <h1 class="text-3xl font-extrabold {{ $restaurante->logo ? 'mt-4' : 'mt-0' }} text-slate-900">
+                {{ $restaurante->nome }}
+            </h1>
 
             <p class="text-slate-500 mt-1"> Venda mais. Compartilhe em qualquer lugar.</p>
 
@@ -310,7 +310,7 @@
 
                             <button type="button"
                                 class="toggle-favorito absolute top-3 right-3 z-10 w-9 h-9 bg-white/90 rounded-full shadow
-                                                                                                    flex items-center justify-center text-xl"
+                                                                                                            flex items-center justify-center text-xl"
                                 data-produto-id="{{ $produto->id }}" aria-label="Favoritar {{ $produto->nome }}">
                                 🤍
                             </button>
@@ -367,7 +367,7 @@
                 <nav class="space-y-2 mt-5">
                     @foreach($restaurante->categorias as $categoria)
                         <button type="button" class="categoria-menu-link w-full flex items-center justify-between bg-slate-50 hover:bg-green-50
-                                                                rounded-2xl px-4 py-4 text-left transition"
+                                                                    rounded-2xl px-4 py-4 text-left transition"
                             data-categoria-alvo="categoria-{{ $categoria->id }}">
                             <span class="font-bold text-slate-800">
                                 {{ $categoria->nome }}

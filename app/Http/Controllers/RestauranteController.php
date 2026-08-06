@@ -66,11 +66,17 @@ class RestauranteController extends Controller
 
         $dados = $this->validarDados($request);
 
-        if ($request->hasFile('logo') && $restaurante->logo) {
+        $dadosEntrega = $request->validate([
+            'ate_5km' => 'nullable|numeric|min:0|max:9999.99',
+            'ate_10km' => 'nullable|numeric|min:0|max:9999.99',
+            'acima_10km' => 'nullable|numeric|min:0|max:9999.99',
+        ]);
+
+        if ($request->hasFile('logo') && $restaurante->logo && !Str::startsWith($restaurante->logo, ['/images/', 'images/'])) {
             Storage::disk('public')->delete($restaurante->logo);
         }
 
-        if ($request->hasFile('banner') && $restaurante->banner) {
+        if ($request->hasFile('banner') && $restaurante->banner && !Str::startsWith($restaurante->banner, ['/images/', 'images/'])) {
             Storage::disk('public')->delete($restaurante->banner);
         }
 
@@ -84,6 +90,17 @@ class RestauranteController extends Controller
         ]);
 
         $restaurante->update($dados);
+
+        if ($request->hasAny(['ate_5km', 'ate_10km', 'acima_10km'])) {
+            $restaurante->configuracaoEntrega()->updateOrCreate(
+                ['restaurante_id' => $restaurante->id],
+                [
+                    'ate_5km' => $dadosEntrega['ate_5km'] ?? 0,
+                    'ate_10km' => $dadosEntrega['ate_10km'] ?? 0,
+                    'acima_10km' => $dadosEntrega['acima_10km'] ?? 0,
+                ]
+            );
+        }
 
         $enderecoNovo = implode('|', [
             $restaurante->cep,
@@ -99,8 +116,41 @@ class RestauranteController extends Controller
         }
 
         return redirect()
-            ->route('restaurantes.index')
+            ->route('restaurante.meu-restaurante.edit', $restaurante->slug)
             ->with('success', 'Restaurante atualizado com sucesso!');
+    }
+
+
+    public function meuRestaurante(string $slug)
+    {
+        $restaurante = Restaurante::where('slug', $slug)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        $linkMenu = route('menu.show', $restaurante->slug);
+
+        $configuracaoEntrega = $restaurante->configuracaoEntrega()->firstOrCreate(
+            ['restaurante_id' => $restaurante->id],
+            [
+                'ate_5km' => 0,
+                'ate_10km' => 0,
+                'acima_10km' => 0,
+            ]
+        );
+
+        return view(
+            'restaurantes.meu-restaurante',
+            compact('restaurante', 'linkMenu', 'configuracaoEntrega')
+        );
+    }
+
+    public function atualizarMeuRestaurante(Request $request, string $slug)
+    {
+        $restaurante = Restaurante::where('slug', $slug)
+            ->where('user_id', auth()->id())
+            ->firstOrFail();
+
+        return $this->update($request, $restaurante);
     }
 
     public function alterarStatus(Restaurante $restaurante)
@@ -120,9 +170,9 @@ class RestauranteController extends Controller
     {
         $dados = $request->validate([
             'nome' => 'required|string|max:255',
-            'telefone' => 'nullable|string|max:50',
-            'documento' => 'nullable|string|max:18',
-            'email' => 'nullable|email|max:255',
+            'telefone' => 'required|string|max:50',
+            'documento' => 'required|string|max:18',
+            'email' => 'required|email|max:255',
             'cep' => 'nullable|string|max:20',
             'endereco' => 'nullable|string|max:255',
             'numero' => 'nullable|string|max:20',
@@ -130,6 +180,10 @@ class RestauranteController extends Controller
             'bairro' => 'nullable|string|max:100',
             'cidade' => 'nullable|string|max:100',
             'estado' => 'nullable|string|max:50',
+            'instagram' => 'nullable|string|max:255',
+            'site' => 'nullable|url|max:255',
+            'taxa_entrega' => 'nullable|numeric|min:0|max:9999.99',
+            'tempo_medio' => 'nullable|integer|min:1|max:600',
             'delivery' => 'nullable|boolean',
             'retirada' => 'nullable|boolean',
             'consumo_local' => 'nullable|boolean',
@@ -149,6 +203,10 @@ class RestauranteController extends Controller
 
         if (!$dados['consumo_local']) {
             $dados['quantidade_mesas'] = 0;
+        }
+
+        if (!$dados['delivery']) {
+            $dados['taxa_entrega'] = 0;
         }
 
         if ($request->hasFile('logo')) {

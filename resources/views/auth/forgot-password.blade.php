@@ -1,25 +1,18 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
-    </div>
-
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <form method="POST" action="{{ route('password.email') }}">
+<x-auth.rima-layout titulo="Recuperar senha" subtitulo="Informe seu e-mail e enviaremos um link para você criar uma nova senha.">
+    @if(session('status'))
+        <div class="mb-5 rounded-xl border border-green-200 bg-green-50 p-4 text-sm font-semibold text-green-700">{{ session('status') }}</div>
+    @endif
+    <form method="POST" action="{{ route('password.email') }}" class="space-y-5">
         @csrf
-
-        <!-- Email Address -->
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
+            <label for="email" class="text-sm font-black text-slate-700">E-mail da sua conta</label>
+            <input id="email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" autofocus required
+                   class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3.5 outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100">
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
+        <button type="submit" class="w-full rounded-xl bg-orange-500 px-5 py-3.5 font-black text-white hover:bg-orange-600">
+            Enviar link de recuperação
+        </button>
+        <a href="{{ route('login') }}" class="flex justify-center text-sm font-bold text-slate-500 hover:text-orange-600">← Voltar ao login</a>
     </form>
-</x-guest-layout>
+</x-auth.rima-layout>

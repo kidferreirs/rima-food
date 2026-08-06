@@ -76,7 +76,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/whatsapp/{conversa}/simular', [WhatsappController::class, 'simular'])->name('whatsapp.simular');
 
     Route::middleware(['auth', 'restaurante'])->prefix('/r/{slug}')->group(function () {
+
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('restaurante.dashboard');
+        Route::get('/meu-restaurante', [RestauranteController::class, 'meuRestaurante'])->name('restaurante.meu-restaurante.edit');
+        Route::put('/meu-restaurante', [RestauranteController::class, 'atualizarMeuRestaurante'])->name('restaurante.meu-restaurante.update');
         Route::resource('categorias', CategoriaController::class)->names('restaurante.categorias');
         Route::resource('produtos', ProdutoController::class)->names('restaurante.produtos');
         Route::resource('clientes', ClienteController::class)->names('restaurante.clientes');

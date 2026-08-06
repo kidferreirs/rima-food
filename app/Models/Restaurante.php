@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Restaurante extends Model
 {
     protected $fillable = [
         'user_id',
+        'account_id',
         'nome',
         'telefone',
         'documento',
@@ -31,6 +34,10 @@ class Restaurante extends Model
         'quantidade_mesas',
         'slug',
         'banner',
+        'segmento',
+        'cor_primaria',
+        'cor_secundaria',
+        'onboarding_concluido',
         'abre_as',
         'fecha_as',
         'google_rating',
@@ -49,6 +56,7 @@ class Restaurante extends Model
         'delivery' => 'boolean',
         'retirada' => 'boolean',
         'consumo_local' => 'boolean',
+        'onboarding_concluido' => 'boolean',
         'evolution_connected_at' => 'datetime',
         'evolution_last_sync_at' => 'datetime',
     ];
@@ -57,69 +65,61 @@ class Restaurante extends Model
     {
         return $this->evolution_status === 'open';
     }
-
     public function usaWhatsappComIA(): bool
     {
-        return in_array($this->plano, [
-            'MENU_IA',
-            'FOOD',
-        ], true);
+        return in_array($this->plano, ['MENU_IA', 'FOOD'], true);
     }
-
     public function nomeInstanciaEvolution(): string
     {
-        return $this->evolution_instance
-            ?? 'rima_rest_' . $this->id;
+        return $this->evolution_instance ?? 'rima_rest_' . $this->id;
     }
-
     public function categorias()
     {
         return $this->hasMany(Categoria::class);
     }
-
     public function produtos()
     {
-        return $this->hasManyThrough(
-            Produto::class,
-            Categoria::class
-        );
+        return $this->hasManyThrough(Produto::class, Categoria::class);
     }
-
     public function clientes()
     {
         return $this->hasMany(Cliente::class);
     }
-
     public function pedidos()
     {
         return $this->hasMany(Pedido::class);
     }
-
     public function campanhas()
     {
         return $this->hasMany(Campanha::class);
     }
-
     public function configuracaoEntrega()
     {
         return $this->hasOne(ConfiguracaoEntrega::class);
     }
-
     public function temIA(): bool
     {
-        return in_array($this->plano, [
-            'MENU_IA',
-            'FOOD',
-        ], true);
+        return in_array($this->plano, ['MENU_IA', 'FOOD'], true);
     }
-
     public function ehFood(): bool
     {
         return $this->plano === 'FOOD';
     }
-
     public function ehMenu(): bool
     {
         return $this->plano === 'MENU';
+    }
+
+    public function getBannerUrlAttribute(): ?string
+    {
+        if (!$this->banner) {
+            return null;
+        }
+
+        if (Str::startsWith($this->banner, ['/images/', 'images/'])) {
+            return asset(ltrim($this->banner, '/'));
+        }
+
+        return Storage::url($this->banner);
     }
 }
