@@ -11,12 +11,11 @@ COPY . .
 
 RUN npm run build
 
-
 # Etapa 2: aplicação Laravel com PHP + Apache
 
 FROM php:8.3-apache
 
-# Configuração permanente do PHP
+# Configurações do PHP
 COPY docker/php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 
 RUN apt-get update && apt-get install -y \
@@ -30,6 +29,10 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     default-mysql-client \
+    poppler-utils \
+    tesseract-ocr \
+    tesseract-ocr-por \
+    tesseract-ocr-eng \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
         pdo_mysql \
