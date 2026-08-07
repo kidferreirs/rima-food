@@ -13,7 +13,11 @@ RUN npm run build
 
 
 # Etapa 2: aplicação Laravel com PHP + Apache
+
 FROM php:8.3-apache
+
+# Configuração permanente do PHP
+COPY docker/php/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 
 RUN apt-get update && apt-get install -y \
     git \
