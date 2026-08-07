@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 180" role="img" aria-labelledby="title desc">
+  <title id="title">Rima Food</title>
+  <desc id="desc">Logo Rima Food para fundo escuro.</desc>
+  <g transform="translate(18 18)">
+    <text x="0" y="118" font-family="Figtree, ui-sans-serif, system-ui, sans-serif" font-size="122" font-weight="800" letter-spacing="-5" fill="#FFFFFF">R</text>
+    <g transform="translate(116 18)" fill="#FF6A00">
+      <rect x="0" y="0" width="8" height="49" rx="4"/>
+      <rect x="14" y="0" width="8" height="49" rx="4"/>
+      <rect x="28" y="0" width="8" height="49" rx="4"/>
+      <rect x="42" y="0" width="8" height="49" rx="4"/>
+      <path d="M2 43 C2 66, 10 75, 21 84 L21 125 C21 135, 29 142, 36 142 C43 142, 51 135, 51 125 L51 84 C62 75, 50 66, 50 43 Z"/>
+    </g>
+    <text x="184" y="118" font-family="Figtree, ui-sans-serif, system-ui, sans-serif" font-size="122" font-weight="800" letter-spacing="-5" fill="#FFFFFF">MA</text>
+    <text x="418" y="118" font-family="Figtree, ui-sans-serif, system-ui, sans-serif" font-size="122" font-weight="800" letter-spacing="-5" fill="#FF6A00">FOOD</text>
+  </g>
+</svg>

@@ -77,46 +77,68 @@
 <body class="bg-white text-slate-950 antialiased">
 
     {{-- HEADER --}}
-    <header class=" sticky top-0 z-50 border-b border-slate-800 bg-slate-950">
+    <header class="sticky top-0 z-50 border-b border-slate-800 bg-slate-950">
         <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
             <a href="#inicio" class="text-xl font-black tracking-tight text-white">
-                RIMA
-                <span class="text-orange-500"> FOOD </span>
+                RIMA <span class="text-orange-500">FOOD</span>
             </a>
 
             <nav class="rf-nav text-sm font-bold text-slate-300">
-                <a href="#produto" class="hover:text-white">
-                    Produto
-                </a>
-
-                <a href="#comparativo" class="hover:text-white">
-                    Marketplace x Rima Food
-                </a>
-
-                <a href="#como-funciona" class="hover:text-white">
-                    Como funciona
-                </a>
-
-                <a href="#planos" class="hover:text-white">
-                    Planos
-                </a>
-
-                <a href="#duvidas" class="hover:text-white">
-                    Dúvidas
-                </a>
+                <a href="#produto" class="hover:text-white">Produto</a>
+                <a href="#comparativo" class="hover:text-white">Marketplace x Rima Food</a>
+                <a href="#como-funciona" class="hover:text-white">Como funciona</a>
+                <a href="#planos" class="hover:text-white">Planos</a>
+                <a href="#duvidas" class="hover:text-white">Dúvidas</a>
             </nav>
 
-            <div class="flex items-center gap-3">
-                <a href="{{ route('login') }}"
-                    class="hidden rounded-xl px-4 py-3 text-sm font-black text-slate-300 hover:text-white sm:inline-flex">
-                    Já sou cliente
-                </a>
-
+            <div class="hidden items-center gap-3 lg:flex">
                 <a href="{{ route('saas.cadastro') }}"
                     class="rounded-xl bg-orange-500 px-4 py-3 text-sm font-black text-white hover:bg-orange-600">
-                    Criar meu restaurante
+                    Criar minha loja
+                </a>
+                <a href="{{ route('login') }}"
+                    class="rounded-xl px-4 py-3 text-sm font-black text-slate-300 hover:text-white">
+                    Já sou cliente
                 </a>
             </div>
+
+            <button id="menu-mobile-btn" type="button"
+                class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-700 bg-slate-900 text-white lg:hidden"
+                aria-label="Abrir menu" aria-expanded="false" aria-controls="menu-mobile">
+                <span id="icone-menu-abrir" class="text-2xl leading-none">☰</span>
+                <span id="icone-menu-fechar" class="hidden text-2xl leading-none">✕</span>
+            </button>
+        </div>
+
+        <div id="menu-mobile" class="hidden border-t border-slate-800 bg-slate-950 lg:hidden">
+            <nav class="mx-auto max-w-7xl px-5 py-5 sm:px-6">
+                <div class="grid gap-2">
+                    <a href="#produto"
+                        class="menu-mobile-link rounded-xl px-4 py-3 font-bold text-slate-300 hover:bg-slate-900 hover:text-white">Produto</a>
+                    <a href="#comparativo"
+                        class="menu-mobile-link rounded-xl px-4 py-3 font-bold text-slate-300 hover:bg-slate-900 hover:text-white">Marketplace
+                        x Rima Food</a>
+                    <a href="#como-funciona"
+                        class="menu-mobile-link rounded-xl px-4 py-3 font-bold text-slate-300 hover:bg-slate-900 hover:text-white">Como
+                        funciona</a>
+                    <a href="#planos"
+                        class="menu-mobile-link rounded-xl px-4 py-3 font-bold text-slate-300 hover:bg-slate-900 hover:text-white">Planos</a>
+                    <a href="#duvidas"
+                        class="menu-mobile-link rounded-xl px-4 py-3 font-bold text-slate-300 hover:bg-slate-900 hover:text-white">Dúvidas</a>
+                </div>
+
+                <div class="mt-4 border-t border-slate-800 pt-4">
+                    <a href="{{ route('saas.cadastro') }}"
+                        class="mt-2 block rounded-xl bg-orange-500 px-4 py-3 text-center font-black text-white hover:bg-orange-600">
+                        Criar minha loja
+                    </a>
+
+                    <a href="{{ route('login') }}"
+                        class="block rounded-xl px-4 py-3 text-center font-black text-slate-200 hover:bg-slate-900 hover:text-white">
+                        Já sou cliente
+                    </a>
+                </div>
+            </nav>
         </div>
     </header>
 
@@ -132,50 +154,26 @@
                     </div>
 
                     <h1 class="mt-7 text-5xl font-black leading-tight tracking-tight sm:text-7xl">
-                        Seu restaurante
-                        <span class="text-orange-500">vende direto.</span>
-                        Seu lucro fica com você.
+                        Seu negócio
+                        <span class="text-orange-500">vende direto.</span></br>
+                        O lucro fica com você.
                     </h1>
 
                     <p class="mt-7 max-w-2xl text-lg leading-8 text-slate-400">
                         Cardápio digital, pedidos, WhatsApp com IA
-                        e gestão em uma plataforma simples para negócios
-                        de alimentação.
+                        e gestão em uma plataforma simples para o seu negócio
                     </p>
 
-                    <div class="
-                    mt-9 flex flex-col
-                    gap-3 sm:flex-row
-                ">
-                        <a href="{{ route('saas.cadastro') }}" class="
-                        rounded-2xl
-                        bg-orange-500
-                        px-7 py-4
-                        text-center font-black
-                        text-white
-                        hover:bg-orange-600
-                    ">
-                            Criar meu restaurante
+                    <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+                        <a href="{{ route('saas.cadastro') }}"
+                            class="rounded-2xl bg-orange-500 px-7 py-4 text-center font-black text-white hover:bg-orange-600 w-full">
+                            Criar minha loja
                         </a>
-
-                        <a href="#produto" class="
-                        rounded-2xl
-                        border border-slate-700
-                        bg-slate-900
-                        px-7 py-4
-                        text-center font-black
-                        text-white
-                        hover:bg-slate-800
-                    ">
-                            Conhecer a plataforma
-                        </a>
+                        <a href="#produto" class="rounded-2xl border border-slate-700 bg-slate-900 px-7 py-4 text-center font-black text-white
+                            hover:bg-slate-800 w-full">Conhecer a plataforma</a>
                     </div>
 
-                    <div class="
-                    mt-9 grid grid-cols-1
-                    gap-3 text-sm font-bold
-                    text-slate-400 sm:grid-cols-2
-                ">
+                    <div class="mt-8 grid gap-x-8 gap-y-3 text-sm font-bold text-slate-400 sm:grid-cols-2">
                         <p>✓ 0% de comissão por pedido</p>
                         <p>✓ Sem cartão para iniciar</p>
                         <p>✓ Seus clientes são seus</p>
@@ -184,112 +182,50 @@
                 </div>
 
                 {{-- MOCKUP --}}
-                <div class="
-                rounded-3xl
-                border border-slate-700
-                bg-slate-900 p-4
-                shadow-2xl
-            ">
-                    <div class="
-                    overflow-hidden
-                    rounded-2xl bg-slate-100
-                    text-slate-950
-                ">
-                        <div class="
-                        flex items-center
-                        justify-between
-                        border-b border-slate-200
-                        bg-white px-5 py-4
-                    ">
+                <div class="rounded-3xl border border-slate-700 bg-slate-900 p-4 shadow-2xl">
+                    <div class="overflow-hidden rounded-2xl bg-slate-100 text-slate-950">
+                        <div class="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="
-                                flex h-11 w-11
-                                items-center justify-center
-                                rounded-xl bg-orange-100
-                                text-xl
-                            ">
+                                <div
+                                    class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-100 text-xl">
                                     🍔
                                 </div>
 
                                 <div>
-                                    <p class="font-black">
-                                        Painel Rima Food
-                                    </p>
-
-                                    <p class="text-xs text-slate-500">
-                                        Restaurante ativo
-                                    </p>
+                                    <p class="font-black">Painel Rima Food</p>
+                                    <p class="text-xs text-slate-500">Loja ativa</p>
                                 </div>
                             </div>
 
-                            <span class="
-                            rounded-full bg-green-100
-                            px-3 py-1
-                            text-xs font-black
-                            text-green-700
-                        ">
+                            <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-black text-green-700">
                                 Online
                             </span>
                         </div>
 
-                        <div class="
-                        grid gap-4 p-5
-                        sm:grid-cols-3
-                    ">
+                        <div class="grid gap-4 p-5 sm:grid-cols-3">
+
                             @foreach([
                                     ['Pedidos hoje', '48'],
                                     ['Faturamento', 'R$ 2.384'],
                                     ['Novos clientes', '19'],
                                 ] as [$titulo, $valor])
-                                <div class="
-                                            rounded-2xl
-                                            border border-slate-200
-                                            bg-white p-4
-                                        ">
-                                    <p class="text-xs text-slate-500">
-                                        {{ $titulo }}
-                                    </p>
-
-                                    <p class="
-                                                mt-3 text-xl
-                                                font-black
-                                            ">
-                                        {{ $valor }}
-                                    </p>
+                                <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                                    <p class="text-xs text-slate-500">{{ $titulo }}</p>
+                                    <p class="mt-3 text-xl font-black">{{ $valor }}</p>
                                 </div>
                             @endforeach
                         </div>
 
-                        <div class="
-                        grid gap-4
-                        px-5 pb-5
-                        sm:grid-cols-2
-                    ">
-                            <div class="
-                            rounded-2xl
-                            border border-slate-200
-                            bg-white p-5
-                        ">
-                                <div class="
-                                flex items-center
-                                justify-between
-                            ">
-                                    <p class="font-black">
-                                        Vendas da semana
-                                    </p>
-
-                                    <span class="
-                                    text-xs font-black
-                                    text-green-600
-                                ">
+                        <div class="grid gap-4 px-5 pb-5 sm:grid-cols-2">
+                            <div class="rounded-2xl border border-slate-200 bg-white p-5">
+                                <div class="flex items-center justify-between">
+                                    <p class="font-black">Vendas da semana</p>
+                                    <span class="text-xs font-black text-green-600">
                                         +31%
                                     </span>
                                 </div>
 
-                                <div class="
-                                mt-8 flex h-40
-                                items-end gap-3
-                            ">
+                                <div class="mt-8 flex h-40 items-end gap-3">
                                     <div class="h-16 flex-1 rounded-t-lg bg-orange-300"></div>
                                     <div class="h-24 flex-1 rounded-t-lg bg-orange-400"></div>
                                     <div class="h-20 flex-1 rounded-t-lg bg-orange-300"></div>
@@ -300,39 +236,18 @@
                                 </div>
                             </div>
 
-                            <div class="
-                            rounded-2xl
-                            bg-slate-950 p-5
-                            text-white
-                        ">
-                                <p class="
-                                text-xs font-black
-                                uppercase tracking-widest
-                                text-orange-400
-                            ">
+                            <div class="rounded-2xl bg-slate-950 p-5 text-white">
+                                <p class="text-xs font-black uppercase tracking-widest text-orange-400">
                                     IA ativa
                                 </p>
 
-                                <p class="
-                                mt-4 text-2xl
-                                font-black
-                            ">
-                                    Atendendo clientes agora.
-                                </p>
+                                <p class="mt-4 text-2xl font-black">Atendendo clientes agora.</p>
 
-                                <div class="
-                                mt-6 rounded-xl
-                                bg-slate-800 p-4
-                                text-sm text-slate-300
-                            ">
+                                <div class="mt-6 rounded-xl bg-slate-800 p-4 text-sm text-slate-300">
                                     “Quero uma pizza grande de calabresa.”
                                 </div>
 
-                                <div class="
-                                mt-3 rounded-xl
-                                bg-orange-500 p-4
-                                text-sm font-bold
-                            ">
+                                <div class="mt-3 rounded-xl bg-orange-500 p-4 text-sm font-bold">
                                     “Deseja adicionar borda recheada?”
                                 </div>
                             </div>
@@ -343,222 +258,193 @@
         </section>
 
         {{-- FAIXA --}}
-        <section class="
-        border-y border-slate-200
-        bg-white py-5
-    ">
-            <div class="
-            mx-auto flex max-w-7xl
-            flex-wrap justify-center
-            gap-x-8 gap-y-3
-            px-5 text-sm font-black
-            uppercase tracking-wider
-            text-slate-500
-        ">
-                <span>0% de comissão</span>
-                <span class="text-orange-500">✦</span>
-                <span>Cardápio digital</span>
-                <span class="text-orange-500">✦</span>
-                <span>WhatsApp com IA</span>
-                <span class="text-orange-500">✦</span>
-                <span>Import Menu</span>
-                <span class="text-orange-500">✦</span>
-                <span>Pedidos organizados</span>
+        <section class="border-y border-slate-200 bg-white py-5">
+            <div class="mx-auto max-w-7xl px-5">
+
+                <div class="grid grid-cols-1 gap-3 text-center text-sm font-black uppercase tracking-wider text-slate-500 sm:flex sm:flex-wrap sm:items-center
+                    sm:justify-center sm:gap-x-8 sm:gap-y-3">
+
+                    <div class="flex items-center justify-center gap-3">
+                        <span class="text-orange-500">✦</span>
+                        <span>0% de comissão</span>
+                    </div>
+
+                    <div class="flex items-center justify-center gap-3">
+                        <span class="text-orange-500">✦</span>
+                        <span>Cardápio digital</span>
+                    </div>
+
+                    <div class="flex items-center justify-center gap-3">
+                        <span class="text-orange-500">✦</span>
+                        <span>WhatsApp com IA</span>
+                    </div>
+
+                    <div class="flex items-center justify-center gap-3">
+                        <span class="text-orange-500">✦</span>
+                        <span>Pedidos organizados</span>
+                    </div>
+
+                    <div class="flex items-center justify-center gap-3">
+                        <span class="text-orange-500">✦</span>
+                        <span>No ar em minutos</span>
+                    </div>
+                </div>
             </div>
         </section>
 
         {{-- PRODUTO --}}
         <section id="produto" class="bg-slate-50 py-20 sm:py-28">
-            <div class="
-            mx-auto max-w-7xl
-            px-5 sm:px-6 lg:px-8
-        ">
-                <div class="
-                grid gap-8
-                lg:grid-cols-2
-            ">
+            <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+                <div class="grid gap-8">
                     <div>
-                        <p class="
-                        text-sm font-black
-                        uppercase tracking-widest
-                        text-orange-500
-                    ">
+                        <p class="text-sm font-black uppercase tracking-widest text-orange-500">
                             Tudo em um só lugar
                         </p>
 
-                        <h2 class="
-                        mt-5 text-4xl font-black
-                        leading-tight tracking-tight
-                        sm:text-6xl
-                    ">
-                            Simples para usar.
-                            Poderoso para vender.
+                        <h2 class="mt-5 text-4xl font-black leading-tight tracking-tight sm:text-6xl">
+                            Simples para usar. Poderoso para vender.
                         </h2>
                     </div>
 
-                    <p class="
-                    max-w-xl self-end
-                    text-lg leading-8
-                    text-slate-600
-                    lg:ml-auto
-                ">
-                        O Rima Food reúne o que seu negócio precisa
-                        sem transformar o sistema em uma ferramenta
-                        complicada.
-                    </p>
+                    <p>O Rima Food reúne o que seu negócio precisa sem transformar o sistema em uma ferramenta
+                        complicada.</p>
                 </div>
 
-                <div class="rf-product-grid mt-14">
-                    <article class="
-                    rounded-3xl
-                    border border-orange-200
-                    bg-orange-50 p-8
-                    md:col-span-2
-                ">
-                        <div class="
-                        flex h-14 w-14
-                        items-center justify-center
-                        rounded-2xl
-                        bg-orange-500
-                        text-2xl
-                    ">
-                            📱
-                        </div>
+                <div class="rf-product-grid mt-14 items-start">
 
-                        <h3 class="
-                        mt-7 text-3xl
-                        font-black
-                    ">
-                            Cardápio digital
-                        </h3>
+                    {{-- Card principal --}}
+                    <article class="rounded-3xl border border-orange-200 bg-orange-50 p-5 sm:p-8 md:col-span-2">
 
-                        <p class="
-                        mt-4 max-w-2xl
-                        leading-7 text-slate-600
-                    ">
-                            Seu menu com sua marca, seu link
-                            e nenhuma concorrência na tela.
-                        </p>
+                        {{-- Cabeçalho --}}
+                        <div class="flex items-start gap-4 sm:items-center sm:gap-5">
 
-                        <div class="
-                        mt-8 grid gap-4
-                        sm:grid-cols-2
-                    ">
-                            <div class="
-                            rounded-2xl
-                            bg-slate-950 p-6
-                            text-white
-                        ">
-                                <p class="
-                                text-xs font-black
-                                uppercase tracking-widest
-                                text-orange-400
-                            ">
-                                    Canal próprio
-                                </p>
-
-                                <p class="
-                                mt-4 text-3xl
-                                font-black
-                            ">
-                                    Sua marca.
-                                    Seu link.
-                                    Seus clientes.
-                                </p>
+                            <div
+                                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-500 text-2xl text-white shadow-lg sm:h-16 sm:w-16 sm:text-3xl">
+                                📱
                             </div>
 
-                            <div class="
-                            rounded-2xl
-                            border border-orange-200
-                            bg-white p-6
-                        ">
-                                <p class="font-black">
-                                    Divulgue onde quiser
-                                </p>
+                            <div class="min-w-0 flex-1">
 
-                                <ul class="
-                                mt-4 space-y-3
-                                text-sm text-slate-600
-                            ">
-                                    <li>✓ WhatsApp</li>
-                                    <li>✓ Instagram</li>
-                                    <li>✓ Google</li>
-                                    <li>✓ QR Code</li>
-                                </ul>
+                                <h3 class="text-2xl font-black leading-tight sm:text-4xl">
+                                    Cardápio digital
+                                </h3>
+
+                                <p class="mt-2 text-base leading-6 text-slate-600 sm:text-lg sm:leading-7">
+                                    Seu menu com sua marca, seu link e nenhuma concorrência na tela.
+                                </p>
+                            </div>
+                        </div>
+
+                        {{-- Cards internos --}}
+                        <div class="mt-10 grid gap-6 sm:grid-cols-2">
+
+                            {{-- Card escuro --}}
+                            <div class="rounded-3xl bg-slate-950 p-8 text-white shadow-xl">
+
+                                <span
+                                    class="inline-flex rounded-full bg-orange-500/20 px-3 py-1 text-2x1 font-black uppercase tracking-widest text-orange-400">
+
+                                    🚀 Canal próprio
+
+                                </span>
+
+                                <h4 class="mt-6 text-4xl font-black leading-tight">
+                                    Sua marca.<br>
+                                    Seu link.<br>
+                                    Seus clientes.
+                                </h4>
+
+                            </div>
+
+                            {{-- Card claro --}}
+                            <div class="rounded-3xl border border-orange-200 bg-white p-8 shadow-lg">
+
+                                <h4 class="text-2xl font-black">
+                                    Divulgue onde quiser
+                                </h4>
+
+                                <div class="mt-8 space-y-5">
+
+                                    <div class="flex items-center gap-4">
+                                        <img src="{{ asset('images/rima-food/icones/icons-whatsapp.png') }}"
+                                            alt="WhatsApp" class="h-7 w-7 object-contain">
+
+                                        <span class="font-medium text-slate-700">
+                                            WhatsApp
+                                        </span>
+                                    </div>
+
+                                    <div class="flex items-center gap-4">
+                                        <img src="{{ asset('images/rima-food/icones/icons-instagram.png') }}"
+                                            alt="Instagram" class="h-7 w-7 object-contain">
+
+                                        <span class="font-medium text-slate-700">
+                                            Instagram
+                                        </span>
+                                    </div>
+
+                                    <div class="flex items-center gap-4">
+                                        <img src="{{ asset('images/rima-food/icones/icons-google-maps.png') }}"
+                                            alt="Google" class="h-7 w-7 object-contain">
+
+                                        <span class="font-medium text-slate-700">
+                                            Google Maps
+                                        </span>
+                                    </div>
+
+                                    <div class="flex items-center gap-4">
+                                        <img src="{{ asset('images/rima-food/icones/icons-qr-code.png') }}"
+                                            alt="QR Code" class="h-7 w-7 object-contain">
+
+                                        <span class="font-medium text-slate-700">
+                                            QR Code
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </article>
 
-                    <img src="{{ asset('images/rima-food/menu-celular.png') }}"
-                        alt="Cardápio digital do Rima Food exibido em um celular"
-                        class="mx-auto h-auto w-full max-w-sm object-contain">
+                    {{-- Celular --}}
+                    <div class="relative flex justify-center self-start lg:-ml-10">
+
+                        {{-- Glow --}}
+                        <div class="absolute top-24 h-72 w-72 rounded-full bg-orange-400/20 blur-3xl">
+                        </div>
+
+                        <img src="{{ asset('images/rima-food/menu-celular.png') }}" alt="Cardápio digital do Rima Food"
+                            class="relative z-10 w-full max-w-sm object-contain">
+                    </div>
                 </div>
+            </div>
             </div>
         </section>
 
         {{-- COMPARATIVO --}}
-        <section id="comparativo" class="
-        bg-slate-950 py-20
-        text-white sm:py-28
-    ">
-            <div class="
-            mx-auto max-w-7xl
-            px-5 sm:px-6 lg:px-8
-        ">
+        <section id="comparativo" class="bg-slate-950 py-20 text-white sm:py-28">
+            <div class="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
                 <div class="mx-auto max-w-4xl text-center">
-                    <p class="
-                    text-sm font-black
-                    uppercase tracking-widest
-                    text-orange-400
-                ">
+                    <p class="text-sm font-black uppercase tracking-widest text-orange-400">
                         Todo pedido tem um destino
                     </p>
 
-                    <h2 class="
-                    mt-6 text-5xl font-black
-                    leading-tight tracking-tight
-                    sm:text-7xl
-                ">
+                    <h2 class="mt-6 text-5xl font-black leading-tight tracking-tight sm:text-7xl">
                         Você vende.
-
-                        <span class="block text-slate-500">
-                            Quem está ficando mais forte?
-                        </span>
+                        <span class="block text-slate-500">Quem está ficando mais forte?</span>
                     </h2>
 
-                    <p class="
-                    mx-auto mt-6 max-w-2xl
-                    text-lg leading-8
-                    text-slate-400
-                ">
-                        Veja o caminho de um pedido de R$ 100
-                        em dois cenários diferentencontramos o Código de 6 digitos da vaga, certifiques.
+                    <p class="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-400">
+                        Veja o caminho de um pedido nos dois cenários diferentes.
                     </p>
                 </div>
 
-                <div class="
-                mt-14 grid gap-7
-                lg:grid-cols-2
-            ">
-                    <article class="
-                    rounded-3xl
-                    border border-red-500
-                    bg-red-950 p-7
-                ">
-                        <p class="
-                        text-xs font-black
-                        uppercase tracking-widest
-                        text-red-300
-                    ">
+                <div class="mt-14 grid gap-7 lg:grid-cols-2">
+                    <article class="rounded-3xl border border-red-500 bg-red-950 p-7">
+                        <p class="text-xs font-black uppercase tracking-widest text-red-300">
                             Marketplace
                         </p>
 
-                        <h3 class="
-                        mt-3 text-4xl
-                        font-black
-                    ">
-                            Pedido de R$ 100
-                        </h3>
+                        <h3 class="mt-3 text-4xl font-black">App de delivery</h3>
 
                         <div class="mt-8 space-y-3">
                             @foreach([
@@ -568,60 +454,27 @@
                                     'Concorrentes aparecem na tela',
                                     'Você depende da plataforma novamente',
                                 ] as $passo)
-                                <div class="
-                                            rounded-2xl
-                                            border border-red-800
-                                            bg-red-900 p-4
-                                            font-bold text-red-100
-                                        ">
+                                <div class="rounded-2xl border border-red-800 bg-red-900 p-4 font-bold text-red-100">
                                     ✕ {{ $passo }}
                                 </div>
                             @endforeach
                         </div>
 
-                        <div class="
-                        mt-7 rounded-2xl
-                        bg-red-600 p-6
-                    ">
-                            <p class="
-                            text-xs font-black
-                            uppercase tracking-widest
-                        ">
-                                Resultado
-                            </p>
+                        <div class="mt-7 rounded-2xl bg-red-600 p-6">
+                            <p class="text-xs font-black uppercase tracking-widest">Resultado</p>
 
-                            <p class="
-                            mt-2 text-3xl
-                            font-black
-                        ">
-                                Você vende.
-                            </p>
+                            <p class="mt-2 text-3xl font-black">Você trabalha.</p>
 
-                            <p class="text-red-100">
-                                O marketplace cresce.
-                            </p>
+                            <p class="text-red-100">O marketplace cresce.</p>
                         </div>
                     </article>
 
-                    <article class="
-                    rounded-3xl
-                    border border-orange-500
-                    bg-slate-900 p-7
-                ">
-                        <p class="
-                        text-xs font-black
-                        uppercase tracking-widest
-                        text-orange-400
-                    ">
+                    <article class="rounded-3xl border border-orange-500 bg-slate-900 p-7">
+                        <p class="text-xs font-black uppercase tracking-widest text-orange-400">
                             Rima Food
                         </p>
 
-                        <h3 class="
-                        mt-3 text-4xl
-                        font-black
-                    ">
-                            Pedido de R$ 100
-                        </h3>
+                        <h3 class="mt-3 text-4xl font-black">App Rima Food</h3>
 
                         <div class="mt-8 space-y-3">
                             @foreach([
@@ -629,73 +482,35 @@
                                     'O valor fica no seu negócio',
                                     'Cliente entra no seu WhatsApp',
                                     'Sua marca fica na memória',
-                                    'Cada venda fortalece seu restaurante',
+                                    'Cada venda fortalece o seu negócio',
                                 ] as $passo)
-                                <div class="
-                                            rounded-2xl
-                                            border border-orange-700
-                                            bg-slate-800 p-4
-                                            font-bold text-slate-100
-                                        ">
+                                <div class="rounded-2xl border border-orange-700 bg-slate-800 p-4 font-bold text-slate-100">
                                     ✓ {{ $passo }}
                                 </div>
                             @endforeach
                         </div>
 
-                        <div class="
-                        mt-7 rounded-2xl
-                        bg-orange-500 p-6
-                    ">
-                            <p class="
-                            text-xs font-black
-                            uppercase tracking-widest
-                        ">
-                                Resultado
-                            </p>
+                        <div class="mt-7 rounded-2xl bg-orange-500 p-6">
+                            <p class="text-xs font-black uppercase tracking-widest">Resultado</p>
 
-                            <p class="
-                            mt-2 text-3xl
-                            font-black
-                        ">
-                                Você vende.
-                            </p>
+                            <p class="mt-2 text-3xl font-black">Você vende.</p>
 
-                            <p class="text-orange-100">
-                                Seu restaurante cresce.
-                            </p>
+                            <p class="text-orange-100">O seu negócio prospera.</p>
                         </div>
                     </article>
                 </div>
 
-                <div class="
-                mt-12 grid gap-4
-                sm:grid-cols-2 lg:grid-cols-4
-            ">
+                <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     @foreach([
                             ['0%', 'de comissão por pedido'],
                             ['100%', 'dos clientes no seu canal'],
-                            ['Sua marca', 'sempre em primeiro lugar'],
+                            ['Sua marca', 'sua logo, seu nome'],
                             ['WhatsApp', 'para vender e fidelizar'],
                         ] as [$valor, $texto])
-                        <div class="
-                                    rounded-3xl
-                                    border border-slate-800
-                                    bg-slate-900 p-7
-                                    text-center
-                                ">
-                            <p class="
-                                        text-3xl font-black
-                                        text-orange-400
-                                    ">
-                                {{ $valor }}
-                            </p>
+                        <div class="rounded-3xl border border-slate-800 bg-slate-900 p-7 text-center">
+                            <p class="text-3xl font-black text-orange-400">{{ $valor }}</p>
 
-                            <p class="
-                                        mt-2 text-sm
-                                        text-slate-400
-                                    ">
-                                {{ $texto }}
-                            </p>
+                            <p class="mt-2 text-sm text-slate-400">{{ $texto }}</p>
                         </div>
                     @endforeach
                 </div>
@@ -724,7 +539,7 @@
                     leading-tight tracking-tight
                     sm:text-6xl
                 ">
-                        A Rima atende.
+                        A IA atende.
                         Você cuida do negócio.
                     </h2>
 
@@ -746,17 +561,17 @@
                                 'Mantém o contexto da conversa',
                             ] as $item)
                             <div class="
-                                        flex items-center gap-4
-                                        rounded-2xl
-                                        border border-slate-200
-                                        bg-slate-50 p-4
-                                    ">
+                                                                                                            flex items-center gap-4
+                                                                                                            rounded-2xl
+                                                                                                            border border-slate-200
+                                                                                                            bg-slate-50 p-4
+                                                                                                        ">
                                 <span class="
-                                            flex h-9 w-9
-                                            items-center justify-center
-                                            rounded-xl bg-orange-100
-                                            font-black text-orange-600
-                                        ">
+                                                                                                                flex h-9 w-9
+                                                                                                                items-center justify-center
+                                                                                                                rounded-xl bg-orange-100
+                                                                                                                font-black text-orange-600
+                                                                                                            ">
                                     ✓
                                 </span>
 
@@ -841,30 +656,30 @@
                             ],
                         ] as [$numero, $titulo, $texto])
                         <article class="
-                                    rounded-3xl
-                                    border border-slate-200
-                                    bg-white p-7
-                                ">
+                                                                                                        rounded-3xl
+                                                                                                        border border-slate-200
+                                                                                                        bg-white p-7
+                                                                                                    ">
                             <span class="
-                                        flex h-14 w-14
-                                        items-center justify-center
-                                        rounded-2xl bg-orange-500
-                                        font-black text-white
-                                    ">
+                                                                                                            flex h-14 w-14
+                                                                                                            items-center justify-center
+                                                                                                            rounded-2xl bg-orange-500
+                                                                                                            font-black text-white
+                                                                                                        ">
                                 {{ $numero }}
                             </span>
 
                             <h3 class="
-                                        mt-7 text-xl
-                                        font-black
-                                    ">
+                                                                                                            mt-7 text-xl
+                                                                                                            font-black
+                                                                                                        ">
                                 {{ $titulo }}
                             </h3>
 
                             <p class="
-                                        mt-3 leading-7
-                                        text-slate-600
-                                    ">
+                                                                                                            mt-3 leading-7
+                                                                                                            text-slate-600
+                                                                                                        ">
                                 {{ $texto }}
                             </p>
                         </article>
@@ -941,7 +756,7 @@
                             <li>✓ Produtos e categorias</li>
                             <li>✓ Import Menu</li>
                             <li>✓ Clientes</li>
-                            <li>✓ Meu Restaurante</li>
+                            <li>✓ Dashboard de pedidos</li>
                         </ul>
 
                         <a href="{{ route('saas.cadastro') }}" class="
@@ -952,7 +767,7 @@
                         font-black text-white
                         hover:bg-slate-800
                     ">
-                            Criar meu restaurante
+                            Criar minha loja
                         </a>
                     </article>
 
@@ -1022,7 +837,7 @@
                         font-black text-white
                         hover:bg-orange-600
                     ">
-                            Criar meu restaurante
+                            Criar minha loja
                         </a>
                     </article>
 
@@ -1078,7 +893,7 @@
                         font-black text-white
                         hover:bg-slate-800
                     ">
-                            Criar meu restaurante
+                            Criar minha loja
                         </a>
                     </article>
                 </div>
@@ -1152,25 +967,25 @@
                             ],
                             [
                                 'Como funciona o WhatsApp com IA?',
-                                'A Rima entende o pedido, pergunta opções e conduz a conversa até a confirmação.',
+                                'A IA entende o pedido, pergunta opções e conduz a conversa até a confirmação.',
                             ],
                         ] as [$pergunta, $resposta])
                         <details class="
-                                    rounded-2xl
-                                    border border-slate-200
-                                    bg-white p-5
-                                ">
+                                                                                                        rounded-2xl
+                                                                                                        border border-slate-200
+                                                                                                        bg-white p-5
+                                                                                                    ">
                             <summary class="
-                                        cursor-pointer
-                                        font-black
-                                    ">
+                                                                                                            cursor-pointer
+                                                                                                            font-black
+                                                                                                        ">
                                 {{ $pergunta }}
                             </summary>
 
                             <p class="
-                                        mt-4 leading-7
-                                        text-slate-600
-                                    ">
+                                                                                                            mt-4 leading-7
+                                                                                                            text-slate-600
+                                                                                                        ">
                                 {{ $resposta }}
                             </p>
                         </details>
@@ -1201,7 +1016,7 @@
                 leading-tight tracking-tight
                 sm:text-7xl
             ">
-                    Seu próximo pedido pode ser 100% seu.
+                    O próximo pedido pode ser 100% seu.
                 </h2>
 
                 <p class="
@@ -1209,7 +1024,7 @@
                 text-lg leading-8
                 text-orange-100
             ">
-                    Crie seu restaurante pelo formulário inteligente
+                    Crie sua loja pelo formulário inteligente
                     e comece seus 15 dias de teste.
                 </p>
 
@@ -1225,10 +1040,10 @@
                     text-orange-600
                     hover:bg-orange-50
                 ">
-                        Criar meu restaurante
+                        Criar minha loja
                     </a>
 
-                    <a href="{{ route('login') }}" class="
+                    <!-- <a href="{{ route('login') }}" class="
                     rounded-2xl
                     border border-orange-200
                     bg-orange-600
@@ -1238,7 +1053,7 @@
                     hover:bg-orange-700
                 ">
                         Já sou cliente
-                    </a>
+                    </a> -->
                 </div>
 
                 <p class="
@@ -1272,7 +1087,7 @@
                 </p>
 
                 <p class="mt-2 text-sm">
-                    Tecnologia simples para pessoas simples.
+                    Seu negócio. Sua marca. Seu lucro.
                 </p>
             </div>
 
@@ -1299,6 +1114,32 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        const menuMobileBtn = document.getElementById('menu-mobile-btn');
+        const menuMobile = document.getElementById('menu-mobile');
+        const iconeAbrir = document.getElementById('icone-menu-abrir');
+        const iconeFechar = document.getElementById('icone-menu-fechar');
+
+        function definirMenuMobile(aberto) {
+            menuMobile.classList.toggle('hidden', !aberto);
+            iconeAbrir.classList.toggle('hidden', aberto);
+            iconeFechar.classList.toggle('hidden', !aberto);
+            menuMobileBtn.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+        }
+
+        menuMobileBtn.addEventListener('click', () => {
+            definirMenuMobile(menuMobileBtn.getAttribute('aria-expanded') !== 'true');
+        });
+
+        document.querySelectorAll('.menu-mobile-link').forEach(link => {
+            link.addEventListener('click', () => definirMenuMobile(false));
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) definirMenuMobile(false);
+        });
+    </script>
 
 </body>
 
