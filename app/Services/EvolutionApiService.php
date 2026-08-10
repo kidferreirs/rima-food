@@ -146,6 +146,23 @@ class EvolutionApiService
         );
     }
 
+    public function enviarTexto(
+        string $nomeInstancia,
+        string $numero,
+        string $texto
+    ): array {
+        $response = $this->request()
+            ->post("/message/sendText/{$nomeInstancia}", [
+                'number' => $numero,
+                'text' => $texto,
+            ]);
+
+        return $this->processarResposta(
+            $response,
+            'Não foi possível enviar a mensagem.'
+        );
+    }
+
     private function request(): PendingRequest
     {
         return Http::baseUrl($this->url)

@@ -61,9 +61,15 @@ return [
     'evolution' => [
         'url' => env('EVOLUTION_API_URL'),
         'key' => env('EVOLUTION_API_KEY'),
+
         'instance_prefix' => env(
             'EVOLUTION_INSTANCE_PREFIX',
             'rima_rest_'
+        ),
+
+        'notification_instance' => env(
+            'EVOLUTION_NOTIFICATION_INSTANCE',
+            'rimafood_notificacoes'
         ),
     ],
 

@@ -3,23 +3,16 @@
 namespace App\Services;
 
 use App\Models\Pedido;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class WhatsappNotificacaoService
 {
+    public function __construct(
+        private readonly EvolutionApiService $evolution
+    ) {
+    }
     public function notificarNovoPedido(Pedido $pedido): bool
     {
-        $webhookUrl = config('services.n8n.webhook_novo_pedido');
-
-        if (empty($webhookUrl)) {
-            Log::warning('Webhook do n8n para novo pedido não configurado.', [
-                'pedido_id' => $pedido->id,
-            ]);
-
-            return false;
-        }
-
         $pedido->loadMissing([
             'restaurante',
             'cliente',
@@ -27,7 +20,6 @@ class WhatsappNotificacaoService
         ]);
 
         $restaurante = $pedido->restaurante;
-        $cliente = $pedido->cliente;
 
         if (empty($restaurante?->telefone)) {
             Log::warning('Restaurante sem telefone para notificação.', [
@@ -38,75 +30,41 @@ class WhatsappNotificacaoService
             return false;
         }
 
-        $itens = $pedido->itens->map(function ($item) {
-            return [
-                'produto' => $item->produto?->nome ?? 'Produto',
-                'quantidade' => $item->quantidade,
-                'preco_unitario' => (float) $item->preco_unitario,
-                'subtotal' => (float) ($item->preco_unitario * $item->quantidade),
-            ];
-        })->values()->all();
+        $instancia = (string) config(
+            'services.evolution.notification_instance'
+        );
 
-        $payload = [
-            'evento' => 'novo_pedido',
+        if ($instancia === '') {
+            Log::warning('Instância central de notificações não configurada.', [
+                'pedido_id' => $pedido->id,
+            ]);
 
-            'restaurante' => [
-                'id' => $restaurante->id,
-                'nome' => $restaurante->nome,
-                'telefone' => $this->normalizarTelefone($restaurante->telefone),
-                'slug' => $restaurante->slug,
-                'plano' => $restaurante->plano,
-            ],
+            return false;
+        }
 
-            'pedido' => [
-                'id' => $pedido->id,
-                'numero' => $pedido->numero_pedido,
-                'token' => $pedido->token,
-                'status' => $pedido->status,
-                'origem' => $pedido->origem,
-                'tipo_entrega' => $pedido->tipo_entrega,
-                'forma_pagamento' => $pedido->forma_pagamento,
-                'observacao' => $pedido->observacao,
-                'subtotal' => (float) $pedido->subtotal,
-                'total' => (float) $pedido->total,
-                'criado_em' => $pedido->created_at?->toIso8601String(),
-            ],
+        $numero = $this->normalizarTelefone(
+            $restaurante->telefone
+        );
 
-            'cliente' => [
-                'id' => $cliente?->id,
-                'nome' => $cliente?->nome,
-                'telefone' => $this->normalizarTelefone($cliente?->telefone),
-            ],
-
-            'itens' => $itens,
-
-            'mensagem' => $this->montarMensagem($pedido),
-        ];
+        $mensagem = $this->montarMensagem($pedido);
 
         try {
-            $response = Http::timeout(10)
-                ->acceptJson()
-                ->asJson()
-                ->post($webhookUrl, $payload);
+            $this->evolution->enviarTexto(
+                $instancia,
+                $numero,
+                $mensagem
+            );
 
-            if ($response->failed()) {
-                Log::error('Falha ao enviar notificação de pedido para o n8n.', [
-                    'pedido_id' => $pedido->id,
-                    'status_http' => $response->status(),
-                    'resposta' => $response->body(),
-                ]);
-
-                return false;
-            }
-
-            Log::info('Notificação de novo pedido enviada ao n8n.', [
+            Log::info('Notificação de novo pedido enviada por WhatsApp.', [
                 'pedido_id' => $pedido->id,
                 'numero_pedido' => $pedido->numero_pedido,
+                'restaurante_id' => $restaurante->id,
+                'telefone' => $numero,
             ]);
 
             return true;
         } catch (\Throwable $exception) {
-            Log::error('Erro ao comunicar com o webhook do n8n.', [
+            Log::error('Erro ao enviar notificação de pedido por WhatsApp.', [
                 'pedido_id' => $pedido->id,
                 'erro' => $exception->getMessage(),
             ]);

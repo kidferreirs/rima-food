@@ -110,6 +110,19 @@ class Restaurante extends Model
         return $this->plano === 'MENU';
     }
 
+    public function getLogoUrlAttribute(): ?string
+    {
+        if (!$this->logo) {
+            return null;
+        }
+
+        if (Str::startsWith($this->logo, ['/images/', 'images/'])) {
+            return asset(ltrim($this->logo, '/'));
+        }
+
+        return Storage::disk('public')->url($this->logo);
+    }
+
     public function getBannerUrlAttribute(): ?string
     {
         if (!$this->banner) {
@@ -120,6 +133,6 @@ class Restaurante extends Model
             return asset(ltrim($this->banner, '/'));
         }
 
-        return Storage::url($this->banner);
+        return Storage::disk('public')->url($this->banner);
     }
 }
