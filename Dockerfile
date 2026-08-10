@@ -51,6 +51,8 @@ WORKDIR /var/www/html
 
 COPY . .
 
+RUN ln -sfn /var/www/html/storage/app/public /var/www/html/public/storage
+
 RUN composer install \
     --no-dev \
     --optimize-autoloader \
