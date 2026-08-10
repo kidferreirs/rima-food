@@ -104,10 +104,21 @@
 
             <div>
                 <label class="font-semibold text-sm">🚚 Tipo de entrega *</label>
+
                 <select id="tipo_entrega" name="tipo_entrega" required class="w-full border rounded-xl p-3 mt-1">
-                    <option value="retirada">Retirada no balcão</option>
-                    <option value="balcao">Consumo no local / Mesa</option>
-                    <option value="entrega">Delivery</option>
+
+                    @if($restaurante->retirada)
+                        <option value="retirada">Retirada no balcão</option>
+                    @endif
+
+                    @if($restaurante->consumo_local)
+                        <option value="balcao">Consumo no local / Mesa</option>
+                    @endif
+
+                    @if($restaurante->delivery)
+                        <option value="entrega">Delivery</option>
+                    @endif
+
                 </select>
             </div>
 
