@@ -35,18 +35,18 @@
 
             </div>
 
-            <div class="mb-8">
+            <div class="mb-10">
 
                 <label class="font-semibold">
                     Link do Cardápio
                 </label>
-
-                <div class="flex gap-3 mt-2">
+                <div class="mt-2 flex flex-col gap-3 sm:flex-row">
 
                     <input id="linkMenu" readonly value="{{ $linkMenu }}"
-                        class="flex-1 border rounded-xl p-3 bg-gray-50">
+                        class="w-full min-w-0 flex-1 rounded-xl border bg-gray-50 p-3">
 
-                    <button onclick="copiarLink()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-xl">
+                    <button type="button" onclick="copiarLink()"
+                        class="w-full rounded-xl bg-blue-600 px-6 py-3 font-bold text-white hover:bg-blue-700 sm:w-auto">
                         Copiar
                     </button>
                 </div>

@@ -10,39 +10,55 @@ class PlanModuleSeeder extends Seeder
 {
     public function run(): void
     {
-        $starter = [
+        /*
+        |--------------------------------------------------------------------------
+        | Rima Menu
+        |--------------------------------------------------------------------------
+        */
+        $menu = [
             'cardapio-digital',
             'qr-code',
             'clientes',
             'produtos',
             'categorias',
+            'delivery',
         ];
 
-        $pro = array_merge($starter, [
+        /*
+        |--------------------------------------------------------------------------
+        | Rima Menu + IA
+        |--------------------------------------------------------------------------
+        */
+        $menuIa = array_merge($menu, [
             'pedidos',
-            'cozinha',
             'whatsapp',
+            'rima-ia',
         ]);
 
-        $business = array_merge($pro, [
-            'rima-ia',
-            'delivery',
+        /*
+        |--------------------------------------------------------------------------
+        | Rima Food
+        |--------------------------------------------------------------------------
+        */
+        $food = array_merge($menuIa, [
+            'mesas',
+            'cozinha',
             'relatorios',
             'campanhas',
             'cupons',
             'fidelidade',
+            'pagamentos',
         ]);
 
-        $enterprise = Module::pluck('slug')->toArray();
-
-        $this->syncPlan('starter', $starter);
-        $this->syncPlan('pro', $pro);
-        $this->syncPlan('business', $business);
-        $this->syncPlan('enterprise', $enterprise);
+        $this->syncPlan('menu', $menu);
+        $this->syncPlan('menu-ia', $menuIa);
+        $this->syncPlan('food', $food);
     }
 
-    private function syncPlan(string $planSlug, array $moduleSlugs): void
-    {
+    private function syncPlan(
+        string $planSlug,
+        array $moduleSlugs
+    ): void {
         $plan = Plan::where('slug', $planSlug)->firstOrFail();
 
         $moduleIds = Module::whereIn('slug', $moduleSlugs)

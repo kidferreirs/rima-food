@@ -101,9 +101,9 @@ class OnboardingService
     private function mapearPlanoRestaurante(string $slug): string
     {
         return match ($slug) {
-            'starter' => 'MENU',
-            'pro' => 'MENU_IA',
-            'business' => 'FOOD',
+            'menu' => 'MENU',
+            'menu-ia' => 'MENU_IA',
+            'food' => 'FOOD',
             default => 'MENU',
         };
     }
