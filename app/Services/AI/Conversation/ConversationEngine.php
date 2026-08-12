@@ -231,13 +231,16 @@ class ConversationEngine
             $contexto->intent = 'ver_cardapio';
             $contexto->estado = ConversationContext::ESTADO_ATENDIMENTO;
 
+            $linkCardapio = route('menu.show', $restaurante->slug);
+
             return $this->resposta(
-                'Claro! Veja nosso cardápio completo no link abaixo.',
+                "Claro! 😊 Veja nosso cardápio completo:\n{$linkCardapio}",
                 $contexto,
                 ConversationAction::ENVIAR_CARDAPIO,
                 [],
                 [
                     'slug' => $restaurante->slug,
+                    'url' => $linkCardapio,
                 ]
             );
         }
@@ -278,22 +281,6 @@ class ConversationEngine
 
         /*
         |--------------------------------------------------------------------------
-        | Informações do restaurante
-        |--------------------------------------------------------------------------
-        */
-
-        if ($this->querInformacaoRestaurante($texto)) {
-            $contexto->intent = 'informacao_restaurante';
-
-            return $this->responderInformacaoRestaurante(
-                $restaurante,
-                $texto,
-                $contexto
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
         | Finalização
         |--------------------------------------------------------------------------
         */
@@ -319,10 +306,26 @@ class ConversationEngine
         }
 
         /*
-    |--------------------------------------------------------------------------
-    | Resposta de grupo obrigatório
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Informações do restaurante
+        |--------------------------------------------------------------------------
+        */
+
+        if ($this->querInformacaoRestaurante($texto)) {
+            $contexto->intent = 'informacao_restaurante';
+
+            return $this->responderInformacaoRestaurante(
+                $restaurante,
+                $texto,
+                $contexto
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Resposta de grupo obrigatório
+        |--------------------------------------------------------------------------
+        */
 
         if (
             !empty($contexto->faltando)
@@ -483,6 +486,21 @@ class ConversationEngine
                 "Certo! {$nomes} será removido do pedido. Deseja mais alguma coisa?",
                 $contexto,
                 'ingredientes_removidos'
+            );
+        }
+
+        if (
+            $contexto->estado === ConversationContext::ESTADO_MONTANDO_PEDIDO
+            && !empty($contexto->itens)
+            && $this->ehNegacao($texto)
+        ) {
+            $contexto->intent = 'finalizar_pedido';
+            $contexto->estado = ConversationContext::ESTADO_AGUARDANDO_CONFIRMACAO;
+
+            return $this->resposta(
+                $this->montarResumo($contexto),
+                $contexto,
+                'aguardando_confirmacao'
             );
         }
 
@@ -1026,33 +1044,26 @@ class ConversationEngine
             'mandar o cardapio',
             'me manda o cardapio',
             'passa o cardapio',
-            'passar o cardapio',
             'me passa o cardapio',
-            'pode passar o cardapio',
             'pode me passar o cardapio',
-
+            'pode me dar o cardapio',
+            'me da o cardapio',
             'ver o cardapio',
             'ver cardapio',
-            'cardapio para ver',
-            'cardapio pra ver',
-
             'quero o cardapio',
             'quero ver o cardapio',
-
             'tem cardapio',
             'tem o cardapio',
-            'tem um cardapio',
-
             'link do cardapio',
             'link do menu',
             'manda o link',
             'passa o link',
             'cade o link',
             'qual o link',
-
             'abrir cardapio',
             'abrir menu',
             'onde vejo os produtos',
+            'cardapio',
         ]);
     }
 

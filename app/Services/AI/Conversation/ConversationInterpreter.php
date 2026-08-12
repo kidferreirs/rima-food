@@ -86,25 +86,11 @@ class ConversationInterpreter
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | Consulta de produtos e categorias
-        |--------------------------------------------------------------------------
-        */
-        $consulta = $this->extrairConsulta($texto);
-        if ($consulta !== null) {
-            return $consulta;
-        }
+ |--------------------------------------------------------------------------
+ | Produto com quantidade
+ |--------------------------------------------------------------------------
+ */
 
-        /*
-        |--------------------------------------------------------------------------
-        | Produto com quantidade
-        |--------------------------------------------------------------------------
-        | Exemplos:
-        | duas cocas
-        | quero 3 x-burgers
-        | adiciona dois x-saladas
-        |
-        */
         $produtoComQuantidade = $this->extrairProdutoComQuantidade($texto);
 
         if ($produtoComQuantidade !== null) {
@@ -115,6 +101,25 @@ class ConversationInterpreter
                 'observacao' => null,
             ];
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Consulta de produtos e categorias
+        |--------------------------------------------------------------------------
+        */
+
+        $consulta = $this->extrairConsulta($texto);
+
+        if ($consulta !== null) {
+            return $consulta;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Desconhecida
+        |--------------------------------------------------------------------------
+        */
+
         return [
             'intent' => self::DESCONHECIDA,
             'quantidade' => 1,
@@ -155,7 +160,13 @@ class ConversationInterpreter
     private function extrairProdutoComQuantidade(string $texto): ?array
     {
         $texto = preg_replace(
-            '/^(eu\s+)?(quero|gostaria de|me ve|manda|coloca|adiciona|adicionar)\s+/u',
+            '/^(?:sim|sim,|claro|ok|beleza)\s+/u',
+            '',
+            $texto
+        );
+
+        $texto = preg_replace(
+            '/^(eu\s+)?(quero|gostaria de|me ve|manda|coloca|adiciona|adicione|adicionar)\s+/u',
             '',
             $texto
         );
