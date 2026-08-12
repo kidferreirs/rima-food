@@ -1076,6 +1076,8 @@ class ConversationEngine
             'quais opcoes',
             'tipos de comida',
             'tipos de lanche',
+            'que lanches tem',
+            'quero lanche',
         ]);
     }
 

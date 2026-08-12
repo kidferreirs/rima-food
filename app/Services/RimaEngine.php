@@ -333,6 +333,47 @@ class RimaEngine
             $contexto
         );
 
+        /*
+|--------------------------------------------------------------------------
+| Transição do motor inteligente para o checkout
+|--------------------------------------------------------------------------
+|
+| O ConversationEngine encerra a montagem do carrinho.
+| A partir daqui, o RimaEngine assume entrega e pagamento.
+|
+*/
+
+        if (
+            ($resultado['acao'] ?? null) === 'pedido_confirmado'
+            || $contexto->pedidoFinalizado
+        ) {
+            $contexto->pedidoFinalizado = false;
+            $contexto->estado = 'tipo_entrega';
+            $contexto->intent = 'tipo_entrega';
+
+            $conversa->contexto_ia = $contexto->toArray();
+
+            $this->sincronizarCarrinho(
+                $conversa,
+                $contexto
+            );
+
+            $conversa->estado = 'tipo_entrega';
+            $conversa->pedido_confirmado = false;
+            $conversa->tipo_entrega = null;
+            $conversa->endereco_entrega = null;
+            $conversa->forma_pagamento = null;
+
+            $conversa->save();
+
+            return
+                "Pedido confirmado! 😊\n\n"
+                . "Como deseja receber seu pedido?\n\n"
+                . "🏪 Balcão\n"
+                . "🛍️ Retirada\n"
+                . "🚚 Entrega";
+        }
+
         $conversa->contexto_ia = $contexto->toArray();
         $conversa->estado = $contexto->estado;
 
