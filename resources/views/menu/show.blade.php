@@ -55,7 +55,8 @@
             @endif
 
             <div class="min-w-0 flex-1">
-                <p class="font-extrabold text-slate-900 truncate">{{ $restaurante->nome }}</p>
+                <a href="{{ route('menu.show', $restaurante->slug) }}" class="font-extrabold text-slate-900 truncate hover:text-orange-500 transition"
+                   title="Voltar ao início">{{ $restaurante->nome }}</a>
                 <p class="text-xs text-slate-500">{{ $statusFuncionamento }}</p>
             </div>
 
@@ -310,7 +311,7 @@
 
                             <button type="button"
                                 class="toggle-favorito absolute top-3 right-3 z-10 w-9 h-9 bg-white/90 rounded-full shadow
-                                                                                                            flex items-center justify-center text-xl"
+                                                                                                                    flex items-center justify-center text-xl"
                                 data-produto-id="{{ $produto->id }}" aria-label="Favoritar {{ $produto->nome }}">
                                 🤍
                             </button>
@@ -367,7 +368,7 @@
                 <nav class="space-y-2 mt-5">
                     @foreach($restaurante->categorias as $categoria)
                         <button type="button" class="categoria-menu-link w-full flex items-center justify-between bg-slate-50 hover:bg-green-50
-                                                                    rounded-2xl px-4 py-4 text-left transition"
+                                                                        rounded-2xl px-4 py-4 text-left transition"
                             data-categoria-alvo="categoria-{{ $categoria->id }}">
                             <span class="font-bold text-slate-800">
                                 {{ $categoria->nome }}
