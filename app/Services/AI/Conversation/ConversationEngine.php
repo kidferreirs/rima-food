@@ -70,8 +70,7 @@ class ConversationEngine
         |--------------------------------------------------------------------------
         */
 
-        if ($contexto->estado === ConversationContext::ESTADO_AGUARDANDO_ADICIONAR_PRODUTO)
-        {
+        if ($contexto->estado === ConversationContext::ESTADO_AGUARDANDO_ADICIONAR_PRODUTO) {
             if ($this->ehConfirmacao($texto)) {
                 $produto = $contexto->produto;
 
@@ -197,6 +196,26 @@ class ConversationEngine
                 "Olá! Seja bem-vindo à {$restaurante->nome}. Gostaria de ver nosso cardápio?",
                 $contexto,
                 ConversationAction::SAUDACAO
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Intenção de iniciar pedido
+        |--------------------------------------------------------------------------
+        */
+
+        $textoNormalizado = $this->normalizar($mensagem);
+
+        if ($this->querIniciarPedido($textoNormalizado)) {
+            $contexto->intent = 'iniciar_pedido';
+            $contexto->estado = ConversationContext::ESTADO_MONTANDO_PEDIDO;
+
+            return $this->resposta(
+                'Claro! 😄 O que você gostaria de pedir?',
+                $contexto,
+                'iniciar_pedido'
             );
         }
 
@@ -979,6 +998,23 @@ class ConversationEngine
             'nao quero',
             'dispenso',
         ], true);
+    }
+
+    private function querIniciarPedido(string $texto): bool
+    {
+        return Str::contains($texto, [
+            'quero fazer um pedido',
+            'quero fazer pedido',
+            'quero pedir',
+            'fazer um pedido',
+            'fazer pedido',
+            'gostaria de fazer um pedido',
+            'gostaria de pedir',
+            'quero comprar',
+            'vou fazer um pedido',
+            'posso fazer um pedido',
+            'como faco um pedido',
+        ]);
     }
 
     private function querLinkCardapio(string $texto): bool
