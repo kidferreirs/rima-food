@@ -16,6 +16,8 @@ class Cliente extends Model
 
         'email',
 
+        'cep',
+
         'observacao',
 
         'ultimo_pedido',

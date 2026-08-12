@@ -40,6 +40,7 @@ class ClienteController extends BaseRestaurantController
             'nome' => 'required|string|max:255',
             'telefone' => 'required|string|max:50',
             'email' => 'nullable|email|max:255',
+            'cep' => 'nullable|string|max:9',
             'observacao' => 'nullable|string',
         ]);
 
@@ -90,6 +91,7 @@ class ClienteController extends BaseRestaurantController
             'nome' => 'required|string|max:255',
             'telefone' => 'required|string|max:50',
             'email' => 'nullable|email|max:255',
+            'cep' => 'nullable|string|max:9',
             'observacao' => 'nullable|string',
         ]);
 

@@ -17,35 +17,18 @@
         <form action="{{ route('restaurante.clientes.store', $restaurante->slug) }}" method="POST" class="space-y-4">
             @csrf
 
-            <input
-                type="text"
-                name="nome"
-                placeholder="Nome do cliente"
-                class="w-full border rounded-lg p-3"
-                required
-            >
+            <input type="text" name="nome" placeholder="Nome do cliente" class="w-full border rounded-lg p-3" required>
 
-            <input
-                type="text"
-                name="telefone"
-                placeholder="(xx) xxxx-xxxx"
-                class="w-full border rounded-lg p-3"
-                required
-            >
+            <input type="text" name="telefone" placeholder="(xx) xxxx-xxxx" class="w-full border rounded-lg p-3"
+                required>
 
-            <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                class="w-full border rounded-lg p-3"
-            >
+            <input type="email" name="email" placeholder="Email" class="w-full border rounded-lg p-3">
 
-            <textarea
-                name="observacao"
-                placeholder="Observação"
-                class="w-full border rounded-lg p-3"
-                rows="4"
-            ></textarea>
+            <input type="text" name="cep" value="{{ old('cep') }}" placeholder="CEP (opcional)" maxlength="9"
+                class="w-full border rounded-lg p-3">
+
+            <textarea name="observacao" placeholder="Observação" class="w-full border rounded-lg p-3"
+                rows="4"></textarea>
 
             <button class="bg-green-500 text-white px-6 py-3 rounded-lg">
                 Salvar

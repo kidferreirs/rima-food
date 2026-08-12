@@ -202,7 +202,10 @@ class PedidoAutomaticoService
         |--------------------------------------------------------------------------
         */
 
-        $taxaEntrega = 0;
+        $taxaEntrega =
+            $conversa->tipo_entrega === 'entrega'
+            ? (float) ($conversa->taxa_entrega ?? 0)
+            : 0;
 
         $totalPedido =
             $subtotalPedido + $taxaEntrega;

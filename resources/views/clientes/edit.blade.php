@@ -12,7 +12,7 @@
             </div>
 
             <a href="{{ route('restaurante.clientes.index', $restaurante->slug) }}"
-               class=" whitespace-nowrap text-sm font-medium text-gray-500 hover:text-gray-800 transition">
+                class=" whitespace-nowrap text-sm font-medium text-gray-500 hover:text-gray-800 transition">
                 ← Voltar
             </a>
         </div>
@@ -36,6 +36,9 @@
 
             <input type="email" name="email" value="{{ old('email', $cliente->email) }}"
                 class="w-full border rounded-lg p-3">
+
+            <input type="text" name="cep" value="{{ old('cep', $cliente->cep) }}" placeholder="CEP (opcional)"
+                maxlength="9" class="w-full border rounded-lg p-3">
 
             <textarea name="observacao" class="w-full border rounded-lg p-3"
                 rows="4">{{ old('observacao', $cliente->observacao) }}</textarea>
