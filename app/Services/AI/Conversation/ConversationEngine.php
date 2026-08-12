@@ -34,14 +34,16 @@ class ConversationEngine
             if ($this->aceitouVerCardapio($texto)) {
                 $contexto->intent = 'ver_cardapio';
                 $contexto->estado = ConversationContext::ESTADO_ATENDIMENTO;
+                $linkCardapio = route('menu.show', $restaurante->slug);
 
                 return $this->resposta(
-                    'Claro! Veja nosso cardápio completo no link abaixo.',
+                    "Claro! 😊 Veja nosso cardápio completo:\n{$linkCardapio}",
                     $contexto,
                     ConversationAction::ENVIAR_CARDAPIO,
                     [],
                     [
                         'slug' => $restaurante->slug,
+                        'url' => $linkCardapio,
                     ]
                 );
             }
@@ -1022,12 +1024,32 @@ class ConversationEngine
         return Str::contains($texto, [
             'manda o cardapio',
             'mandar o cardapio',
+            'me manda o cardapio',
+            'passa o cardapio',
+            'passar o cardapio',
+            'me passa o cardapio',
+            'pode passar o cardapio',
+            'pode me passar o cardapio',
+
             'ver o cardapio',
+            'ver cardapio',
+            'cardapio para ver',
+            'cardapio pra ver',
+
             'quero o cardapio',
+            'quero ver o cardapio',
+
+            'tem cardapio',
+            'tem o cardapio',
+            'tem um cardapio',
+
             'link do cardapio',
             'link do menu',
-            'tem cardapio',
-            'tem menu',
+            'manda o link',
+            'passa o link',
+            'cade o link',
+            'qual o link',
+
             'abrir cardapio',
             'abrir menu',
             'onde vejo os produtos',
