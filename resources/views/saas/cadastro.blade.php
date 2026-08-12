@@ -73,18 +73,13 @@
                         <div class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
                             @foreach($plans as $plan)
                                 @php
-                                    $nomePlano = match ($plan->slug) {
-                                        'starter' => 'Rima Menu',
-                                        'pro' => 'Rima Menu + IA',
-                                        'business' => 'Rima Food',
-                                        default => $plan->nome,
-                                    };
+                                    $nomePlano = $plan->nome;
                                 @endphp
                                 <label
                                     class="plan-card relative cursor-pointer rounded-2xl border-2 border-slate-200 p-4 transition hover:border-orange-300">
                                     <input type="radio" name="plan_slug" value="{{ $plan->slug }}" class="sr-only"
-                                        @checked(old('plan_slug', 'pro') === $plan->slug) required>
-                                    @if($plan->slug === 'pro')<span
+                                        @checked(old('plan_slug', 'menu-ia') === $plan->slug) required>
+                                    @if($plan->slug === 'menu-ia')<span
                                         class="absolute right-3 top-3 rounded-full bg-orange-100 px-2 py-1 text-[10px] font-black text-orange-700">MAIS
                                     ESCOLHIDO</span>@endif
                                     <p class="pr-16 text-lg font-black">{{ $nomePlano }}</p>
