@@ -70,6 +70,64 @@
                 grid-template-columns: repeat(3, minmax(0, 1fr));
             }
         }
+
+        /* ========================================
+   WHATSAPP FLUTUANTE
+======================================== */
+
+        .whatsapp-float {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+
+            width: 64px;
+            height: 64px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #25d366;
+            color: #fff;
+
+            border-radius: 50%;
+            z-index: 9999;
+
+            box-shadow:
+                0 10px 30px rgba(37, 211, 102, .35),
+                0 0 0 8px rgba(37, 211, 102, .08);
+
+            transition:
+                transform .25s ease,
+                box-shadow .25s ease;
+        }
+
+        .whatsapp-float svg {
+            width: 34px;
+            height: 34px;
+        }
+
+        .whatsapp-float:hover {
+            transform: translateY(-4px) scale(1.06);
+
+            box-shadow:
+                0 14px 36px rgba(37, 211, 102, .5),
+                0 0 0 10px rgba(37, 211, 102, .1);
+        }
+
+        @media (max-width: 620px) {
+            .whatsapp-float {
+                width: 56px;
+                height: 56px;
+                right: 16px;
+                bottom: 16px;
+            }
+
+            .whatsapp-float svg {
+                width: 30px;
+                height: 30px;
+            }
+        }
     </style>
 
 </head>
@@ -266,7 +324,7 @@
 
                     <div class="flex items-center justify-center gap-3">
                         <span class="text-orange-500">✦</span>
-                        <span>0% de comissão</span>
+                        <span>Sem limites de pedidos</span>
                     </div>
 
                     <div class="flex items-center justify-center gap-3">
@@ -281,7 +339,7 @@
 
                     <div class="flex items-center justify-center gap-3">
                         <span class="text-orange-500">✦</span>
-                        <span>Pedidos organizados</span>
+                        <span>Sem limites de produtos</span>
                     </div>
 
                     <div class="flex items-center justify-center gap-3">
@@ -561,17 +619,18 @@
                                 'Mantém o contexto da conversa',
                             ] as $item)
                             <div class="
-                                                                                                            flex items-center gap-4
-                                                                                                            rounded-2xl
-                                                                                                            border border-slate-200
-                                                                                                            bg-slate-50 p-4
-                                                                                                        ">
-                                <span class="
-                                                                                                                flex h-9 w-9
-                                                                                                                items-center justify-center
-                                                                                                                rounded-xl bg-orange-100
-                                                                                                                font-black text-orange-600
-                                                                                                            ">
+                                                                                                                            flex items-center gap-4
+                                                                                                                            rounded-2xl
+                                                                                                                            border border-slate-200
+                                                                                                                            bg-slate-50 p-4
+                                                                                                                        ">
+                                <span
+                                    class="
+                                                                                                                                flex h-9 w-9
+                                                                                                                                items-center justify-center
+                                                                                                                                rounded-xl bg-orange-100
+                                                                                                                                font-black text-orange-600
+                                                                                                                            ">
                                     ✓
                                 </span>
 
@@ -656,30 +715,30 @@
                             ],
                         ] as [$numero, $titulo, $texto])
                         <article class="
-                                                                                                        rounded-3xl
-                                                                                                        border border-slate-200
-                                                                                                        bg-white p-7
-                                                                                                    ">
+                                                                                                                        rounded-3xl
+                                                                                                                        border border-slate-200
+                                                                                                                        bg-white p-7
+                                                                                                                    ">
                             <span class="
-                                                                                                            flex h-14 w-14
-                                                                                                            items-center justify-center
-                                                                                                            rounded-2xl bg-orange-500
-                                                                                                            font-black text-white
-                                                                                                        ">
+                                                                                                                            flex h-14 w-14
+                                                                                                                            items-center justify-center
+                                                                                                                            rounded-2xl bg-orange-500
+                                                                                                                            font-black text-white
+                                                                                                                        ">
                                 {{ $numero }}
                             </span>
 
                             <h3 class="
-                                                                                                            mt-7 text-xl
-                                                                                                            font-black
-                                                                                                        ">
+                                                                                                                            mt-7 text-xl
+                                                                                                                            font-black
+                                                                                                                        ">
                                 {{ $titulo }}
                             </h3>
 
                             <p class="
-                                                                                                            mt-3 leading-7
-                                                                                                            text-slate-600
-                                                                                                        ">
+                                                                                                                            mt-3 leading-7
+                                                                                                                            text-slate-600
+                                                                                                                        ">
                                 {{ $texto }}
                             </p>
                         </article>
@@ -971,21 +1030,21 @@
                             ],
                         ] as [$pergunta, $resposta])
                         <details class="
-                                                                                                        rounded-2xl
-                                                                                                        border border-slate-200
-                                                                                                        bg-white p-5
-                                                                                                    ">
+                                                                                                                        rounded-2xl
+                                                                                                                        border border-slate-200
+                                                                                                                        bg-white p-5
+                                                                                                                    ">
                             <summary class="
-                                                                                                            cursor-pointer
-                                                                                                            font-black
-                                                                                                        ">
+                                                                                                                            cursor-pointer
+                                                                                                                            font-black
+                                                                                                                        ">
                                 {{ $pergunta }}
                             </summary>
 
                             <p class="
-                                                                                                            mt-4 leading-7
-                                                                                                            text-slate-600
-                                                                                                        ">
+                                                                                                                            mt-4 leading-7
+                                                                                                                            text-slate-600
+                                                                                                                        ">
                                 {{ $resposta }}
                             </p>
                         </details>
@@ -1115,6 +1174,17 @@
         </div>
     </footer>
 
+    <a href="https://wa.me/5548984993102?text=Olá gostaria de saber mais sobre o Rima Food."
+        class="whatsapp-float" target="_blank" rel="noopener noreferrer"
+        aria-label="Falar com a ART Personalizados pelo WhatsApp">
+
+        <svg viewBox="0 0 32 32" aria-hidden="true">
+            <path fill="currentColor"
+                d="M16.04 3C9.39 3 4 8.28 4 14.79c0 2.31.69 4.56 1.98 6.48L4 28.5l7.45-1.92a12.2 12.2 0 0 0 4.58.89h.01C22.68 27.47 28 22.19 28 15.68 28 9.17 22.68 3 16.04 3zm0 22.48c-1.4 0-2.77-.37-3.97-1.06l-.28-.16-4.42 1.14 1.18-4.23-.18-.29a9.65 9.65 0 0 1-1.5-5.09c0-5.35 4.12-9.7 9.18-9.7 5.06 0 9.18 4.35 9.18 9.7s-4.12 9.69-9.19 9.69zm5.03-7.25c-.28-.14-1.63-.8-1.88-.89-.25-.09-.43-.14-.61.14-.18.27-.71.89-.87 1.07-.16.18-.32.2-.59.07-.28-.14-1.17-.42-2.22-1.35-.82-.72-1.37-1.61-1.53-1.88-.16-.27-.02-.42.12-.56.13-.12.28-.32.41-.48.14-.16.18-.27.28-.46.09-.18.04-.34-.02-.48-.07-.14-.61-1.46-.84-2-.22-.53-.45-.46-.61-.47h-.52c-.18 0-.48.07-.73.34-.25.27-.96.93-.96 2.27 0 1.34.98 2.63 1.12 2.81.14.18 1.93 2.92 4.67 4.09.65.28 1.16.45 1.56.57.66.21 1.25.18 1.72.11.52-.08 1.63-.66 1.86-1.3.23-.64.23-1.2.16-1.31-.07-.11-.25-.18-.52-.32z" />
+        </svg>
+
+    </a>
+
     <script>
         const menuMobileBtn = document.getElementById('menu-mobile-btn');
         const menuMobile = document.getElementById('menu-mobile');
@@ -1140,7 +1210,6 @@
             if (window.innerWidth >= 1024) definirMenuMobile(false);
         });
     </script>
-
 </body>
 
 </html>
