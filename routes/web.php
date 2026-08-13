@@ -20,18 +20,85 @@ use App\Http\Controllers\GarcomCardapioController;
 use App\Http\Controllers\ViaCepController;
 use App\Http\Controllers\DeliveryQuoteController;
 use App\Http\Controllers\WhatsappConfiguracaoController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminClienteController;
+use App\Http\Controllers\Admin\AdminAssinaturaController;
+use App\Http\Controllers\Admin\AdminServicoController;
 
 
 Route::get('/cadastro', [OnboardingController::class, 'create'])->name('saas.cadastro');
 
 Route::post('/cadastro', [OnboardingController::class, 'store'])->name('saas.cadastro.store');
 
+Route::middleware(['auth', 'rimatech.admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/', [AdminDashboardController::class, 'index'])
+            ->name('dashboard');
+
+        Route::get('/clientes', [AdminClienteController::class, 'index'])
+            ->name('clientes.index');
+
+        Route::get('/clientes/create', [AdminClienteController::class, 'create'])
+            ->name('clientes.create');
+
+        Route::post('/clientes', [AdminClienteController::class, 'store'])
+            ->name('clientes.store');
+
+        Route::get('/clientes/{account}', [AdminClienteController::class, 'show'])
+            ->name('clientes.show');
+
+        Route::post('/clientes/{account}/trial/estender', [AdminAssinaturaController::class, 'estenderTrial'])
+            ->name('clientes.trial.estender');
+
+        Route::post('/clientes/{account}/assinatura/ativar', [AdminAssinaturaController::class, 'ativar'])
+            ->name('clientes.assinatura.ativar');
+
+        Route::put('/clientes/{account}/assinatura/plano', [AdminAssinaturaController::class, 'alterarPlano'])
+            ->name('clientes.assinatura.plano');
+
+        Route::patch('/clientes/{account}/status', [AdminAssinaturaController::class, 'alterarStatusConta'])
+            ->name('clientes.status');
+        
+        Route::post('/clientes/{account}/servicos', [AdminServicoController::class, 'store'])
+            ->name('clientes.servicos.store');
+
+        Route::put('/clientes/{account}/servicos/{clienteServico}', [AdminServicoController::class, 'update'])
+            ->name('clientes.servicos.update');
+
+        Route::delete('/clientes/{account}/servicos/{clienteServico}', [AdminServicoController::class, 'destroy'])
+            ->name('clientes.servicos.destroy');
+    });
+
 Route::get('/', function () {
     return view('welcome');
 });
 
 Route::get('/dashboard', function () {
-    $restaurante = \App\Models\Restaurante::where('user_id', auth()->id())
+
+    $user = auth()->user();
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rimatech Admin
+    |--------------------------------------------------------------------------
+    */
+
+    if ($user?->is_rimatech_admin) {
+        return redirect()->route('admin.dashboard');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Usuário de restaurante
+    |--------------------------------------------------------------------------
+    */
+
+    $restaurante = \App\Models\Restaurante::where(
+        'user_id',
+        $user->id
+    )
         ->latest()
         ->first();
 
@@ -39,7 +106,11 @@ Route::get('/dashboard', function () {
         return redirect()->route('restaurantes.create');
     }
 
-    return redirect()->route('restaurante.dashboard', $restaurante->slug);
+    return redirect()->route(
+        'restaurante.dashboard',
+        $restaurante->slug
+    );
+
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {

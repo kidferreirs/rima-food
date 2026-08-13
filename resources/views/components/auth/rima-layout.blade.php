@@ -14,8 +14,8 @@
         <section class="relative hidden overflow-hidden bg-gradient-to-br from-orange-500 via-orange-600 to-slate-950 p-10 text-white lg:flex lg:flex-col lg:justify-between">
             <div>
                 <a href="{{ url('/') }}" class="text-2xl font-black tracking-tight">RIMA <span class="text-orange-200">FOOD</span></a>
-                <h1 class="mt-16 max-w-md text-4xl font-black leading-tight tracking-tight">Seu restaurante, seus clientes e seu lucro.</h1>
-                <p class="mt-5 max-w-md leading-7 text-orange-100">Acesse seu ambiente para organizar cardápio, pedidos, WhatsApp e toda a operação.</p>
+                <h1 class="mt-16 max-w-md text-4xl font-black leading-tight tracking-tight">Seu negócio, seus clientes e seu lucro.</h1>
+                <p class="mt-5 max-w-md leading-7 text-orange-100">Acesse seu ambiente para organizar seu negócio, pedidos, WhatsApp e toda a operação.</p>
             </div>
             <div class="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur">
                 <p class="font-black">Rima Food</p>

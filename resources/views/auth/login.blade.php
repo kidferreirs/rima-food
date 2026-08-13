@@ -1,4 +1,4 @@
-<x-auth.rima-layout titulo="Bem-vindo de volta" subtitulo="Entre para administrar seu restaurante.">
+<x-auth.rima-layout titulo="Bem-vindo de volta" subtitulo="Entre para administrar seu negócio.">
     <x-auth-session-status class="mb-5 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-700" :status="session('status')" />
     <form method="POST" action="{{ route('login') }}" class="space-y-5">
         @csrf
@@ -25,7 +25,7 @@
         </label>
         <button type="submit" class="w-full rounded-xl bg-orange-500 px-5 py-3.5 font-black text-white hover:bg-orange-600">Entrar</button>
         <div class="border-t border-slate-200 pt-5 text-center">
-            <p class="text-sm text-slate-500">Ainda não possui restaurante?</p>
+            <p class="text-sm text-slate-500">Ainda não possui sua loja?</p>
             <a href="{{ route('saas.cadastro') }}" class="mt-2 inline-flex font-black text-orange-600 hover:text-orange-700">
                 Criar pelo formulário inteligente
             </a>

@@ -48,4 +48,26 @@ class Account extends Model
             ->where('slug', $slug)
             ->exists();
     }
+
+    public function servicos()
+    {
+        return $this->belongsToMany(
+            Servico::class,
+            'cliente_servicos'
+        )
+            ->withPivot([
+                'status',
+                'valor',
+                'tipo_cobranca',
+                'data_inicio',
+                'data_fim',
+                'observacoes',
+            ])
+            ->withTimestamps();
+    }
+
+    public function clienteServicos()
+    {
+        return $this->hasMany(ClienteServico::class);
+    }
 }
