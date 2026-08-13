@@ -4,7 +4,7 @@
 
         <div class="mb-2 flex items-center justify-between gap-4">
 
-            <h1 class="text-3xl font-bold sm:text-4xl"> 🍔 Painel </h1>
+            <h1 class="text-3xl font-bold sm:text-4xl">Painel de Pedidos </h1>
 
             <a href="{{ route('restaurante.pedidos.create', $restaurante->slug) }}"
                 class="inline-flex items-center justify-center whitespace-nowrap rounded-xl bg-green-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-600">
