@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
@@ -55,8 +55,11 @@
             @endif
 
             <div class="min-w-0 flex-1">
-                <a href="{{ route('menu.show', $restaurante->slug) }}" class="font-extrabold text-slate-900 truncate hover:text-orange-500 transition"
-                   title="Voltar ao início">{{ $restaurante->nome }}</a>
+                <button type="button" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
+                    class="block max-w-full text-left font-extrabold text-slate-900 truncate hover:text-orange-500 transition"
+                    title="Voltar ao início">
+                    {{ $restaurante->nome }}
+                </button>
                 <p class="text-xs text-slate-500">{{ $statusFuncionamento }}</p>
             </div>
 
@@ -138,19 +141,123 @@
             </div>
         </section>
 
+        @php
+            /*
+             * Sugestões rápidas do Garçom:
+             * usa o segmento quando existir e, para cadastros antigos,
+             * identifica o tipo do negócio pelas categorias reais.
+             */
+            $segmentoMenu = \Illuminate\Support\Str::lower(
+                \Illuminate\Support\Str::ascii($restaurante->segmento ?? '')
+            );
+
+            $categoriasMenu = $restaurante->categorias
+                ->pluck('nome')
+                ->filter()
+                ->map(fn($nome) => \Illuminate\Support\Str::lower(
+                    \Illuminate\Support\Str::ascii($nome)
+                ))
+                ->implode(' ');
+
+            $contextoMenu = trim($segmentoMenu . ' ' . $categoriasMenu);
+
+            $atalhoPrincipal = [
+                'icone' => '🍽️',
+                'label' => 'Cardápio',
+                'pergunta' => 'O que vocês têm no cardápio?',
+            ];
+
+            if (str_contains($contextoMenu, 'pizza')) {
+                $atalhoPrincipal = [
+                    'icone' => '🍕',
+                    'label' => 'Pizzas',
+                    'pergunta' => 'Quais pizzas vocês têm?',
+                ];
+            } elseif (
+                str_contains($contextoMenu, 'hamburg')
+                || str_contains($contextoMenu, 'lanche')
+                || str_contains($contextoMenu, 'sanduich')
+            ) {
+                $atalhoPrincipal = [
+                    'icone' => '🍔',
+                    'label' => 'Lanches',
+                    'pergunta' => 'Quais lanches vocês têm?',
+                ];
+            } elseif (str_contains($contextoMenu, 'pastel')) {
+                $atalhoPrincipal = [
+                    'icone' => '🥟',
+                    'label' => 'Pastéis',
+                    'pergunta' => 'Quais pastéis vocês têm?',
+                ];
+            } elseif (
+                str_contains($contextoMenu, 'espeto')
+                || str_contains($contextoMenu, 'churras')
+            ) {
+                $atalhoPrincipal = [
+                    'icone' => '🍢',
+                    'label' => 'Espetinhos',
+                    'pergunta' => 'Quais espetinhos vocês têm?',
+                ];
+            } elseif (str_contains($contextoMenu, 'acai')) {
+                $atalhoPrincipal = [
+                    'icone' => '🥣',
+                    'label' => 'Açaí',
+                    'pergunta' => 'Quais opções de açaí vocês têm?',
+                ];
+            } elseif (
+                str_contains($contextoMenu, 'sushi')
+                || str_contains($contextoMenu, 'japones')
+            ) {
+                $atalhoPrincipal = [
+                    'icone' => '🍣',
+                    'label' => 'Sushi',
+                    'pergunta' => 'Quais opções de sushi vocês têm?',
+                ];
+            } elseif (
+                str_contains($contextoMenu, 'doce')
+                || str_contains($contextoMenu, 'bolo')
+                || str_contains($contextoMenu, 'confeit')
+            ) {
+                $atalhoPrincipal = [
+                    'icone' => '🍰',
+                    'label' => 'Doces',
+                    'pergunta' => 'Quais doces vocês têm?',
+                ];
+            } elseif (
+                str_contains($contextoMenu, 'marmita')
+                || str_contains($contextoMenu, 'refeicao')
+                || str_contains($contextoMenu, 'prato')
+            ) {
+                $atalhoPrincipal = [
+                    'icone' => '🍛',
+                    'label' => 'Pratos',
+                    'pergunta' => 'Quais pratos vocês têm?',
+                ];
+            } elseif ($restaurante->categorias->isNotEmpty()) {
+                $primeiraCategoria = $restaurante->categorias->first()->nome;
+
+                $atalhoPrincipal = [
+                    'icone' => '🍽️',
+                    'label' => $primeiraCategoria,
+                    'pergunta' => "O que vocês têm em {$primeiraCategoria}?",
+                ];
+            }
+        @endphp
+
         <section class="px-5 mt-6">
             <div class="bg-slate-100 rounded-2xl px-4 py-4 flex items-center gap-3">
-                <span class="text-xl">🔍</span>
-                <input id="search" type="text" placeholder="Pesquise produtos, ingredientes ou categorias..."
-                    autocomplete="off"
-                    class="bg-transparent border-none outline-none focus:ring-0 w-full text-slate-700 placeholder:text-slate-400">
+                <span class="text-xl shrink-0">🔍</span>
+
+                <input id="search" type="text" placeholder="Pesquise no cardápio..." autocomplete="off" class="min-w-0 flex-1 bg-transparent border-none outline-none focus:ring-0
+                           text-sm sm:text-base text-slate-700 placeholder:text-slate-400">
             </div>
 
-            <div id="garcom-container" class="hidden opacity-0 translate-y-2 transition-all duration-300 mt-4">
-                <div class="flex gap-2 overflow-x-auto pb-3">
+            <div id="garcom-container" class="hidden opacity-0 translate-y-2 transition-all duration-300 mt-5">
+                <div class="flex gap-2 overflow-x-auto pb-4">
+
                     <button class="garcom-pergunta bg-white border rounded-full px-4 py-2 whitespace-nowrap"
-                        data-pergunta="Quais pizzas vocês têm?">
-                        🍕 Pizzas
+                        data-pergunta="{{ $atalhoPrincipal['pergunta'] }}">
+                        {{ $atalhoPrincipal['icone'] }} {{ $atalhoPrincipal['label'] }}
                     </button>
 
                     <button class="garcom-pergunta bg-white border rounded-full px-4 py-2 whitespace-nowrap"
@@ -159,17 +266,17 @@
                     </button>
 
                     <button class="garcom-pergunta bg-white border rounded-full px-4 py-2 whitespace-nowrap"
-                        data-pergunta="Tem algo sem lactose?">
-                        🥛 Sem lactose
+                        data-pergunta="Quais categorias vocês têm?">
+                        📋 Categorias
                     </button>
+
                 </div>
 
-                <div id="chat-garcom">
-
+                <div id="chat-garcom" class="overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
                     <div class="bg-green-600 text-white px-4 py-3 flex items-start justify-between gap-3">
 
                         <div>
-                            <h3 class="font-extrabold"> 🤖 Garçom Inteligente </h3>
+                            <h3 class="font-extrabold">🤖 Garçom Inteligente</h3>
                         </div>
 
                         <button id="fechar-chat-garcom" type="button"
@@ -177,20 +284,21 @@
                             aria-label="Recolher Garçom Inteligente">
                             ✕
                         </button>
+
                     </div>
 
-                    <div id="chat-mensagens" class="max-h-72 overflow-y-auto p-4 space-y-3 bg-slate-50 rounded-b-2xl">
+                    <div id="chat-mensagens" class="max-h-72 overflow-y-auto p-4 space-y-3 bg-slate-50">
                         <div class="flex">
                             <div class="bg-white rounded-2xl px-4 py-3 shadow-sm max-w-[90%]">
-                                <p class="font-bold text-green-700"> Garçom </p>
-                                <p class="text-sm text-slate-700 mt-1">
-                                    Olá! 👋
-                                    Posso ajudar você a escolher.
-                                    Pergunte, por exemplo:
-                                    • Quais pizzas vocês têm?
-                                    • Qual é o produto mais barato?
-                                    • Tem algo sem lactose?
-                                </p>
+                                <p class="font-bold text-green-700">Garçom</p>
+
+                                <div class="text-sm text-slate-700 mt-1 space-y-1">
+                                    <p>Olá! 👋 Posso ajudar você a escolher.</p>
+                                    <p>Pergunte, por exemplo:</p>
+                                    <p>• {{ $atalhoPrincipal['pergunta'] }}</p>
+                                    <p>• Qual é o produto mais barato?</p>
+                                    <p>• Quais categorias vocês têm?</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -311,7 +419,7 @@
 
                             <button type="button"
                                 class="toggle-favorito absolute top-3 right-3 z-10 w-9 h-9 bg-white/90 rounded-full shadow
-                                                                                                                    flex items-center justify-center text-xl"
+                                                                                                                            flex items-center justify-center text-xl"
                                 data-produto-id="{{ $produto->id }}" aria-label="Favoritar {{ $produto->nome }}">
                                 🤍
                             </button>
@@ -368,7 +476,7 @@
                 <nav class="space-y-2 mt-5">
                     @foreach($restaurante->categorias as $categoria)
                         <button type="button" class="categoria-menu-link w-full flex items-center justify-between bg-slate-50 hover:bg-green-50
-                                                                        rounded-2xl px-4 py-4 text-left transition"
+                                                                            rounded-2xl px-4 py-4 text-left transition"
                             data-categoria-alvo="categoria-{{ $categoria->id }}">
                             <span class="font-bold text-slate-800">
                                 {{ $categoria->nome }}
