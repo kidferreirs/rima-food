@@ -19,6 +19,8 @@ class AdminAssinaturaController extends Controller
             'dias' => ['required', 'integer', 'min:1', 'max:365'],
         ]);
 
+        $dias = (int) $dados['dias'];
+
         $subscription = $account->subscription;
 
         if (!$subscription) {
@@ -31,8 +33,8 @@ class AdminAssinaturaController extends Controller
 
         $subscription->update([
             'status' => 'trial',
-            'trial_ends_at' => $base->copy()->addDays($dados['dias']),
-            'current_period_ends_at' => $base->copy()->addDays($dados['dias']),
+            'trial_ends_at' => $base->copy()->addDays($dias),
+            'current_period_ends_at' => $base->copy()->addDays($dias),
         ]);
 
         $subscription->logs()->create([
