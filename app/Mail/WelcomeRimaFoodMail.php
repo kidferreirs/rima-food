@@ -42,7 +42,7 @@ class WelcomeRimaFoodMail extends Mailable
     public function attachments(): array
     {
         $manual = storage_path(
-            'app/manuals/Manual_Oficial_Rima_Food_v2.pdf'
+            'app/manuals/Manual_Rima_Food.pdf'
         );
 
         if (! file_exists($manual)) {
