@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\WelcomeRimaFoodMail;
 use App\Models\Plan;
 use App\Services\OnboardingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class OnboardingController extends Controller
@@ -52,6 +55,23 @@ class OnboardingController extends Controller
         $dados['account_nome'] = $dados['restaurante_nome'];
         $resultado = $onboarding->criarConta($dados);
         Auth::login($resultado['user']);
+
+        // O envio do e-mail nao deve impedir o cadastro caso o servico de e-mail esteja indisponivel.
+        try {
+            Mail::to($resultado['user']->email)->send(
+                new WelcomeRimaFoodMail(
+                    $resultado['user'],
+                    $resultado['restaurante']
+                )
+            );
+        } catch (\Throwable $e) {
+            Log::error('Falha ao enviar e-mail de boas-vindas do Rima Food.', [
+                'user_id' => $resultado['user']->id,
+                'restaurante_id' => $resultado['restaurante']->id,
+                'email' => $resultado['user']->email,
+                'erro' => $e->getMessage(),
+            ]);
+        }
 
         if ($dados['possui_cardapio'] === 'sim') {
             return redirect()
